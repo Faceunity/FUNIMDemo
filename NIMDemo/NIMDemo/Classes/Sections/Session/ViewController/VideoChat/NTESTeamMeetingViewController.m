@@ -519,7 +519,6 @@ typedef NS_ENUM(NSInteger,NTESTeamMeetingRoleType) {
     option.audioHowlingSuppress = [[NTESBundleSetting sharedConfig] audioHowlingSuppress];
     option.preferHDAudio =  [[NTESBundleSetting sharedConfig] preferHDAudio];
     option.scene = [[NTESBundleSetting sharedConfig] scene];
-    option.webrtcCompatible = [[NTESBundleSetting sharedConfig] webrtcCompatible];
     
     NIMNetCallVideoCaptureParam *param = [[NIMNetCallVideoCaptureParam alloc] init];
     [self fillVideoCaptureSetting:param];

@@ -8,9 +8,22 @@
 
 #import <UIKit/UIKit.h>
 #import <MediaPlayer/MediaPlayer.h>
+
+@interface NTESVideoViewItem : NSObject
+
+@property (nonatomic,copy) NSString *itemId;//message Id
+
+@property (nonatomic,copy) NSString *path;
+
+@property (nonatomic,copy) NSString *url;
+
+@property (nonatomic,strong) NIMSession *session;
+
+@end
+
 @interface NTESVideoViewController : UIViewController
 
-- (instancetype)initWithVideoObject:(NIMVideoObject *)videoObject;
+- (instancetype)initWithVideoViewItem:(NTESVideoViewItem *)item;
 
 @property (nonatomic, readonly) MPMoviePlayerController *moviePlayer;
 

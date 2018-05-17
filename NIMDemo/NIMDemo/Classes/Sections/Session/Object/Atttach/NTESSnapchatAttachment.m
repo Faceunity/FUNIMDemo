@@ -167,7 +167,7 @@
 - (NSString *)url
 {
     return [_url length] ?
-    [[[NIMSDK sharedSDK] resourceManager] convertHttpToHttps:_url] : nil;
+    [[[NIMSDK sharedSDK] resourceManager] normalizeURLString:_url] : nil;
 }
 
 @end

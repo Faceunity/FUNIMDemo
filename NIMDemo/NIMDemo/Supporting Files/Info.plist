@@ -45,6 +45,20 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+	<key>Fabric</key>
+	<dict>
+		<key>APIKey</key>
+		<string>d395159c291c627c9d4ff9139bf8f0a700b98732</string>
+		<key>Kits</key>
+		<array>
+			<dict>
+				<key>KitInfo</key>
+				<dict/>
+				<key>KitName</key>
+				<string>Crashlytics</string>
+			</dict>
+		</array>
+	</dict>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>weixin</string>
@@ -54,9 +68,7 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>云信想使用您的摄像头</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>云信想使用您的地理位置信息</string>
-	<key>NSLocationWhenInUseDescription</key>
+	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>云信想使用您的地理位置信息</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>云信想使用您的麦克风</string>
@@ -78,6 +90,9 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>

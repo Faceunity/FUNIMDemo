@@ -22,12 +22,11 @@
 
 @property (nonatomic, strong) NSString *peerUid;
 
-
 #pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
 // 发起通话
-- (void)processVideoBuffer:(CMSampleBufferRef)sampleBuffer ;
+- (void)processVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer ;
 // 接听通话
-- (void)responVideoBuffer:(CMSampleBufferRef)sampleBuffer ;
+- (void)responVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer ;
 #pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
 
 

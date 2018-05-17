@@ -39,6 +39,12 @@
 
 - (BOOL)enableSyncWhenFetchRemoteMessages;          //拉取云消息时是否需要存储到本地
 
+- (BOOL)countTeamNotification;                      //是否将群通知计入未读
+
+- (NSInteger)maximumLogDays;                        //日志最大存在天数
+
+- (BOOL)animatedImageThumbnailEnabled;              //支持动图缩略图
+
 #pragma mark - 网络通话和白板
 - (BOOL)serverRecordAudio;                          //服务器录制语音
 
@@ -78,7 +84,5 @@
 - (NIMAVChatScene)scene;                            //音视频场景设置
 
 - (NSInteger)chatroomRetryCount;                    //进聊天室重试次数
-
-- (BOOL)webrtcCompatible;                           //兼容 webrtc
 
 @end

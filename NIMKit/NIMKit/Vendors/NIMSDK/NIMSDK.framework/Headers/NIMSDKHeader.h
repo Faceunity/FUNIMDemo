@@ -11,6 +11,15 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class NIMSDKOption;
+@class NIMServerSetting;
+
+/**
+ *  压缩日志回调
+ *
+ *  @param error 执行结果,如果成功 error 为 nil
+ *  @param path  压缩包的路径，只有当执行成功才有值，否则为 nil
+ */
+typedef void(^NIMArchiveLogsHandler)(NSError *error, NSString *path);
 
 /**
  *  NIMSDK
@@ -83,15 +92,30 @@ NS_ASSUME_NONNULL_BEGIN
  *  获得SDK Log路径
  *
  *  @return SDK当天log路径
- *  @discussion 这个接口会返回当前最新的一个log文件路径,SDK会每天生成一个log文件方便开发者定位和反馈问题
+ *  @discussion 这个接口会返回当前最新的一个 log 文件路径,SDK 会每天生成一个 log 文件方便开发者定位和反馈问题
  */
 - (NSString *)currentLogFilepath;
+
+
+/**
+ *  打包当前的日志集合
+ *
+ *  @param completion 打包后的压缩包路径
+ *  @discussion 这个接口会压缩当前所有的日志为 Zip 文件，并输出 Zip 路径，上层可以根据这个文件进行上传反馈
+ */
+- (void)archiveLogs:(NIMArchiveLogsHandler)completion;
+
 
 /**
  *  开启控制台Log
  */
 - (void)enableConsoleLog;
 
+/**
+ *  当前服务器配置
+ *  @discussion 私有化需要进行自定义设置，必须在注册 appkey 完成之前设置
+ */
+@property (nonatomic,strong)           NIMServerSetting    *serverSetting;
 
 /**
  *  登录管理类 负责登录,注销和相关操作的通知收发
@@ -162,6 +186,16 @@ NS_ASSUME_NONNULL_BEGIN
  *  红包管理类
  */
 @property (nonatomic,strong,readonly)   id<NIMRedPacketManager> redPacketManager;
+
+/**
+ *  广播消息管理类
+ */
+@property (nonatomic,strong,readonly)   id<NIMBroadcastManager> broadcastManager;
+
+/**
+ *  反垃圾管理类
+ */
+@property (nonatomic,strong,readonly)   id<NIMAntispamManager> antispamManager;
 
 @end
 

@@ -40,9 +40,7 @@
 
 - (void)viewDidLoad{
     [super viewDidLoad];
-    //注册 NIMKit 自定义排版配置
-    [[NIMKit sharedKit] registerLayoutConfig:[NTESCellLayoutConfig new]];
-
+    self.view.backgroundColor = UIColorFromRGB(0xe4e7ec);
     self.navigationItem.leftBarButtonItems  = @[];
     self.navigationItem.rightBarButtonItems = @[];
     [SVProgressHUD show];
@@ -55,6 +53,11 @@
 - (NSString *)sessionSubTitle
 {
     return @"";
+}
+
+- (BOOL)disableAudioPlayedStatusIcon:(NIMMessage *)message
+{
+    return YES;
 }
 
 - (void)sendMessage:(NIMMessage *)message{};
@@ -112,10 +115,6 @@
 
 - (id<NIMKitMessageProvider>)messageDataProvider{
     return self.provider;
-}
-
-- (BOOL)disableAudioPlayedStatusIcon{
-    return YES;
 }
 
 - (BOOL)disableProximityMonitor{

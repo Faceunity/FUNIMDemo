@@ -16,8 +16,6 @@
 
 @property (nonatomic,copy)  NSArray<NSNumber *> *types;
 
-@property (nonatomic,strong) UIView *sep;
-
 @property (nonatomic,copy)  NSDictionary *dict;
 
 @property (nonatomic,strong) NIMGrowingTextView *inputTextView;
@@ -33,10 +31,10 @@
     if (self) {
         [self setBackgroundColor:[UIColor whiteColor]];
         
-        _voiceBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_voiceBtn setImage:[UIImage nim_imageInKit:@"icon_toolview_voice_normal"] forState:UIControlStateNormal];
-        [_voiceBtn setImage:[UIImage nim_imageInKit:@"icon_toolview_voice_pressed"] forState:UIControlStateHighlighted];
-        [_voiceBtn sizeToFit];
+        _voiceButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_voiceButton setImage:[UIImage nim_imageInKit:@"icon_toolview_voice_normal"] forState:UIControlStateNormal];
+        [_voiceButton setImage:[UIImage nim_imageInKit:@"icon_toolview_voice_pressed"] forState:UIControlStateHighlighted];
+        [_voiceButton sizeToFit];
         
         
         _emoticonBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -61,7 +59,7 @@
         
         _inputTextView = [[NIMGrowingTextView alloc] initWithFrame:CGRectZero];
         _inputTextView.font = [UIFont systemFontOfSize:14.0f];
-        _inputTextView.maxNumberOfLines = 4;
+        _inputTextView.maxNumberOfLines = _maxNumberOfInputLines?:4;
         _inputTextView.minNumberOfLines = 1;
         _inputTextView.textColor = [UIColor blackColor];
         _inputTextView.backgroundColor = [UIColor clearColor];
@@ -69,9 +67,17 @@
         _inputTextView.textViewDelegate = self;
         _inputTextView.returnKeyType = UIReturnKeySend;
         
-        _sep = [[UIView alloc] initWithFrame:CGRectZero];
-        _sep.backgroundColor = [UIColor lightGrayColor];
-        [self addSubview:_sep];
+        //顶部分割线
+        UIView *sep = [[UIView alloc] initWithFrame:CGRectZero];
+        sep.backgroundColor = [UIColor lightGrayColor];
+        sep.nim_size = CGSizeMake(self.nim_width, .5f);
+        sep.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self addSubview:sep];
+        
+        //底部分割线
+        _bottomSep = [[UIView alloc] initWithFrame:CGRectZero];
+        _bottomSep.backgroundColor = [UIColor lightGrayColor];
+        [self addSubview:_bottomSep];
         
         self.types = @[
                          @(NIMInputBarItemTypeVoice),
@@ -116,7 +122,7 @@
         [self adjustTextViewWidth:size.width];
         // TextView 自适应高度
         [self.inputTextView layoutIfNeeded];
-        viewHeight = self.inputTextView.frame.size.height;
+        viewHeight = (int)self.inputTextView.frame.size.height;
         //得到 ToolBar 自身高度
         viewHeight = viewHeight + 2 * self.spacing + 2 * self.textViewPadding;
     }
@@ -163,8 +169,8 @@
     
     //底部分割线
     CGFloat sepHeight = .5f;
-    _sep.nim_size     = CGSizeMake(self.nim_width, sepHeight);
-    _sep.nim_bottom   = self.nim_height - sepHeight;
+    _bottomSep.nim_size     = CGSizeMake(self.nim_width, sepHeight);
+    _bottomSep.nim_bottom   = self.nim_height - sepHeight;
 }
 
 
@@ -240,8 +246,8 @@
 
 - (void)updateVoiceBtnImages:(BOOL)selected
 {
-    [self.voiceBtn setImage:selected?[UIImage nim_imageInKit:@"icon_toolview_voice_normal"]:[UIImage nim_imageInKit:@"icon_toolview_keyboard_normal"] forState:UIControlStateNormal];
-    [self.voiceBtn setImage:selected?[UIImage nim_imageInKit:@"icon_toolview_voice_pressed"]:[UIImage nim_imageInKit:@"icon_toolview_keyboard_pressed"] forState:UIControlStateHighlighted];
+    [self.voiceButton setImage:selected?[UIImage nim_imageInKit:@"icon_toolview_voice_normal"]:[UIImage nim_imageInKit:@"icon_toolview_keyboard_normal"] forState:UIControlStateNormal];
+    [self.voiceButton setImage:selected?[UIImage nim_imageInKit:@"icon_toolview_voice_pressed"]:[UIImage nim_imageInKit:@"icon_toolview_keyboard_pressed"] forState:UIControlStateHighlighted];
 }
 
 - (void)updateEmotAndTextBtnImages:(BOOL)selected
@@ -307,7 +313,7 @@
 - (UIView *)subViewForType:(NIMInputBarItemType)type{
     if (!_dict) {
         _dict = @{
-                  @(NIMInputBarItemTypeVoice) : self.voiceBtn,
+                  @(NIMInputBarItemTypeVoice) : self.voiceButton,
                   @(NIMInputBarItemTypeTextAndRecord)  : self.inputTextBkgImage,
                   @(NIMInputBarItemTypeEmoticon) : self.emoticonBtn,
                   @(NIMInputBarItemTypeMore)     : self.moreMediaBtn

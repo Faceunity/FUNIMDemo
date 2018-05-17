@@ -48,17 +48,26 @@
     return self;
 }
 
+- (void)viewDidLayoutSubviews {
+    if (@available(iOS 11.0, *)) {
+        CGFloat height = self.view.safeAreaInsets.bottom;
+        self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height - height);
+    }
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.navigationItem.title = @"设置";
-    NSString *versionStr = [[NSBundle mainBundle]objectForInfoDictionaryKey:@"CFBundleVersion"];
-    NSString *sdkVersion = [NIMSDK sharedSDK].sdkVersion;
-    self.versionLabel.text = [NSString stringWithFormat:@"版本号:%@  SDK版本:%@",versionStr,sdkVersion];
+    self.view.backgroundColor = [UIColor whiteColor];
     [self buildData];
     __weak typeof(self) wself = self;
     self.delegator = [[NIMCommonTableDelegate alloc] initWithTableData:^NSArray *{
         return wself.data;
     }];
+    self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+    [self.view addSubview:self.tableView];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.sectionIndexBackgroundColor = [UIColor clearColor];
     self.tableView.delegate   = self.delegator;
     self.tableView.dataSource = self.delegator;
     
@@ -124,6 +133,19 @@
                                         ],
                           FooterTitle:@"在iPhone的“设置- 通知中心”功能，找到应用程序“云信”，可以更改云信新消息提醒设置"
                         },
+                        @{
+                          HeaderTitle:@"",
+                          RowContent :@[
+                                          @{
+                                              Title      : @"通知显示详情",
+                                              CellClass  : @"NTESSettingSwitcherCell",
+                                              ExtraInfo  : @(setting.type == NIMPushNotificationDisplayTypeDetail? YES : NO),
+                                              CellAction :@"onActionShowPushDetailSetting:",
+                                              ForbidSelect : @(YES)
+                                           },
+                                      ],
+                          FooterTitle:@""
+                          },
                        @{
                           HeaderTitle:@"",
                           RowContent :@[
@@ -148,9 +170,9 @@
                                             CellAction :@"onTouchUploadLog:",
                                             },
                                         @{
-                                          Title      :@"清空所有聊天记录",
-                                          CellAction :@"onTouchCleanAllChatRecord:",
-                                         },
+                                            Title      :@"清理缓存",
+                                            CellAction :@"onTouchCleanCache:",
+                                            },
                                         @{
                                             Title      :customNotifyText,
                                             CellAction :@"onTouchCustomNotify:",
@@ -205,6 +227,21 @@
     [self.navigationController pushViewController:vc animated:YES];
 }
 
+- (void)onActionShowPushDetailSetting:(UISwitch *)switcher
+{
+    NIMPushNotificationSetting *setting = [NIMSDK sharedSDK].apnsManager.currentSetting;
+    setting.type = switcher.on? NIMPushNotificationDisplayTypeDetail : NIMPushNotificationDisplayTypeNoDetail;
+    __weak typeof(self) wself = self;
+    [[NIMSDK sharedSDK].apnsManager updateApnsSetting:setting completion:^(NSError * _Nullable error) {
+        if (error)
+        {
+            [wself.view makeToast:@"更新失败" duration:2.0 position:CSToastPositionCenter];
+            switcher.on = !switcher.on;
+        }
+    }];
+}
+
+
 - (void)onTouchShowLog:(id)sender{
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"查看日志" delegate:nil cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"查看 DEMO 配置",@"查看 SDK 日志",@"查看网络通话日志",@"查看网络探测日志",@"查看 Demo 日志", nil];
     [actionSheet showInView:self.view completionHandler:^(NSInteger index) {
@@ -253,35 +290,42 @@
     }];
 }
 
+
+- (void)onTouchCleanCache:(id)sender
+{
+    UIAlertController *vc = [UIAlertController alertControllerWithTitle:@"" message:@"清除后，图片、视频等多媒体消息需要重新下载查看。确定清除？" preferredStyle:UIAlertControllerStyleActionSheet];
+    [[vc addAction:@"清除" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+        NIMResourceQueryOption *option = [[NIMResourceQueryOption alloc] init];
+        option.timeInterval = 0;
+        [SVProgressHUD show];
+        [[NIMSDK sharedSDK].resourceManager removeResourceFiles:option completion:^(NSError * _Nullable error, long long freeBytes) {
+            [SVProgressHUD dismiss];
+            if (error)
+            {
+                UIAlertController *result = [UIAlertController alertControllerWithTitle:@"" message:@"清除失败！" preferredStyle:UIAlertControllerStyleAlert];
+                [result addAction:@"确定" style:UIAlertActionStyleCancel handler:nil];
+                [result show];
+            }
+            else
+            {
+                CGFloat freeMB = (CGFloat)freeBytes / 1000 / 1000;
+                UIAlertController *result = [UIAlertController alertControllerWithTitle:@"" message:[NSString stringWithFormat:@"成功清理了%.2fMB磁盘空间",freeMB] preferredStyle:UIAlertControllerStyleAlert];
+                [result addAction:@"确定" style:UIAlertActionStyleCancel handler:nil];
+                [result show];
+            }
+        }];
+    }]
+     addAction:@"取消" style:UIAlertActionStyleCancel handler:nil];
+    
+    [vc show];
+}
+
 - (void)onTouchMyWallet:(id)sender
 {
     JrmfWalletSDK * jrmf = [[JrmfWalletSDK alloc] init];
     NSString *userId = [[NIMSDK sharedSDK].loginManager currentAccount];
     NIMKitInfo *userInfo = [[NIMKit sharedKit] infoByUser:userId option:nil];
     [jrmf doPresentJrmfWalletPageWithBaseViewController:self userId:userId userName:userInfo.showName userHeadLink:userInfo.avatarUrlString thirdToken:[JRMFSington GetPacketSington].JrmfThirdToken];
-}
-
-- (void)onTouchCleanAllChatRecord:(id)sender{
-    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"确定清空所有聊天记录？" delegate:nil cancelButtonTitle:@"取消" destructiveButtonTitle:@"确定" otherButtonTitles:nil, nil];
-    [sheet showInView:self.view completionHandler:^(NSInteger index) {
-        switch (index) {
-            case 0:{
-                BOOL removeRecentSessions = [NTESBundleSetting sharedConfig].removeSessionWhenDeleteMessages;
-                BOOL removeTables = [NTESBundleSetting sharedConfig].dropTableWhenDeleteMessages;
-                NIMDeleteMessagesOption *option = [[NIMDeleteMessagesOption alloc] init];
-                option.removeSession = removeRecentSessions;
-                option.removeTable = removeTables;
-                [[NIMSDK sharedSDK].conversationManager deleteAllMessages:option];
-                for (NIMRecentSession *recent in [NIMSDK sharedSDK].conversationManager.allRecentSessions) {
-                    [NTESSessionUtil removeRecentSessionAtMark:recent.session];
-                }
-                [self.view makeToast:@"消息已删除" duration:2 position:CSToastPositionCenter];
-                break;
-            }
-            default:
-                break;
-        }
-    }];
 }
 
 - (void)onTouchCustomNotify:(id)sender{

@@ -15,7 +15,7 @@
 const NSInteger NIMInputEmoticonTabViewHeight = 35;
 const NSInteger NIMInputEmoticonSendButtonWidth = 50;
 
-const CGFloat InputLineBoarder = .5f;
+const CGFloat NIMInputLineBoarder = .5f;
 
 @interface NIMInputEmoticonTabView()
 
@@ -44,11 +44,9 @@ const CGFloat InputLineBoarder = .5f;
         _sendButton.nim_width = NIMInputEmoticonSendButtonWidth;
         [self addSubview:_sendButton];
         
+        self.layer.borderColor = sepColor.CGColor;
+        self.layer.borderWidth = NIMInputLineBoarder;
         
-        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0,0, self.nim_width,InputLineBoarder)];
-        view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        view.backgroundColor = sepColor;
-        [self addSubview:view];
     }
     return self;
 }
@@ -71,7 +69,7 @@ const CGFloat InputLineBoarder = .5f;
         [self addSubview:button];
         [_tabs addObject:button];
         
-        UIView *sep = [[UIView alloc] initWithFrame:CGRectMake(0, 0, InputLineBoarder, NIMInputEmoticonTabViewHeight)];
+        UIView *sep = [[UIView alloc] initWithFrame:CGRectMake(0, 0, NIMInputLineBoarder, NIMInputEmoticonTabViewHeight)];
         sep.backgroundColor = sepColor;
         [_seps addObject:sep];
         [self addSubview:sep];
@@ -104,10 +102,10 @@ const CGFloat InputLineBoarder = .5f;
         button.nim_centerY = self.nim_height * .5f;
         
         UIView *sep = self.seps[index];
-        sep.nim_left = button.nim_right + spacing;
-        left = sep.nim_right + spacing;
+        sep.nim_left = (int)(button.nim_right + spacing);
+        left = (int)(sep.nim_right + spacing);
     }
-    _sendButton.nim_right = self.nim_width;
+    _sendButton.nim_right = (int)self.nim_width;
 }
 
 

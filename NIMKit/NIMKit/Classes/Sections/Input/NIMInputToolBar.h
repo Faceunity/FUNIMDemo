@@ -38,7 +38,7 @@ typedef NS_ENUM(NSInteger,NIMInputStatus)
 
 @interface NIMInputToolBar : UIView
 
-@property (nonatomic,strong) UIButton    *voiceBtn;
+@property (nonatomic,strong) UIButton    *voiceButton;
 
 @property (nonatomic,strong) UIButton    *emoticonBtn;
 
@@ -48,6 +48,8 @@ typedef NS_ENUM(NSInteger,NIMInputStatus)
 
 @property (nonatomic,strong) UIImageView *inputTextBkgImage;
 
+@property (nonatomic,strong) UIView *bottomSep;
+
 @property (nonatomic,copy) NSString *contentText;
 
 @property (nonatomic,weak) id<NIMInputToolBarDelegate> delegate;
@@ -55,6 +57,8 @@ typedef NS_ENUM(NSInteger,NIMInputStatus)
 @property (nonatomic,assign) BOOL showsKeyboard;
 
 @property (nonatomic,assign) NSArray *inputBarItemTypes;
+
+@property (nonatomic,assign) NSInteger maxNumberOfInputLines;
 
 - (void)update:(NIMInputStatus)status;
 

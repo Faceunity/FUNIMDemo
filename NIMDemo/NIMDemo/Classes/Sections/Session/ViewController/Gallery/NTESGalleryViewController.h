@@ -9,14 +9,16 @@
 #import <UIKit/UIKit.h>
 
 @interface NTESGalleryItem : NSString
+@property (nonatomic,copy)  NSString    *itemId;
 @property (nonatomic,copy)  NSString    *thumbPath;
 @property (nonatomic,copy)  NSString    *imageURL;
 @property (nonatomic,copy)  NSString    *name;
+@property (nonatomic,assign) CGSize     size;
 @end
 
 
 @interface NTESGalleryViewController : UIViewController
-- (instancetype)initWithItem:(NTESGalleryItem *)item;
+- (instancetype)initWithItem:(NTESGalleryItem *)item session:(NIMSession *)session;
 @end
 
 

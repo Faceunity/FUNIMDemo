@@ -36,7 +36,7 @@
 
 @property (nonatomic,strong) NSMutableDictionary *robotTemplates;
 
-@property (nonatomic,strong) NSDictionary<NSString *, NIMKitRobotTemplate *> *elementNameMapping;
+@property (nonatomic,strong) NSDictionary<NSString *, NSNumber *> *elementNameMapping;
 
 @end
 

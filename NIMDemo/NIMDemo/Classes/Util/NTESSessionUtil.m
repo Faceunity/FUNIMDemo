@@ -231,42 +231,55 @@ static NSString *const NTESRecentSessionAtMark = @"NTESRecentSessionAtMark";
 }
 
 
-+ (NSString *)tipOnMessageRevoked:(id)message
++ (NSString *)tipOnMessageRevoked:(NIMRevokeMessageNotification *)notificaton
 {
     NSString *fromUid = nil;
     NIMSession *session = nil;
-    
-    if ([message isKindOfClass:[NIMMessage class]])
+    NSString *tip = @"";
+    BOOL isFromMe = NO;
+    if([notificaton isKindOfClass:[NIMRevokeMessageNotification class]])
     {
-        fromUid = [(NIMMessage *)message from];
-        session = [(NIMMessage *)message session];
+        fromUid = [notificaton fromUserId];
+        session = [notificaton session];
+        isFromMe = [fromUid isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
+
     }
-    else if([message isKindOfClass:[NIMRevokeMessageNotification class]])
+    else if(!notificaton)
     {
-        fromUid = [(NIMRevokeMessageNotification *)message fromUserId];
-        session = [(NIMRevokeMessageNotification *)message session];
+        isFromMe = YES;
     }
     else
     {
         assert(0);
     }
-    
-    BOOL isFromMe = [fromUid isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
-    NSString *tip = @"你";
-    if (!isFromMe) {
+    if (isFromMe)
+    {
+        tip = @"你";
+    }
+    else{
         switch (session.sessionType) {
             case NIMSessionTypeP2P:
                 tip = @"对方";
                 break;
             case NIMSessionTypeTeam:{
+                NIMTeam *team = [[NIMSDK sharedSDK].teamManager teamById:session.sessionId];
+                NIMTeamMember *member = [[NIMSDK sharedSDK].teamManager teamMember:fromUid inTeam:session.sessionId];
+                if ([fromUid isEqualToString:team.owner])
+                {
+                    tip = @"群主";
+                }
+                else if(member.type == NIMTeamMemberTypeManager)
+                {
+                    tip = @"管理员";
+                }
                 NIMKitInfoFetchOption *option = [[NIMKitInfoFetchOption alloc] init];
                 option.session = session;
                 NIMKitInfo *info = [[NIMKit sharedKit] infoByUser:fromUid option:option];
-                tip = info.showName;
+                tip = [tip stringByAppendingString:info.showName];
             }
                 break;
             default:
-                    break;
+                break;
         }
     }
     return [NSString stringWithFormat:@"%@撤回了一条消息",tip];
@@ -299,10 +312,9 @@ static NSString *const NTESRecentSessionAtMark = @"NTESRecentSessionAtMark";
 
 + (BOOL)canMessageBeRevoked:(NIMMessage *)message
 {
-    BOOL isFromMe = [message.from isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
-    BOOL isToMe   = [message.session.sessionId isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
+    BOOL canRevokeMessageByRole  = [self canRevokeMessageByRole:message];
     BOOL isDeliverFailed = !message.isReceivedMsg && message.deliveryState == NIMMessageDeliveryStateFailed;
-    if (!isFromMe || isToMe || isDeliverFailed) {
+    if (!canRevokeMessageByRole || isDeliverFailed) {
         return NO;
     }
     id<NIMMessageObject> messageObject = message.messageObject;
@@ -315,11 +327,30 @@ static NSString *const NTESRecentSessionAtMark = @"NTESRecentSessionAtMark";
         id<NTESCustomAttachmentInfo> attach = (id<NTESCustomAttachmentInfo>)[(NIMCustomObject *)message.messageObject attachment];
         return [attach canBeRevoked];
     }
+    return YES;
+}
+
+
++ (BOOL)canRevokeMessageByRole:(NIMMessage *)message
+{
+    BOOL isFromMe  = [message.from isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
+    BOOL isToMe        = [message.session.sessionId isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
+    BOOL isTeamManager = NO;
+    if (message.session.sessionType == NIMSessionTypeTeam)
+    {
+        NIMTeamMember *member = [[NIMSDK sharedSDK].teamManager teamMember:[NIMSDK sharedSDK].loginManager.currentAccount inTeam:message.session.sessionId];
+        isTeamManager = member.type == NIMTeamMemberTypeOwner || member.type == NIMTeamMemberTypeManager;
+    }
+    
+    BOOL isRobotMessage = NO;
+    id<NIMMessageObject> messageObject = message.messageObject;
     if ([messageObject isKindOfClass:[NIMRobotObject class]]) {
         NIMRobotObject *robotObject = (NIMRobotObject *)messageObject;
-        return !robotObject.isFromRobot;
+        isRobotMessage = robotObject.isFromRobot;
     }
-    return YES;
+    //我发出去的消息并且不是发给我的电脑的消息并且不是机器人的消息，可以撤回
+    //群消息里如果我是管理员可以撤回以上所有消息
+    return (isFromMe && !isToMe && !isRobotMessage) || isTeamManager;
 }
 
 

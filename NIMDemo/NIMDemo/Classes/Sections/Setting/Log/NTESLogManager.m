@@ -31,7 +31,6 @@
 - (instancetype)init {
     self = [super init];
     if(self) {
-        [DDLog addLogger:[DDASLLogger sharedInstance]];
         [DDLog addLogger:[DDTTYLogger sharedInstance]];
         [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
         [[DDTTYLogger sharedInstance] setForegroundColor:[UIColor greenColor] backgroundColor:nil forFlag:DDLogFlagDebug];

@@ -59,6 +59,9 @@
 #import "NTESSessionRedPacketTipContentView.h"
 #import "NTESRedPacketAttachment.h"
 #import "NTESRedPacketTipAttachment.h"
+#import "NTESCellLayoutConfig.h"
+#import "NTESTeamReceiptSendViewController.h"
+#import "NTESTeamReceiptDetailViewController.h"
 
 @interface NTESSessionViewController ()
 <UIImagePickerControllerDelegate,
@@ -370,7 +373,7 @@ NIMEventSubscribeManagerDelegate>
 
 
 
-#pragma mark - 提醒消息
+#pragma mark - 提示消息
 - (void)onTapMediaItemTip:(NIMMediaItem *)item
 {
     UIAlertView *alert =[[UIAlertView alloc] initWithTitle:nil message:@"输入提醒" delegate:nil cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
@@ -396,6 +399,29 @@ NIMEventSubscribeManagerDelegate>
     [[NTESRedPacketManager sharedManager] sendRedPacket:self.session];
 }
 
+#pragma mark - 群已读回执
+- (void)onTapMediaItemTeamReceipt:(NIMMediaItem *)item
+{
+    NTESTeamReceiptSendViewController *vc = [[NTESTeamReceiptSendViewController alloc] initWithSession:self.session];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+
+#pragma mark - 消息发送时间截获
+- (void)sendMessage:(NIMMessage *)message didCompleteWithError:(NSError *)error
+{
+    if (error.code == NIMRemoteErrorCodeInBlackList)
+    {
+        //消息打上拉黑拒收标记，方便 UI 显示
+        message.localExt = @{NTESMessageRefusedTag:@(true)};
+        [[NIMSDK sharedSDK].conversationManager updateMessage:message forSession:self.session completion:nil];
+        
+        //插入一条 Tip 提示
+        NIMMessage *tip = [NTESSessionMsgConverter msgWithTip:@"消息已发送，但对方拒收"];
+        [[NIMSDK sharedSDK].conversationManager saveMessage:tip forSession:self.session completion:nil];
+    }
+    [super sendMessage:message didCompleteWithError:error];
+}
 
 #pragma mark - 录音事件
 - (void)onRecordFailed:(NSError *)error
@@ -502,7 +528,8 @@ NIMEventSubscribeManagerDelegate>
     return handled;
 }
 
-- (BOOL)onTapAvatar:(NSString *)userId{
+- (BOOL)onTapAvatar:(NIMMessage *)message{
+    NSString *userId = [self messageSendSource:message];
     UIViewController *vc = nil;
     if ([[NIMSDK sharedSDK].robotManager isValidRobot:userId])
     {
@@ -518,8 +545,9 @@ NIMEventSubscribeManagerDelegate>
 }
 
 
-- (BOOL)onLongPressAvatar:(NSString *)userId
+- (BOOL)onLongPressAvatar:(NIMMessage *)message
 {
+    NSString *userId = [self messageSendSource:message];
     if (self.session.sessionType == NIMSessionTypeTeam && ![userId isEqualToString:[NIMSDK sharedSDK].loginManager.currentAccount])
     {
         NIMKitInfoFetchOption *option = [[NIMKitInfoFetchOption alloc] init];
@@ -539,6 +567,34 @@ NIMEventSubscribeManagerDelegate>
     return YES;
 }
 
+- (BOOL)onPressReadLabel:(NIMMessage *)message
+{
+    if (self.session.sessionType == NIMSessionTypeTeam)
+    {
+        NTESTeamReceiptDetailViewController *vc = [[NTESTeamReceiptDetailViewController alloc] initWithMessage:message];
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+    return YES;
+}
+
+
+- (NSString *)messageSendSource:(NIMMessage *)message
+{
+    NSString *from = nil;
+    if (message.messageType == NIMMessageTypeRobot)
+    {
+        NIMRobotObject *object = (NIMRobotObject *)message.messageObject;
+        if (object.isFromRobot)
+        {
+            from = object.robotId;
+        }
+    }
+    if (!from)
+    {
+        from = message.from;
+    }
+    return from;
+}
 
 
 #pragma mark - Cell Actions
@@ -549,7 +605,12 @@ NIMEventSubscribeManagerDelegate>
     item.thumbPath      = [object thumbPath];
     item.imageURL       = [object url];
     item.name           = [object displayName];
-    NTESGalleryViewController *vc = [[NTESGalleryViewController alloc] initWithItem:item];
+    item.itemId         = [message messageId];
+    item.size           = [object size];
+    
+    NIMSession *session = [self isMemberOfClass:[NTESSessionViewController class]]? self.session : nil;
+    
+    NTESGalleryViewController *vc = [[NTESGalleryViewController alloc] initWithItem:item session:session];
     [self.navigationController pushViewController:vc animated:YES];
     if(![[NSFileManager defaultManager] fileExistsAtPath:object.thumbPath]){
         //如果缩略图下跪了，点进看大图的时候再去下一把缩略图
@@ -565,7 +626,15 @@ NIMEventSubscribeManagerDelegate>
 - (void)showVideo:(NIMMessage *)message
 {
     NIMVideoObject *object = message.messageObject;
-    NTESVideoViewController *playerViewController = [[NTESVideoViewController alloc] initWithVideoObject:object];
+    NIMSession *session = [self isMemberOfClass:[NTESSessionViewController class]]? self.session : nil;
+    
+    NTESVideoViewItem *item = [[NTESVideoViewItem alloc] init];
+    item.path = object.path;
+    item.url  = object.url;
+    item.session = session;
+    item.itemId  = object.message.messageId;
+    
+    NTESVideoViewController *playerViewController = [[NTESVideoViewController alloc] initWithVideoViewItem:item];
     [self.navigationController pushViewController:playerViewController animated:YES];
     if(![[NSFileManager defaultManager] fileExistsAtPath:object.coverPath]){
         //如果封面图下跪了，点进视频的时候再去下一把封面图
@@ -716,6 +785,7 @@ NIMEventSubscribeManagerDelegate>
     NIMMessage *message = [self messageForMenu];
     UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"选择会话类型" delegate:nil cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"个人",@"群组", nil];
     __weak typeof(self) weakSelf = self;
+    message.setting.teamReceiptEnabled = NO;
     [sheet showInView:self.view completionHandler:^(NSInteger index) {
         switch (index) {
             case 0:{
@@ -767,7 +837,7 @@ NIMEventSubscribeManagerDelegate>
         else
         {
             NIMMessageModel *model = [self uiDeleteMessage:message];
-            NIMMessage *tip = [NTESSessionMsgConverter msgWithTip:[NTESSessionUtil tipOnMessageRevoked:message]];
+            NIMMessage *tip = [NTESSessionMsgConverter msgWithTip:[NTESSessionUtil tipOnMessageRevoked:nil]];
             tip.timestamp = model.messageTime;
             [self uiInsertMessages:@[tip]];
             

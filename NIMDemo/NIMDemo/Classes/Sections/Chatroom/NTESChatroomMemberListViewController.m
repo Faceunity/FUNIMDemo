@@ -17,7 +17,7 @@
 
 @property (nonatomic, strong) UITableView *tableView;
 
-@property (nonatomic, strong) NIMChatroom *chatrooom;
+@property (nonatomic, strong) NIMChatroom *chatroom;
 
 @property (nonatomic, assign) NSInteger limit; //分页条数
 
@@ -32,7 +32,7 @@
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         _limit     = 100;
-        _chatrooom = chatroom;
+        _chatroom = chatroom;
         _members   = [[NSMutableArray alloc] init];
     }
     return self;
@@ -165,7 +165,7 @@
 {
     NIMChatroomMember *member = self.members[indexPath.row];
     NIMChatroomMemberUpdateRequest *request = [[NIMChatroomMemberUpdateRequest alloc] init];
-    request.roomId = self.chatrooom.roomId;
+    request.roomId = self.chatroom.roomId;
     request.userId = member.userId;
     request.enable = isBlack;
     __weak typeof(self) weakSelf = self;
@@ -193,7 +193,7 @@
 {
     NIMChatroomMember *member = self.members[indexPath.row];
     NIMChatroomMemberUpdateRequest *request = [[NIMChatroomMemberUpdateRequest alloc] init];
-    request.roomId = self.chatrooom.roomId;
+    request.roomId = self.chatroom.roomId;
     request.userId = member.userId;
     request.enable = isMute;
     __weak typeof(self) weakSelf = self;
@@ -220,7 +220,7 @@
 {
     NIMChatroomMember *member = self.members[indexPath.row];
     NIMChatroomMemberUpdateRequest *request = [[NIMChatroomMemberUpdateRequest alloc] init];
-    request.roomId = self.chatrooom.roomId;
+    request.roomId = self.chatroom.roomId;
     request.userId = member.userId;
     request.enable = isManager;
     __weak typeof(self) weakSelf = self;
@@ -242,7 +242,7 @@
 {
     NIMChatroomMember *member = self.members[indexPath.row];
     NIMChatroomMemberKickRequest *request = [[NIMChatroomMemberKickRequest alloc] init];
-    request.roomId = self.chatrooom.roomId;
+    request.roomId = self.chatroom.roomId;
     request.userId = member.userId;
     __weak typeof(self) weakSelf = self;
     [[NIMSDK sharedSDK].chatroomManager kickMember:request completion:^(NSError *error) {
@@ -262,9 +262,9 @@
 #pragma mark - Private 
 - (void)requestTeamMembers:(NIMChatroomMember *)lastMember handler:(NIMChatroomMembersHandler)handler{
     NIMChatroomMemberRequest *request = [[NIMChatroomMemberRequest alloc] init];
-    request.roomId = self.chatrooom.roomId;
+    request.roomId = self.chatroom.roomId;
     request.lastMember = lastMember;
-    request.type   = lastMember.type == NIMChatroomMemberTypeGuest ? NIMChatroomFetchMemberTypeTemp : NIMChatroomFetchMemberTypeRegularOnline;
+    request.type   = (lastMember.type == NIMChatroomMemberTypeGuest || lastMember.type == NIMChatroomMemberTypeAnonymousGuest)? NIMChatroomFetchMemberTypeTemp : NIMChatroomFetchMemberTypeRegularOnline;
     request.limit  = self.limit;
     __weak typeof(self) wself = self;
     [[NIMSDK sharedSDK].chatroomManager fetchChatroomMembers:request completion:^(NSError *error, NSArray *members) {
@@ -273,7 +273,7 @@
             if (members.count < wself.limit && request.type == NIMChatroomFetchMemberTypeRegularOnline) {
                 //固定的没抓够，再抓点临时的充数
                 NIMChatroomMemberRequest *req = [[NIMChatroomMemberRequest alloc] init];
-                req.roomId = wself.chatrooom.roomId;
+                req.roomId = wself.chatroom.roomId;
                 req.lastMember = nil;
                 req.type   = NIMChatroomFetchMemberTypeTemp;
                 req.limit  = wself.limit;
@@ -309,6 +309,7 @@
                                @(NIMChatroomMemberTypeNormal ) : @(3),
                                @(NIMChatroomMemberTypeLimit  ) : @(4),
                                @(NIMChatroomMemberTypeGuest  ) : @(5),
+                               @(NIMChatroomMemberTypeAnonymousGuest  ) : @(6),
                               };
     [self.members sortUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
         NIMChatroomMember *member1  = obj1;

@@ -24,6 +24,16 @@
 		</dict>
 		<dict>
 			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>DefaultValue</key>
+			<string>7</string>
+			<key>Title</key>
+			<string>日志存在天数</string>
+			<key>Key</key>
+			<string>maximum_log_days</string>
+		</dict>
+		<dict>
+			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
 			<string>删除所有消息时同时移除消息表</string>
@@ -52,16 +62,16 @@
 			<key>DefaultValue</key>
 			<false/>
 		</dict>
-        <dict>
-            <key>Type</key>
-            <string>PSToggleSwitchSpecifier</string>
-            <key>Title</key>
-            <string>获取远程消息的时候同步到本地</string>
-            <key>Key</key>
-            <string>sync_when_remote_fetch_messages</string>
-            <key>DefaultValue</key>
-            <false/>
-        </dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>获取远程消息的时候同步到本地</string>
+			<key>Key</key>
+			<string>sync_when_remote_fetch_messages</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
 		<dict>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
@@ -79,6 +89,26 @@
 			<string>需要验证才能添加好友</string>
 			<key>Key</key>
 			<string>add_friend_need_verify</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>群通知是否计入未读</string>
+			<key>Key</key>
+			<string>count_team_notification</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>远程缩略图支持动图</string>
+			<key>Key</key>
+			<string>animated_image_thumbnail_enabled</string>
 			<key>DefaultValue</key>
 			<false/>
 		</dict>
@@ -405,16 +435,6 @@
 			<string>avchat_scene</string>
 			<key>DefaultValue</key>
 			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>兼容 webrtc</string>
-			<key>Key</key>
-			<string>webrtc_compatible</string>
-			<key>DefaultValue</key>
-			<false/>
 		</dict>
 	</array>
 </dict>

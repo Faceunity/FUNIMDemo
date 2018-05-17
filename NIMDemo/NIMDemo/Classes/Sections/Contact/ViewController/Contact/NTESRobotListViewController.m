@@ -18,6 +18,9 @@
 @interface NTESRobotListViewController ()<UITableViewDelegate,UITableViewDataSource,NIMUserManagerDelegate,NTESUserListCellDelegate>
 
 @property (nonatomic,strong) NSMutableArray *data;
+
+@property (nonatomic,strong) UIRefreshControl *refreshControl;
+
 @end
 
 @implementation NTESRobotListViewController
@@ -39,6 +42,7 @@
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
+    [self.tableView addSubview:self.refreshControl];
 }
 
 
@@ -93,6 +97,28 @@
     [self.tableView reloadData];
 }
 
+- (void)onPull2Refresh:(id)sender
+{
+    [self.refreshControl beginRefreshing];
+    __weak typeof(self) weakSelf = self;
+    [[NIMSDK sharedSDK].robotManager fetchAllRobotsFromServer:^(NSError * _Nullable error, NSArray<NIMRobot *> * _Nullable robots) {
+        [weakSelf.refreshControl endRefreshing];
+        if (!error)
+        {
+            NSMutableArray *list = [[NSMutableArray alloc] init];
+            for (NIMRobot *robot in robots) {
+                NTESContactDataMember *member = [[NTESContactDataMember alloc] init];
+                NIMKitInfo *info = [[NIMKit sharedKit] infoByUser:robot.userId option:nil];
+                member.info = info;
+                [list addObject:member];
+            }
+            weakSelf.data = list;
+            [weakSelf.tableView reloadData];
+        }
+    }];
+    
+}
+
 #pragma mark - Private
 
 - (void)addListener
@@ -115,6 +141,15 @@
         [list addObject:member];
     }
     return list;
+}
+
+- (UIRefreshControl *)refreshControl
+{
+    if (!_refreshControl) {
+        _refreshControl = [[UIRefreshControl alloc] initWithFrame:CGRectZero];
+        [_refreshControl addTarget:self action:@selector(onPull2Refresh:) forControlEvents:UIControlEventValueChanged];
+    }
+    return _refreshControl;
 }
 
 

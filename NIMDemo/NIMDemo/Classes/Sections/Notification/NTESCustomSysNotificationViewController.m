@@ -137,7 +137,8 @@ static NSString *reuseIdentifier = @"reuseIdentifier";
     }];
 }
 
-- (void)clearAll:(id)sender{
+- (void)clearAll:(id)sender
+{
     NTESCustomNotificationDB *db = [NTESCustomNotificationDB sharedInstance];
     [db deleteAllNotification];
     [self.data removeAllObjects];
@@ -150,26 +151,20 @@ static NSString *reuseIdentifier = @"reuseIdentifier";
     if (!selectId.length) {
         return;
     }
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"" message:@"自定义发送内容" delegate:nil cancelButtonTitle:@"取消" otherButtonTitles:@"确认", nil];
-    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-    [alert showAlertWithCompletionHandler:^(NSInteger index) {
-        switch (index) {
-            case 0://取消
-                break;
-            case 1:{
-                
-                NSString *content = [[alert textFieldAtIndex:0].text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-                content = [content length] ? content : @"";
-                NIMSession *session = [NIMSession session:selectId type:self.sendSessionType];
-            
-                [_sender sendCustomContent:content
-                                 toSession:session];
-            }
-                break;
-            default:
-                break;
-        }
-    }];
+    
+    UIAlertController *vc = [UIAlertController alertControllerWithTitle:@"" message:@"自定义发送内容" preferredStyle:UIAlertControllerStyleAlert];
+    [vc addTextFieldWithConfigurationHandler:nil];
+    __weak UIAlertController *wvc = vc;
+    [[vc addAction:@"确认" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        NSString *content = [wvc.textFields.firstObject.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        content = [content length] ? content : @"";
+        NIMSession *session = [NIMSession session:selectId type:self.sendSessionType];
+        [_sender sendCustomContent:content
+                         toSession:session];
+    }]
+    addAction:@"取消" style:UIAlertActionStyleCancel handler:nil];
+    
+    [vc show];
 }
 
 @end

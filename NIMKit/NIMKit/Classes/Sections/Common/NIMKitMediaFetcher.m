@@ -88,8 +88,9 @@
             }
             if (status == PHAuthorizationStatusAuthorized) {
                 NIMKitMediaPickerController *vc = [[NIMKitMediaPickerController alloc] initWithMaxImagesCount:self.limit delegate:weakSelf];
-                vc.navigationBar.barTintColor = [UIColor whiteColor];
-                vc.barItemTextColor = [UIColor blackColor];
+                vc.naviBgColor = [UIColor blackColor];
+                vc.naviTitleColor = [UIColor whiteColor];
+                vc.barItemTextColor = [UIColor whiteColor];
                 vc.navigationBar.barStyle = UIBarStyleDefault;
                 vc.allowPickingVideo = [_mediaTypes containsObject:(NSString *)kUTTypeMovie];
                 if(handler) handler(vc);
@@ -165,11 +166,13 @@
     if (!assets.count) {
         return;
     }
+    
     __weak typeof(self) weakSelf = self;
     [NIMKitProgressHUD show];
     [self requestAsset:assets.firstObject handler:^(NSString *path, PHAssetMediaType type) {
         [NIMKitProgressHUD dismiss];
-        if (weakSelf.libraryResultHandler) {
+        if (weakSelf.libraryResultHandler)
+        {
             weakSelf.libraryResultHandler(nil,path,type);
         }
         NIMKit_Dispatch_Async_Main(^{

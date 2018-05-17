@@ -69,7 +69,6 @@ NTES_FORBID_INTERACTIVE_POP
         self.callInfo.caller = caller;
         self.callInfo.callee = [[NIMSDK sharedSDK].loginManager currentAccount];
         self.callInfo.callID = callID;
-        
     }
     return self;
 }
@@ -98,7 +97,6 @@ NTES_FORBID_INTERACTIVE_POP
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     __weak typeof(self) wself = self;
     [self checkServiceEnable:^(BOOL result) {
         if (result) {
@@ -173,14 +171,15 @@ NTES_FORBID_INTERACTIVE_POP
     }
 }
 
-#pragma mark /***--- 空方法，子类重写 ---***/
+
+#pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
 // 发起通话
-- (void)processVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer {
+- (void)processVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
 }
 // 接听通话
-- (void)responVideoBuffer:(CMSampleBufferRef)sampleBuffer {
+- (void)responVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
 }
-#pragma mark /***--- 以上空方法，子类重写 ---***/
+#pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
 
 - (void)doStartByCaller
 {
@@ -192,15 +191,15 @@ NTES_FORBID_INTERACTIVE_POP
     option.apnsContent = [NSString stringWithFormat:@"%@请求", self.callInfo.callType == NIMNetCallTypeAudio ? @"网络通话" : @"视频聊天"];
     option.apnsSound = @"video_chat_tip_receiver.aac";
     [self fillUserSetting:option];
+    
     option.videoCaptureParam.startWithCameraOn = (self.callInfo.callType == NIMNetCallTypeVideo);
     
-    /****--- 获取视频数据 ---*****/
+#pragma mark /**---- FaceUnity 获取视频数据 ----**/
     __weak typeof(self) wself = self;
     option.videoCaptureParam.videoHandler = ^(CMSampleBufferRef  _Nonnull sampleBuffer) {
-        
-        [wself processVideoBuffer:sampleBuffer];
-    } ;
-    
+        [wself processVideoCallWithBuffer:sampleBuffer ];
+    };
+#pragma mark /**---- FaceUnity 获取视频数据 ----**/
     
     [[NIMAVChatSDK sharedSDK].netCallManager start:callees type:wself.callInfo.callType option:option completion:^(NSError *error, UInt64 callID) {
         if (!error && wself) {
@@ -263,9 +262,11 @@ NTES_FORBID_INTERACTIVE_POP
     [self fillUserSetting:option];
     
     __weak typeof(self) wself = self;
+#pragma mark /**---- FaceUnity 获取视频数据 ----**/
     option.videoCaptureParam.videoHandler = ^(CMSampleBufferRef  _Nonnull sampleBuffer) {
-        [wself responVideoBuffer:sampleBuffer];
+        [wself responVideoCallWithBuffer:sampleBuffer ];
     };
+#pragma mark /**---- FaceUnity 获取视频数据 ----**/
 
     [[NIMAVChatSDK sharedSDK].netCallManager response:self.callInfo.callID accept:accept option:option completion:^(NSError *error, UInt64 callID) {
         if (!error) {
@@ -913,7 +914,6 @@ NTES_FORBID_INTERACTIVE_POP
     option.audioHowlingSuppress = [[NTESBundleSetting sharedConfig] audioHowlingSuppress];
     option.preferHDAudio =  [[NTESBundleSetting sharedConfig] preferHDAudio];
     option.scene = [[NTESBundleSetting sharedConfig] scene];
-    option.webrtcCompatible = [[NTESBundleSetting sharedConfig] webrtcCompatible];
     
     NIMNetCallVideoCaptureParam *param = [[NIMNetCallVideoCaptureParam alloc] init];
     [self fillVideoCaptureSetting:param];

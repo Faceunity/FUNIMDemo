@@ -10,8 +10,6 @@
 
 @interface NTESSettingViewController : UIViewController
 
-@property (nonatomic,strong) IBOutlet UITableView *tableView;
-
-@property (nonatomic,strong) IBOutlet UILabel *versionLabel;
+@property(nonatomic, strong) UITableView *tableView;
 
 @end

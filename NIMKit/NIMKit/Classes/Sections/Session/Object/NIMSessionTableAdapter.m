@@ -10,7 +10,6 @@
 #import "NIMMessageModel.h"
 #import "NIMMessageCellFactory.h"
 #import "UIView+NIM.h"
-#import "NIMKitUIConfig.h"
 
 @interface NIMSessionTableAdapter()
 
@@ -39,7 +38,7 @@
     return [self.interactor items].count;
 }
 
--(UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+- (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = nil;
     id model = [[self.interactor items] objectAtIndex:indexPath.row];
@@ -47,6 +46,7 @@
         cell = [self.cellFactory cellInTable:tableView
                                    forMessageMode:model];
         [(NIMMessageCell *)cell setDelegate:self.delegate];
+        [(NIMMessageCell *)cell refreshData:model];
     }
     else if ([model isKindOfClass:[NIMTimestampModel class]])
     {
@@ -60,6 +60,14 @@
     return cell;
 }
 
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if ([self.delegate respondsToSelector:@selector(tableView:willDisplayCell:forRowAtIndexPath:)])
+    {
+        [self.delegate tableView:tableView willDisplayCell:cell forRowAtIndexPath:indexPath];
+    }
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     CGFloat cellHeight = 0;
@@ -67,11 +75,9 @@
     if ([modelInArray isKindOfClass:[NIMMessageModel class]])
     {
         NIMMessageModel *model = (NIMMessageModel *)modelInArray;
-        NSAssert([model respondsToSelector:@selector(contentSize)], @"config must have a cell height value!!!");
         
-        [self.interactor checkLayoutConfig:model];
+        CGSize size = [model contentSize:tableView.nim_width];
         
-        CGSize size = model.contentSize;
         UIEdgeInsets contentViewInsets = model.contentViewInsets;
         UIEdgeInsets bubbleViewInsets  = model.bubbleViewInsets;
         cellHeight = size.height + contentViewInsets.top + contentViewInsets.bottom + bubbleViewInsets.top + bubbleViewInsets.bottom;
@@ -87,10 +93,13 @@
     return cellHeight;
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     [[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
+    CGFloat currentOffsetY = scrollView.contentOffset.y;
+    if (currentOffsetY + scrollView.frame.size.height  > scrollView.contentSize.height\
+        && scrollView.frame.size.height <= scrollView.contentSize.height && scrollView.isDragging) {
+        [self.interactor pullUp];
+    }
 }
-
-
 
 @end

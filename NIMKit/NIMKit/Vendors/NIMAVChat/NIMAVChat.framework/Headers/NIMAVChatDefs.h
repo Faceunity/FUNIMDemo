@@ -2,7 +2,7 @@
 //  NIMAVChatDefs.h
 //  NIMAVChat
 //
-//  Created by fenric on 16/10/28.
+//  Created by Netease on 16/10/28.
 //  Copyright © 2016年 Netease. All rights reserved.
 //
 
@@ -193,42 +193,82 @@ typedef NS_ENUM(NSUInteger, NIMAVChatScene) {
     NIMAVChatSceneDefault,
     
     /**
-     *  高清音乐场景. 只在 preferHDAudio 开启时生效. 生效后 audioDenoise 和 voiceDetect 的设置无效 (自动关闭)
+     *  高清音乐场景. 只在 preferHDAudio 开启时生效
      */
     NIMAVChatSceneHighQualityMusic,
     
     /**
-     *  自适应高清音乐场景. 只在 preferHDAudio 开启时生效. 生效后 audioDenoise 和 voiceDetect 的设置无效 (自动关闭). 该场景在多人会议中无其他端或者其他端都是观众时适时自动适配高清音乐，当其他端有发言者时自动适配 VoIP 通话
+     *  自适应高清音乐场景. 只在 preferHDAudio 开启时生效. 该场景在多人会议中无其他端或者其他端都是观众时适时自动适配高清音乐，当其他端有发言者时自动适配 VoIP 通话
      */
     NIMAVChatSceneHighQualityMusicAdaptive,
 };
 
 
 /**
- *  视频混频模式, 用于互动直播连麦时的视频混频参数设置
+ *  视频调控策略
  */
-typedef NS_ENUM(NSUInteger, NIMNetCallVideoMixMode) {
+typedef NS_ENUM(NSUInteger, NIMAVChatVideoAdaptiveStrategy) {
+    /**
+     *  流畅优先
+     */
+    NIMAVChatVideoAdaptiveStrategySmooth = 1,
+    /**
+     *  清晰优先
+     */
+    NIMAVChatVideoAdaptiveStrategyQuality = 2,
+    /**
+     *  录屏模式
+     */
+    NIMAVChatVideoAdaptiveStrategyScreenRecord = 3,
+};
+
+
+/**
+ *  回声抑制
+ */
+typedef NS_ENUM(NSUInteger, NIMAVChatAcousticEchoCanceler) {
+    /**
+     *  默认回声抑制
+     */
+    NIMAVChatAcousticEchoCancelerDefault = 0,
+    /**
+     *  SDK 内建回声抑制
+     */
+    NIMAVChatAcousticEchoCancelerSDKBuiltin,
+    
+    /**
+     *  关闭回声抑制
+     */
+    NIMAVChatAcousticEchoCancelerClose,
+};
+/**
+ *  音视频混屏模式, 用于互动直播连麦时的音视频混屏参数设置
+ */
+typedef NS_ENUM(NSUInteger, NIMNetCallBypassStreamingMixMode) {
     /**
      *  右侧纵排浮窗(画中画)
      */
-    NIMNetCallVideoMixModeFloatingRightVertical  = 0,
+    NIMNetCallBypassStreamingMixModeFloatingRightVertical  = 0,
     /**
      *  左侧纵排浮窗(画中画)
      */
-    NIMNetCallVideoMixModeFloatingLeftVertical   = 1,
+    NIMNetCallBypassStreamingMixModeFloatingLeftVertical   = 1,
     /**
      *  分格平铺, 显示完整画面, 不裁剪
      */
-    NIMNetCallVideoMixModeLatticeAspectFit       = 2,
+    NIMNetCallBypassStreamingMixModeLatticeAspectFit       = 2,
     /**
      *  分格平铺, 填满区域, 可能裁剪
      */
-    NIMNetCallVideoMixModeLatticeAspectFill      = 3,
-    
+    NIMNetCallBypassStreamingMixModeLatticeAspectFill      = 3,
     /**
-     *  自定义布局
+     *  自定义视频布局
      */
-    NIMNetCallVideoMixModeCustomLayout           = 4,
+    NIMNetCallBypassStreamingMixModeCustomVideoLayout      = 4,
+    /**
+     *  自定义音频布局（混屏人数）
+     */
+    NIMNetCallBypassStreamingMixModeCustomAudioLayout      = 5,
 
 };
 
@@ -304,6 +344,10 @@ typedef NS_ENUM(NSInteger, NIMNetCallErrorCode) {
      */
     NIMNetCallErrorCodeBeKicked           = 20412,
 
+    /**
+     *  房间被关闭
+     */
+    NIMNetCallErrorCodeChannelClosed      = 20413,
 
 };
 
@@ -402,8 +446,54 @@ typedef NS_ENUM(NSInteger, NIMAVLocalErrorCode) {
 };
 
 /**
+ *  互动直播设置主画面错误码 （AV） Doamin:NIMAVRoomServerErrorDomain
+ */
+typedef NS_ENUM(NSInteger, NIMAVRoomServerErrorCode) {
+    /**
+     *  服务器错误
+     */
+    NIMAVRoomServerErrorServerError = 101,
+    /**
+     *  请求失败
+     */
+    NIMAVRoomServerErrorConnctionFailed = 102,
+    /**
+     *  发起者不是主播
+     */
+    NIMAVRoomServerErrorNotAnchor = 103,
+    /**
+     *  模式错误
+     */
+    NIMAVRoomServerErrorModeFault = 104,
+    /**
+     *  请求参数错误
+     */
+    NIMAVRoomServerErrorUserInvalidParam = 400,
+    /**
+     *  请求认证错误
+     */
+    NIMAVRoomServerErrorKeyInvalid = 401,
+    /**
+     *  房间不存在
+     */
+    NIMAVRoomServerErrorRoomNotExsit = 404,
+    /**
+     *  房间内不存在该用户
+     */
+    NIMAVRoomServerErrorUserNotJoined = 405,
+    /**
+     *  请求数据错误
+     */
+    NIMAVRoomServerErrorInvalidRequst = 417, 
+    /**
+     *  服务器内部错误
+     */
+    NIMAVRoomServerErrorServerUnknown = 500,
+};
+
+/**
  *  服务器错误码 （AV） Doamin: NIMRemoteErrorDomain
- *  @discussion 更多错误详见 http://dev.netease.im/docs?doc=nim_status_code#服务器端状态码
+ *  @discussion 更多错误详见 [服务器端状态码](http://dev.netease.im/docs?doc=nim_status_code#服务器端状态码)
  */
 typedef NS_ENUM(NSInteger, NIMAVRemoteErrorCode) {
     /**
@@ -417,6 +507,11 @@ typedef NS_ENUM(NSInteger, NIMAVRemoteErrorCode) {
  *  网络通话的网络状态
  */
 typedef NS_ENUM(NSInteger, NIMNetCallNetStatus){
+    
+    /**
+     *  网络极差,视频发送被关闭
+     */
+    NIMNetCallNetStatusVideoClosed = -1,
     /**
      *  网络非常好
      */
@@ -426,13 +521,17 @@ typedef NS_ENUM(NSInteger, NIMNetCallNetStatus){
      */
     NIMNetCallNetStatusGood     = 1,
     /**
+     *  网络弱
+     */
+    NIMNetCallNetStatusPoor     = 2,
+    /**
      *  网络差
      */
-    NIMNetCallNetStatusBad      = 2,
+    NIMNetCallNetStatusBad      = 3,
     /**
-     *  网络非常差
+     *  网络极差, 建议停止视频发送
      */
-    NIMNetCallNetStatusVeryBad  = 3,
+    NIMNetCallNetStatusVeryBad  = 4,
 };
 
 

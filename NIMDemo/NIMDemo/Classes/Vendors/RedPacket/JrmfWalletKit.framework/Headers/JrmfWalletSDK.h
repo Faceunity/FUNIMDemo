@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+UIKIT_EXTERN NSString * const kJrmfWalletShow;/**< 界面出现 */
+UIKIT_EXTERN NSString * const kJrmfWalletHide;/**< 界面消失 */
+
 @interface JrmfWalletSDK : NSObject
 
 /**
@@ -64,6 +67,30 @@
  @param isOnline  测试环境  默认NO：测试环境
  */
 + (void)instanceJrmfWalletSDKWithPartnerId:(NSString *)partnerId AppMethod:(BOOL)isOnline;
+
+/**
+ 初始化函数
+ 
+ @param partnerId 渠道ID（我们分配给贵公司的渠道名称）
+ @param dynamicToken 是否开启动态token
+ @param isOnline  测试环境  默认NO：测试环境
+ */
++ (void)instanceJrmfWalletSDKWithPartnerId:(NSString *)partnerId dynamicToken:(BOOL)dynamicToken AppMethod:(BOOL)isOnline;
+
++ (void)instanceJrmfWalletSDKWithPartnerId:(NSString *)partnerId dynamicToken:(BOOL)dynamicToken customerClass:(NSString *)className AppMethod:(BOOL)isOnline;
+
+/**
+ 调用钱包页面
+ 
+ @param userId      当前用户ID（接入方app用户的唯一标识）
+ @param userName    用户昵称
+ @param avatarLink  用户头像链接
+ @param thirdToken  第三方签名令牌
+ 
+ @discussion      A.三方签名令牌（服务端计算后给到app，服务端算法为md5（custUid+appsecret））
+ @discussion      B.用户头像字符串限制在260个字符内
+ */
+- (void)doPresentJrmfWalletPageWithUserId:(NSString *)userId userName:(NSString *)userName userHeadLink:(NSString *)avatarLink thirdToken:(NSString *)thirdToken   __deprecated_msg("已废弃，请使用doPresentJrmfWalletPageWithBaseViewController，设置基础视图调用钱包");
 
 /**
  调用钱包页面

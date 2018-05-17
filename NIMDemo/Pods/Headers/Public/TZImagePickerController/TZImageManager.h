@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <Photos/Photos.h>
+#import "TZAssetModel.h"
 
 @class TZAlbumModel,TZAssetModel;
 @protocol TZImagePickerControllerDelegate;
@@ -18,6 +19,7 @@
 @property (nonatomic, strong) PHCachingImageManager *cachingImageManager;
 
 + (instancetype)manager NS_SWIFT_NAME(default());
++ (void)deallocManager;
 
 @property (assign, nonatomic) id<TZImagePickerControllerDelegate> pickerDelegate;
 
@@ -25,6 +27,8 @@
 
 /// Default is 600px / 默认600像素宽
 @property (nonatomic, assign) CGFloat photoPreviewMaxWidth;
+/// The pixel width of output image, Default is 828px / 导出图片的宽度，默认828像素宽
+@property (nonatomic, assign) CGFloat photoWidth;
 
 /// Default is 4, Use in photos collectionView in TZPhotoPickerController
 /// 默认4列, TZPhotoPickerController中的照片collectionView
@@ -74,10 +78,13 @@
 
 /// Get video 获得视频
 - (void)getVideoWithAsset:(id)asset completion:(void (^)(AVPlayerItem * playerItem, NSDictionary * info))completion;
-- (void)getVideoWithAsset:(id)asset progressHandler:(void (^)(double progress, NSError *error, BOOL *stop, NSDictionary *info))progressHandler completion:(void (^)(AVPlayerItem * _Nullable, NSDictionary * _Nullable))completion;
+- (void)getVideoWithAsset:(id)asset progressHandler:(void (^)(double progress, NSError *error, BOOL *stop, NSDictionary *info))progressHandler completion:(void (^)(AVPlayerItem *, NSDictionary *))completion;
 
-/// Export video 导出视频
-- (void)getVideoOutputPathWithAsset:(id)asset completion:(void (^)(NSString *outputPath))completion;
+/// Export video 导出视频 presetName: 预设名字，默认值是AVAssetExportPreset640x480
+- (void)getVideoOutputPathWithAsset:(id)asset success:(void (^)(NSString *outputPath))success failure:(void (^)(NSString *errorMessage, NSError *error))failure;
+- (void)getVideoOutputPathWithAsset:(id)asset presetName:(NSString *)presetName success:(void (^)(NSString *outputPath))success failure:(void (^)(NSString *errorMessage, NSError *error))failure;
+/// Deprecated, Use -getVideoOutputPathWithAsset:failure:success:
+- (void)getVideoOutputPathWithAsset:(id)asset completion:(void (^)(NSString *outputPath))completion __attribute__((deprecated("Use -getVideoOutputPathWithAsset:failure:success:")));
 
 /// Get photo bytes 获得一组照片的大小
 - (void)getPhotosBytesWithArray:(NSArray *)photos completion:(void (^)(NSString *totalBytes))completion;
@@ -86,7 +93,7 @@
 - (BOOL)isAssetsArray:(NSArray *)assets containAsset:(id)asset;
 
 - (NSString *)getAssetIdentifier:(id)asset;
-- (BOOL)isCameraRollAlbum:(NSString *)albumName;
+- (BOOL)isCameraRollAlbum:(id)metadata;
 
 /// 检查照片大小是否满足最小要求
 - (BOOL)isPhotoSelectableWithAsset:(id)asset;
@@ -95,8 +102,10 @@
 /// 修正图片转向
 - (UIImage *)fixOrientation:(UIImage *)aImage;
 
-@end
+/// 获取asset的资源类型
+- (TZAssetModelMediaType)getAssetType:(id)asset;
 
+@end
 
 //@interface TZSortDescriptor : NSSortDescriptor
 //

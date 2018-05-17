@@ -163,7 +163,7 @@
 static char PresentedViewAddress;   //被Present的View
 static char PresentingViewAddress;  //正在Present其他视图的view
 #define AnimateDuartion .25f
-- (void)presentView:(UIView*)view animated:(BOOL)animated complete:(void(^)()) complete{
+- (void)presentView:(UIView*)view animated:(BOOL)animated complete:(void(^)(void)) complete{
     if (!self.window) {
         return;
     }
@@ -182,7 +182,7 @@ static char PresentingViewAddress;  //正在Present其他视图的view
     return view;
 }
 
-- (void)dismissPresentedView:(BOOL)animated complete:(void(^)()) complete{
+- (void)dismissPresentedView:(BOOL)animated complete:(void(^)(void)) complete{
     UIView * view =  objc_getAssociatedObject(self, &PresentedViewAddress);
     if (animated) {
         [self doHideAnimate:view complete:complete];
@@ -192,7 +192,7 @@ static char PresentingViewAddress;  //正在Present其他视图的view
     }
 }
 
-- (void)hideSelf:(BOOL)animated complete:(void(^)()) complete{
+- (void)hideSelf:(BOOL)animated complete:(void(^)(void)) complete{
     UIView * baseView =  objc_getAssociatedObject(self, &PresentingViewAddress);
     if (!baseView) {
         return;
@@ -207,7 +207,7 @@ static char PresentingViewAddress;  //正在Present其他视图的view
 }
 
 #pragma mark - Animation
-- (void)doAlertAnimate:(UIView*)view complete:(void(^)()) complete{
+- (void)doAlertAnimate:(UIView*)view complete:(void(^)(void)) complete{
     CGRect bounds = view.bounds;
     // 放大
     CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"bounds"];

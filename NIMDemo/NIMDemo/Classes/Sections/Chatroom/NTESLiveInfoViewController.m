@@ -118,6 +118,11 @@
 {
     NIMChatroomMembersByIdsRequest *request = [[NIMChatroomMembersByIdsRequest alloc] init];
     request.roomId  = self.chatroom.roomId;
+    if (!self.chatroom.creator)
+    {
+        DDLogInfo(@"warning! can not find this chatroom's creator! stop requst creator info!  %@",self.chatroom);
+        return;
+    }
     request.userIds = @[self.chatroom.creator];
     __weak typeof(self) wself = self;
     [[NIMSDK sharedSDK].chatroomManager fetchChatroomMembersByIds:request completion:^(NSError *error, NSArray *members) {

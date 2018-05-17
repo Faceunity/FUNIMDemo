@@ -17,15 +17,25 @@
 
 @optional
 
+#pragma mark - cell 样式更改
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
+
+- (BOOL)disableAudioPlayedStatusIcon:(NIMMessage *)message;
+
+#pragma mark - 点击事件
 - (BOOL)onTapCell:(NIMKitEvent *)event;
 
 - (BOOL)onLongPressCell:(NIMMessage *)message
                  inView:(UIView *)view;
 
-- (BOOL)onTapAvatar:(NSString *)userId;
+- (BOOL)onTapAvatar:(NIMMessage *)message;
 
-- (BOOL)onLongPressAvatar:(NSString *)userId;
+- (BOOL)onLongPressAvatar:(NIMMessage *)message;
+
+- (BOOL)onPressReadLabel:(NIMMessage *)message;
 
 - (void)onRetryMessage:(NIMMessage *)message;
+
 
 @end

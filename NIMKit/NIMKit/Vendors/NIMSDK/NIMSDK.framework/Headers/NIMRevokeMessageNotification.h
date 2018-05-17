@@ -24,6 +24,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic,copy,readonly)    NSString    *fromUserId;
 
+
+/**
+ * 消息的发送者，表示撤回的这条消息是谁发的
+ */
+@property (nonatomic,copy,readonly)    NSString    *messageFromUserId;
+
 /**
  * 撤回消息所属会话
  */

@@ -124,7 +124,7 @@ NTES_USE_CLEAR_BAR
                                       [SVProgressHUD dismiss];
                                       if (error == nil)
                                       {
-                                          LoginData *sdkData = [[LoginData alloc] init];
+                                          NTESLoginData *sdkData = [[NTESLoginData alloc] init];
                                           sdkData.account   = loginAccount;
                                           sdkData.token     = loginToken;
                                           [[NTESLoginManager sharedManager] setCurrentLoginData:sdkData];

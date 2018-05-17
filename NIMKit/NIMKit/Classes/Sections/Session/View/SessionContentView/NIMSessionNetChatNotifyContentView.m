@@ -10,7 +10,8 @@
 #import "M80AttributedLabel+NIMKit.h"
 #import "NIMMessageModel.h"
 #import "NIMKitUtil.h"
-#import "NIMKitUIConfig.h"
+#import "UIView+NIM.h"
+#import "NIMKit.h"
 
 @implementation NIMSessionNetChatNotifyContentView
 
@@ -26,21 +27,23 @@
     return self;
 }
 
-- (void)refresh:(NIMMessageModel *)data{
+- (void)refresh:(NIMMessageModel *)data
+{
     [super refresh:data];
     NSString *text = [NIMKitUtil messageTipContent:data.message];
     [self.textLabel nim_setText:text];
     
-    NIMKitBubbleConfig *config = [[NIMKitUIConfig sharedConfig] bubbleConfig:data.message];
+    NIMKitSetting *setting = [[NIMKit sharedKit].config setting:data.message];
     
-    self.textLabel.textColor = config.contentTextColor;;
-    self.textLabel.font      = config.contentTextFont;
+    self.textLabel.textColor = setting.textColor;;
+    self.textLabel.font      = setting.font;
 }
 
 - (void)layoutSubviews{
     [super layoutSubviews];
     UIEdgeInsets contentInsets = self.model.contentViewInsets;
-    CGSize contentsize = self.model.contentSize;
+    CGFloat tableViewWidth = self.superview.nim_width;
+    CGSize contentsize = [self.model contentSize:tableViewWidth];
     CGRect labelFrame = CGRectMake(contentInsets.left, contentInsets.top, contentsize.width, contentsize.height);
     self.textLabel.frame = labelFrame;
 }

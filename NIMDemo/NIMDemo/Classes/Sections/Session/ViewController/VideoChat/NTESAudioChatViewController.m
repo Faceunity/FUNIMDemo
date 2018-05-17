@@ -130,7 +130,7 @@
 //接听中界面(音频)
 - (void)audioCallingInterface{
     
-    NSString *peerUid = ([[NIMSDK sharedSDK].loginManager currentAccount] == self.callInfo.caller) ? self.callInfo.callee : self.callInfo.caller;
+    NSString *peerUid = ([self.callInfo.caller isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]]) ? self.callInfo.callee : self.callInfo.caller;
     
     NIMNetCallNetStatus status = [[NIMAVChatSDK sharedSDK].netCallManager netStatus:peerUid];
     [self.netStatusView refreshWithNetState:status];
@@ -153,12 +153,12 @@
 //切换接听中界面(视频)
 - (void)videoCallingInterface{
     NTESVideoChatViewController *vc = [[NTESVideoChatViewController alloc] initWithCallInfo:self.callInfo];
-    [UIView  beginAnimations:nil context:NULL];
-    [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-    [UIView setAnimationDuration:0.75];
+//    [UIView  beginAnimations:nil context:NULL];
+//    [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+//    [UIView setAnimationDuration:0.75];
     [self.navigationController pushViewController:vc animated:NO];
-    [UIView setAnimationTransition:UIViewAnimationTransitionFlipFromRight forView:self.navigationController.view cache:NO];
-    [UIView commitAnimations];
+//    [UIView setAnimationTransition:UIViewAnimationTransitionFlipFromRight forView:self.navigationController.view cache:NO];
+//    [UIView commitAnimations];
     NSMutableArray * vcs = [self.navigationController.viewControllers mutableCopy];
     [vcs removeObject:self];
     self.navigationController.viewControllers = vcs;

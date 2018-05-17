@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijksdl/gles2/internal.h"
+#include "internal.h"
 
 static const char g_shader[] = IJK_GLES_STRING(
     precision highp float;

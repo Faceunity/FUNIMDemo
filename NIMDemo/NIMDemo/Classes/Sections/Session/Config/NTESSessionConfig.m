@@ -12,8 +12,8 @@
 #import "NTESSnapchatAttachment.h"
 #import "NTESWhiteboardAttachment.h"
 #import "NTESBundleSetting.h"
-#import "NIMKitUIConfig.h"
 #import "NSString+NTES.h"
+#import "NIMSessionConfig.h"
 
 @interface NTESSessionConfig()
 
@@ -23,7 +23,7 @@
 
 - (NSArray *)mediaItems
 {
-    NSArray *defaultMediaItems = [NIMKitUIConfig sharedConfig].defaultMediaItems;
+    NSArray *defaultMediaItems = [NIMKit sharedKit].config.defaultMediaItems;
     
     NIMMediaItem *janKenPon = [NIMMediaItem item:@"onTapMediaItemJanKenPon:"
                                      normalImage:[UIImage imageNamed:@"icon_jankenpon_normal"]
@@ -38,7 +38,7 @@
     NIMMediaItem *tip       = [NIMMediaItem item:@"onTapMediaItemTip:"
                                      normalImage:[UIImage imageNamed:@"bk_media_tip_normal"]
                                    selectedImage:[UIImage imageNamed:@"bk_media_tip_pressed"]
-                                           title:@"提醒消息"];
+                                           title:@"提示消息"];
     
     NIMMediaItem *audioChat =  [NIMMediaItem item:@"onTapMediaItemAudioChat:"
                                       normalImage:[UIImage imageNamed:@"btn_media_telphone_message_normal"]
@@ -70,6 +70,12 @@
                                     selectedImage:[UIImage imageNamed:@"icon_redpacket_pressed"]
                                             title:@"红包"];
     
+    NIMMediaItem *teamReceipt  = [NIMMediaItem item:@"onTapMediaItemTeamReceipt:"
+                                      normalImage:[UIImage imageNamed:@"icon_team_receipt_normal"]
+                                    selectedImage:[UIImage imageNamed:@"icon_team_receipt_pressed"]
+                                            title:@"已读回执"];
+    
+    
     
     BOOL isMe   = _session.sessionType == NIMSessionTypeP2P
     && [_session.sessionId isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
@@ -81,7 +87,7 @@
     }
     else if(_session.sessionType == NIMSessionTypeTeam)
     {
-        items = @[janKenPon,teamMeeting,fileTrans,tip,redPacket];
+        items = @[janKenPon,teamMeeting,fileTrans,tip,teamReceipt,redPacket];
     }
     else
     {
@@ -129,12 +135,12 @@
     
     
     return type == NIMMessageTypeText ||
-           type == NIMMessageTypeAudio ||
-           type == NIMMessageTypeImage ||
-           type == NIMMessageTypeVideo ||
-           type == NIMMessageTypeFile ||
-           type == NIMMessageTypeLocation ||
-           type == NIMMessageTypeCustom;
+    type == NIMMessageTypeAudio ||
+    type == NIMMessageTypeImage ||
+    type == NIMMessageTypeVideo ||
+    type == NIMMessageTypeFile ||
+    type == NIMMessageTypeLocation ||
+    type == NIMMessageTypeCustom;
 }
 
 - (NSArray<NIMInputEmoticonCatalog *> *)charlets

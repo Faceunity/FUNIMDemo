@@ -20,7 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijksdl/ijksdl.h"
+#include "ijksdl.h"
 #if defined NTESIJKSDLHasAudio
 #include "ijksdl_aout_ios_audiounit.h"
 #endif

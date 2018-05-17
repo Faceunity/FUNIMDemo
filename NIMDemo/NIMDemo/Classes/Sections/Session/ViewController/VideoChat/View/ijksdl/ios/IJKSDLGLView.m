@@ -23,12 +23,23 @@
  */
 
 #import "IJKSDLGLView.h"
-#include "ijksdl/ijksdl_timer.h"
-#include "ijksdl/ios/ijksdl_ios.h"
-#include "ijksdl/ijksdl_gles2.h"
+#include "ijksdl_timer.h"
+#include "ijksdl_ios.h"
+#include "ijksdl_gles2.h"
 #if defined NTESIJKSDLHudView
 #import "IJKSDLHudViewController.h"
 #endif
+
+typedef void(^ijksdl_dispatch_block)(void);
+
+static inline void ijksdl_main_sync(ijksdl_dispatch_block block){
+    if ([NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), block);
+    }
+}
+
 
 @interface NTESIJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
@@ -144,18 +155,18 @@
     if ([self isApplicationActive] == NO)
         return NO;
 
-    CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
-    eaglLayer.opaque = YES;
-    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                    [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
-                                    kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                    nil];
+        CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
+        eaglLayer.opaque = YES;
+        eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+                                        [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
+                                        kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
+                                        nil];
 
-    _scaleFactor = [[UIScreen mainScreen] scale];
-    if (_scaleFactor < 0.1f)
-        _scaleFactor = 1.0f;
-
-    [eaglLayer setContentsScale:_scaleFactor];
+        _scaleFactor = [[UIScreen mainScreen] scale];
+        if (_scaleFactor < 0.1f)
+            _scaleFactor = 1.0f;
+        
+        [eaglLayer setContentsScale:_scaleFactor];
 
     _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     if (_context == nil) {
@@ -181,14 +192,18 @@
     if (_didSetupGL)
         return YES;
 
-    if ([self isApplicationActive] == NO)
-        return NO;
-
-    if (![self tryLockGLActive])
-        return NO;
-
-    BOOL didSetupGL = [self setupGL];
-    [self unlockGLActive];
+    __block BOOL didSetupGL = NO;
+    ijksdl_main_sync(^{
+        if ([self isApplicationActive] == NO) {
+            didSetupGL = NO;
+        } else if (![self tryLockGLActive]) {
+            didSetupGL = NO;
+        } else {
+            didSetupGL = [self setupGL];
+            [self unlockGLActive];
+        }
+    });
+    
     return didSetupGL;
 }
 

@@ -21,9 +21,6 @@
 
 @property (nonatomic, strong)  NIMSession *session;
 
-
-
-
 /**
  *  当前当初的菜单所关联的消息
  *
@@ -44,7 +41,6 @@
  *  @discussion 可以更改文字的大小，颜色等属性，文案内容请使用 - (NSString *)sessionSubTitle 接口
  */
 @property (nonatomic, strong, readonly)    UILabel *subTitleLabel;
-
 
 
 /**
@@ -130,9 +126,9 @@
 #pragma mark - 操作接口
 
 /**
- *  追加一条消息
+ *  追加多条消息
  *
- *  @param message 消息
+ *  @param messages 消息集合
  *
  *  @discussion 不会比较时间戳，直接加在消息列表末尾。不会触发 DB 操作，，请手动调用 SDK 里 saveMessage:forSession:completion: 接口。
  */
@@ -141,9 +137,9 @@
 
 
 /**
- *  插入一条消息
+ *  插入多条消息
  *
- *  @param message 消息
+ *  @param messages 消息集合
  *
  *  @discussion 会比较时间戳，加在合适的地方，不推荐聊天室这种大消息量场景使用。不会触发 DB 操作，，请手动调用 SDK 里 saveMessage:forSession:completion: 接口。
  */

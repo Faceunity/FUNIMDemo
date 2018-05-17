@@ -33,7 +33,7 @@
 
 + (BOOL)canMessageBeRevoked:(NIMMessage *)message;
 
-+ (NSString *)tipOnMessageRevoked:(id)message;
++ (NSString *)tipOnMessageRevoked:(NIMRevokeMessageNotification *)notificaton;
 
 + (void)addRecentSessionAtMark:(NIMSession *)session;
 

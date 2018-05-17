@@ -11,7 +11,7 @@
 #import "NIMMessageModel.h"
 #import "NIMTimestampModel.h"
 #import "NIMGlobalMacro.h"
-#import "NIMKitUIConfig.h"
+#import "NIMKit.h"
 
 @interface NIMSessionMsgDatasource()
 
@@ -35,8 +35,8 @@
         _sessionConfig     = sessionConfig;
         id<NIMKitMessageProvider> dataProvider = [_sessionConfig respondsToSelector:@selector(messageDataProvider)] ? [_sessionConfig messageDataProvider] : nil;
         
-        NSInteger limit = [[[NIMKitUIConfig sharedConfig] globalConfig] messageLimit];
-        NSTimeInterval showTimestampInterval =[[[NIMKitUIConfig sharedConfig] globalConfig] messageInterval];
+        NSInteger limit = [NIMKit sharedKit].config.messageLimit;
+        NSTimeInterval showTimestampInterval = [NIMKit sharedKit].config.messageInterval;
         
         _dataProvider      = dataProvider;
         _messageLimit      = limit;
@@ -93,11 +93,10 @@
     return currentIndex - count;
 }
 
-
 /**
  *  从后插入消息
  *
- *  @param messages 消息集合
+ *  @param models 消息集合
  *
  *  @return 插入的消息的index
  */
@@ -207,6 +206,27 @@
             });
         }
     }
+}
+
+- (void)loadPullUpMessagesWithComplete:(void (^)(NSInteger, NSArray *, NSError *))handler {
+    __block NIMMessageModel *currentNewestMsg = self.items.lastObject;
+    __block NSInteger index = 0;
+    NIMMessageSearchOption *option = [NIMMessageSearchOption new];
+    option.startTime = currentNewestMsg.messageTime - 0.1;
+    option.limit = [NIMKit sharedKit].config.messageLimit;
+    option.allMessageTypes = YES;
+    option.order = NIMMessageSearchOrderAsc;
+    __weak typeof(self) wself = self;
+    [[NIMSDK sharedSDK].conversationManager searchMessages:_currentSession
+                                                    option:option
+                                                    result:^(NSError * _Nullable error, NSArray<NIMMessage *> * _Nullable messages) {
+                                                        index = [wself appendMessageModels:[self modelsWithMessages:messages]].count;
+                                                        if (handler) {
+                                                            NIMKit_Dispatch_Async_Main(^{
+                                                                handler(index,messages,nil);
+                                                            });
+                                                        }
+                                                    }];
 }
 
 - (NSArray*)deleteMessageModel:(NIMMessageModel *)msgModel

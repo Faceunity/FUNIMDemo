@@ -15,10 +15,11 @@
 #import "NIMBadgeView.h"
 #import "UITableView+NIMScrollToBottom.h"
 #import "NIMMessageMaker.h"
-#import "NIMKitUIConfig.h"
 #import "UIView+NIM.h"
 #import "NIMSessionConfigurator.h"
 #import "NIMKitInfoFetchOption.h"
+#import "NIMKitTitleView.h"
+#import "NIMKitKeyboardInfo.h"
 
 @interface NIMSessionViewController ()<NIMMediaManagerDelegate,NIMInputDelegate>
 
@@ -70,7 +71,7 @@
     //进入会话时，标记所有消息已读，并发送已读回执
     [self markRead];
     //更新已读位置
-    [self uiCheckReceipt];    
+    [self uiCheckReceipts:nil];
 }
 
 - (void)setupNav
@@ -78,7 +79,10 @@
     [self setUpTitleView];
     NIMCustomLeftBarView *leftBarView = [[NIMCustomLeftBarView alloc] init];
     UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:leftBarView];
-    self.navigationItem.leftBarButtonItem = leftItem;
+    if (@available(iOS 11.0, *)) {
+        leftBarView.translatesAutoresizingMaskIntoConstraints = NO;
+    }
+    self.navigationItem.leftBarButtonItems = @[leftItem];
     self.navigationItem.leftItemsSupplementBackButton = YES;
 }
 
@@ -88,26 +92,31 @@
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     self.tableView.backgroundColor = NIMKit_UIColorFromRGB(0xe4e7ec);
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.estimatedRowHeight = 0;
+    self.tableView.estimatedSectionHeaderHeight = 0;
+    self.tableView.estimatedSectionFooterHeight = 0;
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    if ([self.sessionConfig respondsToSelector:@selector(sessionBackgroundImage)] && [self.sessionConfig sessionBackgroundImage]) {
+        UIImageView *imgView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+        imgView.image = [self.sessionConfig sessionBackgroundImage];
+        imgView.contentMode = UIViewContentModeScaleAspectFill;
+        self.tableView.backgroundView = imgView;
+    }
     [self.view addSubview:self.tableView];
 }
 
 
 - (void)setupInputView
 {
-    BOOL disableInputView = NO;
-    if ([self.sessionConfig respondsToSelector:@selector(disableInputView)]) {
-        disableInputView = [self.sessionConfig disableInputView];
-    }
-    if (!disableInputView) {
+    if ([self shouldShowInputView])
+    {
         self.sessionInputView = [[NIMInputView alloc] initWithFrame:CGRectMake(0, 0, self.view.nim_width,0) config:self.sessionConfig];
-        [self.sessionInputView refreshStatus:NIMInputStatusText];
+        self.sessionInputView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         [self.sessionInputView setSession:self.session];
         [self.sessionInputView setInputDelegate:self];
         [self.sessionInputView setInputActionDelegate:self];
+        [self.sessionInputView refreshStatus:NIMInputStatusText];
         [self.view addSubview:_sessionInputView];
-        
-        self.tableView.nim_height -= self.sessionInputView.toolBar.nim_height;
     }
 }
 
@@ -117,10 +126,7 @@
     _configurator = [[NIMSessionConfigurator alloc] init];
     [_configurator setup:self];
     
-    BOOL needProximityMonitor = YES;
-    if ([self.sessionConfig respondsToSelector:@selector(disableProximityMonitor)]) {
-        needProximityMonitor = !self.sessionConfig.disableProximityMonitor;
-    }
+    BOOL needProximityMonitor = [self needProximityMonitor];
     [[NIMSDK sharedSDK].mediaManager setNeedProximityMonitor:needProximityMonitor];
 }
 
@@ -130,15 +136,22 @@
     [self.interactor onViewWillAppear];
 }
 
-- (void)viewDidDisappear:(BOOL)animated{
-    [super viewDidDisappear:animated];
-    [self.interactor onViewDidDisappear];
-    
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
     [self.sessionInputView endEditing:YES];
 }
 
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    [self.interactor onViewDidDisappear];
+}
 
-- (void)viewDidLayoutSubviews{
+
+- (void)viewDidLayoutSubviews
+{
     [self changeLeftBarBadge:self.conversationManager.allUnreadCount];
     [self.interactor resetLayout];
 }
@@ -164,7 +177,7 @@
 
 - (void)didFetchMessageData
 {
-    [self uiCheckReceipt];
+    [self uiCheckReceipts:nil];
     [self.tableView reloadData];
     [self.tableView nim_scrollToBottom:NO];
 }
@@ -175,6 +188,8 @@
     [self refreshSessionSubTitle:self.sessionSubTitle];
     [self.tableView reloadData];
 }
+
+- (void)didPullUpMessageData {}
 
 #pragma mark - 会话title
 - (NSString *)sessionTitle
@@ -217,9 +232,16 @@
 //发送结果
 - (void)sendMessage:(NIMMessage *)message didCompleteWithError:(NSError *)error
 {
-    if ([message.session isEqual:_session]) {
+    if ([message.session isEqual:_session])
+    {
         [self.interactor updateMessage:message];
-    }
+        if (message.session.sessionType == NIMSessionTypeTeam)
+        {
+            //如果是群的话需要检查一下回执显示情况
+            NIMMessageReceipt *receipt = [[NIMMessageReceipt alloc] initWithMessage:message];
+            [self.interactor checkReceipts:@[receipt]];
+        }
+    }    
 }
 
 //发送进度
@@ -233,46 +255,61 @@
 //接收消息
 - (void)onRecvMessages:(NSArray *)messages
 {
-    NIMMessage *message = messages.firstObject;
-    NIMSession *session = message.session;
-    if (![session isEqual:self.session] || !messages.count){
-        return;
+    if ([self shouldAddListenerForNewMsg])
+    {
+        NIMMessage *message = messages.firstObject;
+        NIMSession *session = message.session;
+        if (![session isEqual:self.session] || !messages.count)
+        {
+            return;
+        }
+        
+        [self uiAddMessages:messages];
+        [self.interactor markRead];
     }
-    
-    [self uiAddMessages:messages];
-    [self sendMessageReceipt:messages];
-    
-    [self.conversationManager markAllMessagesReadInSession:self.session];
 }
 
 
 - (void)fetchMessageAttachment:(NIMMessage *)message progress:(float)progress
 {
-    if ([message.session isEqual:_session]) {
+    if ([message.session isEqual:_session])
+    {
         [self.interactor updateMessage:message];
     }
 }
 
 - (void)fetchMessageAttachment:(NIMMessage *)message didCompleteWithError:(NSError *)error
 {
-    if ([message.session isEqual:_session]) {
+    if ([message.session isEqual:_session])
+    {
         NIMMessageModel *model = [self.interactor findMessageModel:message];
         //下完缩略图之后，因为比例有变化，重新刷下宽高。
-        [model calculateContent:self.tableView.frame.size.width force:YES];
+        [model cleanCache];
         [self.interactor updateMessage:message];
     }
 }
 
-- (void)onRecvMessageReceipt:(NIMMessageReceipt *)receipt
+- (void)onRecvMessageReceipts:(NSArray<NIMMessageReceipt *> *)receipts
 {
-    if ([receipt.session isEqual:self.session] && [self shouldHandleReceipt]) {
-        [self uiCheckReceipt];
+    if ([self shouldAddListenerForNewMsg])
+    {
+        NSMutableArray *handledReceipts = [[NSMutableArray alloc] init];
+        for (NIMMessageReceipt *receipt in receipts) {
+            if ([receipt.session isEqual:self.session])
+            {
+                [handledReceipts addObject:receipt];
+            }
+        }
+        if (handledReceipts.count)
+        {
+            [self uiCheckReceipts:handledReceipts];
+        }
     }
 }
 
 #pragma mark - NIMConversationManagerDelegate
 - (void)messagesDeletedInSession:(NIMSession *)session{
-    [self.interactor resetMessages];
+    [self.interactor resetMessages:nil];
     [self.tableView reloadData];
 }
 
@@ -344,20 +381,10 @@
 - (void)showRecordFileNotSendReason{}
 
 #pragma mark - NIMInputDelegate
-- (void)showInputView
-{
-    [self.tableView setUserInteractionEnabled:NO];
-}
 
-- (void)hideInputView
+- (void)didChangeInputHeight:(CGFloat)inputHeight
 {
-    [self.tableView setUserInteractionEnabled:YES];
-}
-
-- (void)inputViewSizeToHeight:(CGFloat)height showInputView:(BOOL)show
-{
-    [self.tableView setUserInteractionEnabled:!show];
-    [self.interactor changeLayout:height];
+    [self.interactor changeLayout:inputHeight];
 }
 
 #pragma mark - NIMInputActionDelegate
@@ -438,13 +465,8 @@
 {
     _sessionInputView.recording = YES;
     
-    NIMAudioType type = NIMAudioTypeAAC;
-    if ([self.sessionConfig respondsToSelector:@selector(recordType)])
-    {
-        type = [self.sessionConfig recordType];
-    }
-    
-    NSTimeInterval duration = [NIMKitUIConfig sharedConfig].globalConfig.recordMaxDuration;
+    NIMAudioType type = [self recordAudioType];
+    NSTimeInterval duration = [NIMKit sharedKit].config.recordMaxDuration;
     
     [[NIMSDK sharedSDK].mediaManager addDelegate:self];
     
@@ -512,11 +534,66 @@
     return handle;
 }
 
+- (BOOL)disableAudioPlayedStatusIcon:(NIMMessage *)message
+{
+    BOOL disable = NO;
+    if ([self.sessionConfig respondsToSelector:@selector(disableAudioPlayedStatusIcon)])
+    {
+        disable = [self.sessionConfig disableAudioPlayedStatusIcon];
+    }
+    return disable;
+}
+
 #pragma mark - 配置项
 - (id<NIMSessionConfig>)sessionConfig
 {
-    return nil;
+    return nil; //使用默认配置
 }
+
+#pragma mark - 配置项列表
+//是否需要监听新消息通知 : 某些场景不需要监听新消息，如浏览服务器消息历史界面
+- (BOOL)shouldAddListenerForNewMsg
+{
+    BOOL should = YES;
+    if ([self.sessionConfig respondsToSelector:@selector(disableReceiveNewMessages)]) {
+        should = ![self.sessionConfig disableReceiveNewMessages];
+    }
+    return should;
+}
+
+
+
+//是否需要显示输入框 : 某些场景不需要显示输入框，如使用 3D touch 的场景预览会话界面内容
+- (BOOL)shouldShowInputView
+{
+    BOOL should = YES;
+    if ([self.sessionConfig respondsToSelector:@selector(disableInputView)]) {
+        should = ![self.sessionConfig disableInputView];
+    }
+    return should;
+}
+
+
+//当前录音格式 : NIMSDK 支持 aac 和 amr 两种格式
+- (NIMAudioType)recordAudioType
+{
+    NIMAudioType type = NIMAudioTypeAAC;
+    if ([self.sessionConfig respondsToSelector:@selector(recordType)]) {
+        type = [self.sessionConfig recordType];
+    }
+    return type;
+}
+
+//是否需要监听感应器事件
+- (BOOL)needProximityMonitor
+{
+    BOOL needProximityMonitor = YES;
+    if ([self.sessionConfig respondsToSelector:@selector(disableProximityMonitor)]) {
+        needProximityMonitor = !self.sessionConfig.disableProximityMonitor;
+    }
+    return needProximityMonitor;
+}
+
 
 #pragma mark - 菜单
 - (NSArray *)menusItems:(NIMMessage *)message
@@ -600,9 +677,9 @@
 
 - (NIMMessageModel *)uiDeleteMessage:(NIMMessage *)message{
     NIMMessageModel *model = [self.interactor deleteMessage:message];
-    if (model.shouldShowReadLabel)
+    if (model.shouldShowReadLabel && model.message.session.sessionType == NIMSessionTypeP2P)
     {
-        [self uiCheckReceipt];
+        [self uiCheckReceipts:nil];
     }
     return model;
 }
@@ -611,11 +688,9 @@
     [self.interactor updateMessage:message];
 }
 
-- (void)uiCheckReceipt
+- (void)uiCheckReceipts:(NSArray<NIMMessageReceipt *> *)receipts
 {
-    if ([self shouldHandleReceipt]) {
-        [self.interactor checkReceipt];
-    }
+    [self.interactor checkReceipts:receipts];
 }
 
 #pragma mark - NIMMeidaButton
@@ -657,18 +732,7 @@
 #pragma mark - 标记已读
 - (void)markRead
 {
-    if (![self disableAutoMarkRead]) {
-        [[NIMSDK sharedSDK].conversationManager markAllMessagesReadInSession:self.session];
-        [self sendMessageReceipt:self.interactor.items];
-    }
-}
-
-#pragma mark - 已读回执
-- (void)sendMessageReceipt:(NSArray *)messages
-{
-    if ([self shouldHandleReceipt]) {
-        [self.interactor sendMessageReceipt:messages];
-    }
+    [self.interactor markRead];
 }
 
 
@@ -676,11 +740,7 @@
 
 - (void)addListener
 {
-    
-    if (![self.sessionConfig respondsToSelector:@selector(disableReceiveNewMessages)]
-        || ![self.sessionConfig disableReceiveNewMessages]) {
-        [[NIMSDK sharedSDK].chatManager addDelegate:self];
-    }
+    [[NIMSDK sharedSDK].chatManager addDelegate:self];
     [[NIMSDK sharedSDK].conversationManager addDelegate:self];
 }
 
@@ -698,18 +758,6 @@
 }
 
 
-- (BOOL)shouldHandleReceipt
-{
-    return [self.interactor shouldHandleReceipt];
-}
-
-
-- (BOOL)disableAutoMarkRead
-{
-    return [self.sessionConfig respondsToSelector:@selector(disableAutoMarkMessageRead)] &&
-    [self.sessionConfig disableAutoMarkMessageRead];
-}
-
 - (id<NIMConversationManager>)conversationManager{
     switch (self.session.sessionType) {
         case NIMSessionTypeChatroom:
@@ -725,59 +773,33 @@
 
 - (void)setUpTitleView
 {
-    self.titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    self.titleLabel.font = [UIFont boldSystemFontOfSize:15.f];
-    self.titleLabel.text = self.sessionTitle;
- 
-    self.titleLabel.textAlignment = NSTextAlignmentCenter;
-    
-    self.subTitleLabel  = [[UILabel alloc] initWithFrame:CGRectZero];
-    self.subTitleLabel.textColor = [UIColor grayColor];
-    self.subTitleLabel.font = [UIFont systemFontOfSize:12.f];
-    self.subTitleLabel.text = self.sessionSubTitle;
-    self.subTitleLabel.textAlignment = NSTextAlignmentCenter;
-    
-    UIView *titleView = [[UIView alloc] init];
-    [titleView addSubview:self.titleLabel];
-    [titleView addSubview:self.subTitleLabel];
-    
-    self.navigationItem.titleView = titleView;
-    
-    [self layoutTitleView];
-    
+    NIMKitTitleView *titleView = (NIMKitTitleView *)self.navigationItem.titleView;
+    if (!titleView || ![titleView isKindOfClass:[NIMKitTitleView class]])
+    {
+        titleView = [[NIMKitTitleView alloc] initWithFrame:CGRectZero];
+        self.navigationItem.titleView = titleView;
+        
+        titleView.titleLabel.text = self.sessionTitle;
+        titleView.subtitleLabel.text = self.sessionSubTitle;
+        
+        self.titleLabel    = titleView.titleLabel;
+        self.subTitleLabel = titleView.subtitleLabel;
+    }
+
+    [titleView sizeToFit];
 }
-
-- (void)layoutTitleView
-{
-    CGFloat maxLabelWidth = 150.f;
-    [self.titleLabel sizeToFit];
-    self.titleLabel.nim_width = maxLabelWidth;
-    
-    [self.subTitleLabel sizeToFit];
-    self.subTitleLabel.nim_width = maxLabelWidth;
-    
-    
-    UIView *titleView = self.navigationItem.titleView;
-    
-    titleView.nim_width  = MAX(self.titleLabel.nim_width, self.subTitleLabel.nim_width);
-    titleView.nim_height = self.titleLabel.nim_height + self.subTitleLabel.nim_height;
-    
-    self.subTitleLabel.nim_bottom  = titleView.nim_height;
-}
-
-
 
 - (void)refreshSessionTitle:(NSString *)title
 {
     self.titleLabel.text = title;
-    [self layoutTitleView];
+    [self setUpTitleView];
 }
 
 
 - (void)refreshSessionSubTitle:(NSString *)title
 {
     self.subTitleLabel.text = title;
-    [self layoutTitleView];
+    [self setUpTitleView];
 }
 
 

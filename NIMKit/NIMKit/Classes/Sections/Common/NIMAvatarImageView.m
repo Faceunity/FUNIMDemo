@@ -17,6 +17,9 @@ static char imageURLKey;
 
 
 @interface NIMAvatarImageView()
+
+@property (nonatomic,strong) UIImageView *imageView;
+
 @end
 
 @implementation NIMAvatarImageView
@@ -26,9 +29,7 @@ static char imageURLKey;
     self = [super initWithFrame:frame];
     if (self)
     {
-        self.backgroundColor = [UIColor clearColor];
-        self.layer.geometryFlipped = YES;
-        self.clipPath = YES;
+        [self setup];
     }
     return self;
 }
@@ -38,11 +39,38 @@ static char imageURLKey;
 {
     if (self = [super initWithCoder:aDecoder])
     {
-        self.backgroundColor = [UIColor clearColor];
-        self.layer.geometryFlipped = YES;
-        self.clipPath = YES;
+        [self setup];
     }
     return self;
+}
+
+- (void)setup
+{
+    _imageView = [[UIImageView alloc] initWithFrame:self.bounds];
+    _imageView.contentMode = UIViewContentModeScaleAspectFill;
+    [self addSubview:_imageView];
+    
+    self.backgroundColor = [UIColor clearColor];
+    [self setupRadius];
+}
+
+
+- (void)setupRadius
+{
+    switch ([NIMKit sharedKit].config.avatarType)
+    {
+        case NIMKitAvatarTypeNone:
+            _cornerRadius = 0;
+            break;
+        case NIMKitAvatarTypeRounded:
+            _cornerRadius = self.nim_width *.5f;
+            break;
+        case NIMKitAvatarTypeRadiusCorner:
+            _cornerRadius = 6.f;
+            break;
+        default:
+            break;
+    }
 }
 
 
@@ -51,53 +79,37 @@ static char imageURLKey;
     if (_image != image)
     {
         _image = image;
-        [self setNeedsDisplay];
+        UIImage *fixedImage  = [self imageAddCornerWithRadius:_cornerRadius andSize:self.bounds.size];
+        self.imageView.image = fixedImage;
     }
+}
+
+- (UIImage*)imageAddCornerWithRadius:(CGFloat)radius andSize:(CGSize)size
+{
+    CGRect rect = CGRectMake(0, 0, size.width, size.height);
+    
+    UIGraphicsBeginImageContextWithOptions(size, NO, [UIScreen mainScreen].scale);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGPathRef path = self.path;
+    CGContextAddPath(ctx,path);
+    CGContextClip(ctx);
+    [self.image drawInRect:rect];
+    CGContextDrawPath(ctx, kCGPathFillStroke);
+    UIImage * newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
 }
 
 
 - (CGPathRef)path
 {
     return [[UIBezierPath bezierPathWithRoundedRect:self.bounds
-                                       cornerRadius:CGRectGetWidth(self.bounds) / 2] CGPath];
+                                       cornerRadius:self.cornerRadius] CGPath];
 }
 
 
-#pragma mark Draw
-- (void)drawRect:(CGRect)rect
-{
-    if (!self.nim_width || !self.nim_height) {
-        return;
-    }
-    
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    CGContextSaveGState(context);
-    if (_clipPath)
-    {
-        CGContextAddPath(context, [self path]);
-        CGContextClip(context);
-    }
-    UIImage *image = _image;
-    if (image && image.size.height && image.size.width)
-    {
-        //ScaleAspectFill模式
-        CGPoint center   = CGPointMake(self.nim_width * .5f, self.nim_height * .5f);
-        //哪个小按哪个缩
-        CGFloat scaleW   = image.size.width  / self.nim_width;
-        CGFloat scaleH   = image.size.height / self.nim_height;
-        CGFloat scale    = scaleW < scaleH ? scaleW : scaleH;
-        CGSize  size     = CGSizeMake(image.size.width / scale, image.size.height / scale);
-        CGRect  drawRect = NIMKit_CGRectWithCenterAndSize(center, size);
-        CGContextDrawImage(context, drawRect, image.CGImage);
-        
-    }
-    CGContextRestoreGState(context);
-}
 
-CGRect NIMKit_CGRectWithCenterAndSize(CGPoint center, CGSize size){
-    return CGRectMake(center.x - (size.width/2), center.y - (size.height/2), size.width, size.height);
-}
+
 
 - (void)setAvatarBySession:(NIMSession *)session
 {
@@ -217,7 +229,7 @@ CGRect NIMKit_CGRectWithCenterAndSize(CGPoint center, CGSize size){
         dispatch_main_async_safe(^{
             [self sd_removeActivityIndicator];
             if (completedBlock) {
-                NSError *error = [NSError errorWithDomain:SDWebImageErrorDomain code:-1 userInfo:@{NSLocalizedDescriptionKey : @"Trying to load a nil url"}];
+                NSError *error = [NSError errorWithDomain:@"SDWebImageErrorDomain" code:-1 userInfo:@{NSLocalizedDescriptionKey : @"Trying to load a nil url"}];
                 completedBlock(nil, error, SDImageCacheTypeNone, url);
             }
         });

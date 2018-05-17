@@ -170,6 +170,12 @@ typedef NS_ENUM(NSInteger,NTESMainTabType) {
     [self refreshSessionBadge];
 }
 
+- (void)allMessagesRead
+{
+    self.sessionUnreadCount = 0;
+    [self refreshSessionBadge];
+}
+
 #pragma mark - NIMSystemNotificationManagerDelegate
 - (void)onSystemNotificationCountChanged:(NSInteger)unreadCount
 {

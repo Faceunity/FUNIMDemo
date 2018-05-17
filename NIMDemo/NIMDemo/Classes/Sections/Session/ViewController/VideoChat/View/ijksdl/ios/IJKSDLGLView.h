@@ -24,7 +24,7 @@
 
 #import <UIKit/UIKit.h>
 
-#include "ijksdl/ijksdl_vout.h"
+#include "ijksdl_vout.h"
 
 @interface NTESIJKSDLGLView : UIView
 

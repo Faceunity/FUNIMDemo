@@ -44,9 +44,11 @@
 
 - (void)loadHistoryMessagesWithComplete:(void(^)(NSInteger index, NSArray *messages , NSError *error))handler;
 
+- (void)loadNewMessagesWithComplete:(void(^)(NSInteger index, NSArray *messages , NSError *error))handler;
+
 - (void)checkAttachmentState:(NSArray *)messages;
 
-- (NSDictionary *)checkReceipt;
+- (NSDictionary *)checkReceipts:(NSArray<NIMMessageReceipt *> *)receipts;
 
 - (void)sendMessageReceipt:(NSArray *)messages;
 
@@ -71,7 +73,7 @@
 
 - (BOOL)canInsertChatroomMessages;
 
-- (void)layoutConfig:(NIMMessageModel *)model;
+- (void)calculateContent:(NIMMessageModel *)model;
 
 - (void)reloadTable;
 
@@ -82,6 +84,8 @@
 - (void)setDelegate:(id<NIMSessionLayoutDelegate>)delegate;
 
 - (void)layoutAfterRefresh;
+
+- (void)adjustOffset:(NSInteger)row;
 
 @end
 

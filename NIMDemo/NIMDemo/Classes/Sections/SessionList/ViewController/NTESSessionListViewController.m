@@ -72,11 +72,58 @@
     
     NSString *userID = [[[NIMSDK sharedSDK] loginManager] currentAccount];
     self.navigationItem.titleView  = [self titleView:userID];
+    [self setUpNavItem];
+}
+
+- (void)setUpNavItem{
+    UIButton *moreBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [moreBtn addTarget:self action:@selector(more:) forControlEvents:UIControlEventTouchUpInside];
+    [moreBtn setImage:[UIImage imageNamed:@"icon_sessionlist_more_normal"] forState:UIControlStateNormal];
+    [moreBtn setImage:[UIImage imageNamed:@"icon_sessionlist_more_pressed"] forState:UIControlStateHighlighted];
+    [moreBtn sizeToFit];
+    UIBarButtonItem *moreItem = [[UIBarButtonItem alloc] initWithCustomView:moreBtn];
+    self.navigationItem.rightBarButtonItem = moreItem;
 }
 
 - (void)refresh{
     [super refresh];
     self.emptyTipLabel.hidden = self.recentSessions.count;
+}
+
+- (void)more:(id)sender
+{
+    UIAlertController *vc = [UIAlertController alertControllerWithTitle:nil
+                                                                message:nil
+                                                         preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    UIAlertAction *markAllMessagesReadAction = [UIAlertAction actionWithTitle:@"标记所有消息为已读"
+                                                          style:UIAlertActionStyleDefault
+                                                        handler:^(UIAlertAction * _Nonnull action) {
+                                                            [[NIMSDK sharedSDK].conversationManager markAllMessagesRead];
+                                                        }];
+    [vc addAction:markAllMessagesReadAction];
+    
+    
+    UIAlertAction *cleanAllMessagesAction = [UIAlertAction actionWithTitle:@"清理所有消息"
+                                                                       style:UIAlertActionStyleDefault
+                                                                     handler:^(UIAlertAction * _Nonnull action) {
+                                                                         BOOL removeRecentSessions = [NTESBundleSetting sharedConfig].removeSessionWhenDeleteMessages;
+                                                                         BOOL removeTables = [NTESBundleSetting sharedConfig].dropTableWhenDeleteMessages;
+
+                                                                         NIMDeleteMessagesOption *option = [[NIMDeleteMessagesOption alloc] init];
+                                                                         option.removeSession = removeRecentSessions;
+                                                                         option.removeTable = removeTables;
+
+                                                                         [[NIMSDK sharedSDK].conversationManager deleteAllMessages:option];
+                                                                     }];
+    [vc addAction:cleanAllMessagesAction];
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消"
+                                                                     style:UIAlertActionStyleCancel
+                                                                   handler:nil];
+    [vc addAction:cancel];
+    
+    [self presentViewController:vc animated:YES completion:nil];
 }
 
 - (void)onSelectedRecent:(NIMRecentSession *)recent atIndexPath:(NSIndexPath *)indexPath{
@@ -157,13 +204,13 @@
     [self.titleLabel sizeToFit];
     self.titleLabel.centerX   = self.navigationItem.titleView.width * .5f;
     [self.header refreshWithType:ListHeaderTypeNetStauts value:@(step)];
-    [self.view setNeedsLayout];
+    [self refreshSubview];
 }
 
 - (void)onMultiLoginClientsChanged
 {
     [self.header refreshWithType:ListHeaderTypeLoginClients value:[NIMSDK sharedSDK].loginManager.currentLoginClients];
-    [self.view setNeedsLayout];
+    [self refreshSubview];
 }
 
 
@@ -240,9 +287,21 @@
 - (void)refreshSubview{
     [self.titleLabel sizeToFit];
     self.titleLabel.centerX   = self.navigationItem.titleView.width * .5f;
-    self.tableView.top = self.header.height;
+    if (@available(iOS 11.0, *))
+    {
+        self.header.top = self.view.safeAreaInsets.top;
+        self.tableView.top = self.header.bottom;
+        CGFloat offset = self.view.safeAreaInsets.bottom;
+        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, offset, 0);
+    }
+    else
+    {
+        self.tableView.top = self.header.height;
+        self.header.bottom    = self.tableView.top + self.tableView.contentInset.top;
+    }
     self.tableView.height = self.view.height - self.tableView.top;
-    self.header.bottom    = self.tableView.top + self.tableView.contentInset.top;
+    
     self.emptyTipLabel.centerX = self.view.width * .5f;
     self.emptyTipLabel.centerY = self.tableView.height * .5f;
 }

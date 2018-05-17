@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface LoginData : NSObject
+@interface NTESLoginData : NSObject
 @property (nonatomic,copy)  NSString *account;
 @property (nonatomic,copy)  NSString *token;
 @end
@@ -16,5 +16,5 @@
 @interface NTESLoginManager : NSObject
 + (instancetype)sharedManager;
 
-@property (nonatomic,strong)    LoginData   *currentLoginData;
+@property (nonatomic,strong)    NTESLoginData   *currentLoginData;
 @end

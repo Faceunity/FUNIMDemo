@@ -29,6 +29,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self setUpNavItem];
+    self.view.backgroundColor = [UIColor whiteColor];
     self.data = self.myBlackListUser;
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -149,10 +150,19 @@
 
 
 #pragma mark - Private
-- (void)refreshSubviews{
-    self.tableView.top = self.header.height;
+- (void)refreshSubviews
+{
+    if (@available(iOS 11.0, *))
+    {
+        self.header.top = self.view.safeAreaInsets.top;
+        self.tableView.top = self.header.bottom;
+    }
+    else
+    {
+        self.tableView.top = self.header.height;
+        self.header.bottom = self.tableView.top + self.tableView.contentInset.top;
+    }
     self.tableView.height = self.view.height - self.tableView.top;
-    self.header.bottom    = self.tableView.top + self.tableView.contentInset.top;
 }
 
 - (NSMutableArray *)myBlackListUser{

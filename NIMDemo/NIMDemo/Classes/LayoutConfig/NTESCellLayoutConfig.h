@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "NIMKit.h"
 
+#define NTESMessageRefusedTag  @"NTESMessageRefusedTag"
+
 @interface NTESCellLayoutConfig : NIMCellLayoutConfig<NIMCellLayoutConfig>
 
 @end

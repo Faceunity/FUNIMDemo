@@ -2,7 +2,7 @@
 //  NIMDeleteMessagesOption.h
 //  NIMLib
 //
-//  Created by amao on 2017/7/11.
+//  Created by Netease.
 //  Copyright © 2017年 Netease. All rights reserved.
 //
 

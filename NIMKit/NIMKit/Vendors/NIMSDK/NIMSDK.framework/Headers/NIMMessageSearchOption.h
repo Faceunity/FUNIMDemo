@@ -32,7 +32,7 @@ typedef NS_ENUM(NSInteger,NIMMessageSearchOrder) {
 
 /**
  *  本地搜索选项
- *  @discussion 搜索条件: 时间在(startTime,endTime) 内(不包含)，类型为 messageType （或全类型） ，且匹配 searchContent 或 fromIds 的一定数量 (limit) 消息
+ *  @discussion 搜索条件: 时间在(startTime,endTime) 内(不包含)，类型为 messageTypes （或全类型） ，且匹配 searchContent 或 fromIds 的一定数量 (limit) 消息
  */
 @interface NIMMessageSearchOption : NSObject
 
@@ -61,9 +61,9 @@ typedef NS_ENUM(NSInteger,NIMMessageSearchOrder) {
 
 /**
  *  查询的消息类型
- *  @discusssion 默认为 NIMMessageTypeText
+ *  @discusssion 消息类型组合，默认只搜索文本类型, 只有在 allMessageTypes 为 NO 时有效，取值范围为: NIMMessageType 枚举类型
  */
-@property (nonatomic,assign)    NIMMessageType messageType;
+@property (nonatomic,copy)    NSArray<NSNumber *> *messageTypes;
 
 /**
  *  全部消息类型
@@ -128,6 +128,13 @@ typedef NS_ENUM(NSInteger,NIMMessageSearchOrder) {
  *  只有不存在本地的消息才可以通过 sync 标记进行 db 存储
  */
 @property (nonatomic,assign)      BOOL            sync;
+
+
+/**
+ *  查询的消息类型
+ *  @discusssion 消息类型组合，默认为 nil ，搜索全类型。 此参数只对聊天室会话有效,取值范围为: NIMMessageType 枚举类型
+ */
+@property (nonatomic,copy)    NSArray<NSNumber *> *messageTypes;
 
 
 @end

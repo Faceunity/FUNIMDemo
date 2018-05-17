@@ -10,6 +10,6 @@
 
 @interface NTESContactViewController : UIViewController<UITableViewDataSource,UITableViewDelegate>
 
-@property(nonatomic,strong) IBOutlet UITableView *tableView;
+@property(nonatomic, strong) UITableView *tableView;
 
 @end

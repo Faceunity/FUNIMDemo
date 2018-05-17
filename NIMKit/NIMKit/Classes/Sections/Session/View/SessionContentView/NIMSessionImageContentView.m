@@ -27,6 +27,7 @@
         self.opaque = YES;
         _imageView  = [[UIImageView alloc] initWithFrame:CGRectZero];
         _imageView.backgroundColor = [UIColor blackColor];
+        _imageView.contentMode = UIViewContentModeScaleAspectFill;
         [self addSubview:_imageView];
         _progressView = [[NIMLoadProgressView alloc] initWithFrame:CGRectMake(0, 0, 44, 44)];
         _progressView.maxProgress = 1.0f;
@@ -35,7 +36,8 @@
     return self;
 }
 
-- (void)refresh:(NIMMessageModel *)data{
+- (void)refresh:(NIMMessageModel *)data
+{
     [super refresh:data];
     NIMImageObject * imageObject = (NIMImageObject*)self.model.message.messageObject;
     UIImage * image              = [UIImage imageWithContentsOfFile:imageObject.thumbPath];
@@ -49,7 +51,8 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     UIEdgeInsets contentInsets = self.model.contentViewInsets;
-    CGSize contentSize = self.model.contentSize;
+    CGFloat tableViewWidth = self.superview.nim_width;
+    CGSize contentSize = [self.model contentSize:tableViewWidth];
     CGRect imageViewFrame = CGRectMake(contentInsets.left, contentInsets.top, contentSize.width, contentSize.height);
     self.imageView.frame  = imageViewFrame;
     _progressView.frame   = self.bounds;

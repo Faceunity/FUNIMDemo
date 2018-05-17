@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NIMSessionConfig.h"
 
+@class NIMSessionConfig;
 @interface NTESSessionConfig : NSObject<NIMSessionConfig>
 @property (nonatomic,strong)    NIMSession *session;
 

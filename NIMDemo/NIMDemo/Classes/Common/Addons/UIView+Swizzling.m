@@ -16,10 +16,12 @@
     dispatch_once(&onceToken, ^{
         //响应链日志，在调试的时候开启
         //swizzling_exchangeMethod([UIView class] ,@selector(hitTest:withEvent:), @selector(swizzling_hitTest:withEvent:));
+        // setFrame 日志，在调试的时候开启
+        //swizzling_exchangeMethod([UIView class] ,@selector(setFrame:), @selector(swizzling_setFrame:));
     });
 }
 
-#pragma mark - ShouldAutorotate
+#pragma mark - HitTest
 - (UIView *)swizzling_hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *view = [self swizzling_hitTest:point withEvent:event];
@@ -29,6 +31,16 @@
     return view;
 }
 
+
+#pragma mark - SetFrame
+- (void)swizzling_setFrame:(CGRect)frame
+{
+    [self swizzling_setFrame:frame];
+    if ([self isKindOfClass:[UITableView class]])
+    {
+        DDLogDebug(@"--set frame--，view : %@, [%.2f,%.2f,%.2f,%.2f] ",[self class],frame.origin.x,frame.origin.y,frame.size.width,frame.size.height);
+    }    
+}
 
 
 @end

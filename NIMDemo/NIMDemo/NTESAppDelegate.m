@@ -1,4 +1,4 @@
-//
+ //
 //  AppDelegate.m
 //  NIMDemo
 //
@@ -24,7 +24,10 @@
 #import "NTESCellLayoutConfig.h"
 #import "NTESSubscribeManager.h"
 #import "NTESRedPacketManager.h"
-
+#import "NTESBundleSetting.h"
+#import <UserNotifications/UserNotifications.h>
+#import <Fabric/Fabric.h>
+#import <Crashlytics/Crashlytics.h>
 
 @import PushKit;
 
@@ -43,17 +46,19 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 
     [self setupNIMSDK];
     [self setupServices];
+    [self setupCrashlytics];
+    
     [self registerPushService];
     [self commonInitListenEvents];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.backgroundColor = [UIColor grayColor];
     [self.window makeKeyAndVisible];
     [application setStatusBarStyle:UIStatusBarStyleLightContent];
 
     [self setupMainViewController];
     
     [[NTESRedPacketManager sharedManager] application:application didFinishLaunchingWithOptions:launchOptions];
+    
     DDLogInfo(@"launch with options %@",launchOptions);
     return YES;
 }
@@ -93,6 +98,8 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
     DDLogInfo(@"receive remote notification:  %@", userInfo);
 }
 
+
+
 - (void)application:(UIApplication *)app didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
     DDLogError(@"fail to get apns token :%@",error);
@@ -111,7 +118,8 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 {
     DDLogInfo(@"receive payload %@ type %@",payload.dictionaryPayload,type);
     NSNumber *badge = payload.dictionaryPayload[@"aps"][@"badge"];
-    if ([badge isKindOfClass:[NSNumber class]]) {
+    if ([badge isKindOfClass:[NSNumber class]])
+    {
         [UIApplication sharedApplication].applicationIconBadgeNumber = [badge integerValue];
     }
 }
@@ -145,13 +153,28 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 #pragma mark - misc
 - (void)registerPushService
 {
-    //apns
+    if (@available(iOS 11.0, *))
+    {
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        [center requestAuthorizationWithOptions:(UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+            if (!granted)
+            {
+                dispatch_async_main_safe(^{
+                    [[UIApplication sharedApplication].keyWindow makeToast:@"请开启推送功能否则无法收到推送通知" duration:2.0 position:CSToastPositionCenter];
+                })
+            }
+        }];
+    }
+    else
+    {
+        UIUserNotificationType types = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:types
+                                                                                 categories:nil];
+        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+    }
+    
     [[UIApplication sharedApplication] registerForRemoteNotifications];
     
-    UIUserNotificationType types = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
-    UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:types
-                                                                             categories:nil];
-    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     
     //pushkit
     PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
@@ -160,9 +183,10 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 
 }
 
+
 - (void)setupMainViewController
 {
-    LoginData *data = [[NTESLoginManager sharedManager] currentLoginData];
+    NTESLoginData *data = [[NTESLoginManager sharedManager] currentLoginData];
     NSString *account = [data account];
     NSString *token = [data token];
     
@@ -203,7 +227,7 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 }
 
 #pragma mark - 注销
--(void)logout:(NSNotification*)note
+-(void)logout:(NSNotification *)note
 {
     [self doLogout];
 }
@@ -259,13 +283,16 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 
 - (void)setupNIMSDK
 {
-    //在注册 NIMSDK appKey 之前先进行配置信息的注册，如是否使用新路径,是否要忽略某些通知，是否需要多端同步未读数
+    //配置额外配置信息 （需要在注册 appkey 前完成
     self.sdkConfigDelegate = [[NTESSDKConfigDelegate alloc] init];
     [[NIMSDKConfig sharedConfig] setDelegate:self.sdkConfigDelegate];
     [[NIMSDKConfig sharedConfig] setShouldSyncUnreadCount:YES];
     [[NIMSDKConfig sharedConfig] setMaxAutoLoginRetryTimes:10];
+    [[NIMSDKConfig sharedConfig] setMaximumLogDays:[[NTESBundleSetting sharedConfig] maximumLogDays]];
+    [[NIMSDKConfig sharedConfig] setShouldCountTeamNotification:[[NTESBundleSetting sharedConfig] countTeamNotification]];
+    [[NIMSDKConfig sharedConfig] setAnimatedImageThumbnailEnabled:[[NTESBundleSetting sharedConfig] animatedImageThumbnailEnabled]];
     
-    
+
     //appkey 是应用的标识，不同应用之间的数据（用户、消息、群组等）是完全隔离的。
     //如需打网易云信 Demo 包，请勿修改 appkey ，开发自己的应用时，请替换为自己的 appkey 。
     //并请对应更换 Demo 代码中的获取好友列表、个人信息等网易云信 SDK 未提供的接口。
@@ -275,12 +302,20 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
     option.pkCername        = [[NTESDemoConfig sharedConfig] pkCername];
     [[NIMSDK sharedSDK] registerWithOption:option];
     
-    
     //注册自定义消息的解析器
     [NIMCustomObject registerCustomDecoder:[NTESCustomAttachmentDecoder new]];
     
     //注册 NIMKit 自定义排版配置
     [[NIMKit sharedKit] registerLayoutConfig:[NTESCellLayoutConfig new]];
+    
+    BOOL isUsingDemoAppKey = [[NIMSDK sharedSDK] isUsingDemoAppKey];
+    [[NIMSDKConfig sharedConfig] setTeamReceiptEnabled:isUsingDemoAppKey];
+}
+
+- (void)setupCrashlytics
+{
+    //Fabric 崩溃统计
+    [Fabric with:@[[Crashlytics class]]];
 }
 
 #pragma mark - 登录错误回调
@@ -297,7 +332,7 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
         UIAlertAction *retryAction = [UIAlertAction actionWithTitle:@"重试"
                                                               style:UIAlertActionStyleCancel
                                                             handler:^(UIAlertAction * _Nonnull action) {
-                                                                LoginData *data = [[NTESLoginManager sharedManager] currentLoginData];
+                                                                NTESLoginData *data = [[NTESLoginManager sharedManager] currentLoginData];
                                                                 NSString *account = [data account];
                                                                 NSString *token = [data token];
                                                                 if ([account length] && [token length])

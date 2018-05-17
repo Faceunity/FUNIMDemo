@@ -149,9 +149,6 @@
 
 - (CGFloat)statusBarHeight{
     CGFloat height = [UIApplication sharedApplication].statusBarFrame.size.height;
-    if (!IOS8 && ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft || [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)) {
-        height = [UIApplication sharedApplication].statusBarFrame.size.width;
-    }
     return height;
 }
 

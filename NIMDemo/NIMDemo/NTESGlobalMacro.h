@@ -9,7 +9,7 @@
 #ifndef NIMDemo_GlobalMacro_h
 #define NIMDemo_GlobalMacro_h
 
-#define IOS8            ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 8.0)
+#define IOS11            ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 11.0)
 #define UIScreenWidth                              [UIScreen mainScreen].bounds.size.width
 #define UIScreenHeight                             [UIScreen mainScreen].bounds.size.height
 #define UISreenWidthScale   UIScreenWidth / 320

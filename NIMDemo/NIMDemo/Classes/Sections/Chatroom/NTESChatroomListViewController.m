@@ -16,6 +16,7 @@
 #import "UIView+Toast.h"
 #import "NTESBundleSetting.h"
 
+
 static NSString *ChatroomListReuseIdentity = @"ChatroomListReuseIdentity";
 
 @interface NTESChatroomListViewController ()
@@ -194,6 +195,7 @@ static NSString *ChatroomListReuseIdentity = @"ChatroomListReuseIdentity";
         [_collectionView registerClass:[NTESChatroomListCell class] forCellWithReuseIdentifier:ChatroomListReuseIdentity];
         _collectionView.delegate   = self;
         _collectionView.dataSource = self;
+        _collectionView.alwaysBounceVertical = YES;
     }
     return _collectionView;
 }

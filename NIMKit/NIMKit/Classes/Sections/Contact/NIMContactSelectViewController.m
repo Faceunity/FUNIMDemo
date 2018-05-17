@@ -54,6 +54,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.view.backgroundColor = NIMKit_UIColorFromRGB(0x383836);
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:self.tableView];
@@ -104,9 +105,15 @@
 
 - (void)viewDidLayoutSubviews{
     [super viewDidLayoutSubviews];
+    UIEdgeInsets safeAreaInsets = UIEdgeInsetsZero;
+    if (@available(iOS 11.0, *))
+    {
+        safeAreaInsets = self.view.safeAreaInsets;
+    }
+    
     self.selectIndicatorView.nim_width = self.view.nim_width;
-    self.tableView.nim_height = self.view.nim_height - self.selectIndicatorView.nim_height;
-    self.selectIndicatorView.nim_bottom = self.view.nim_height;
+    self.tableView.nim_height = self.view.nim_height - self.selectIndicatorView.nim_height - safeAreaInsets.bottom;
+    self.selectIndicatorView.nim_bottom = self.view.nim_height - safeAreaInsets.bottom;
 }
 
 - (void)show{

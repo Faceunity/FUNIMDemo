@@ -255,10 +255,10 @@ typedef NS_ENUM(NSInteger, NIMUserInfoUpdateTag) {
  *  @param values      需要更新的用户信息键值对
  *  @param completion  修改结果回调
  *
- *  @discussion   这个接口可以一次性修改多个属性,如昵称,头像等,传入的数据键值对是 {@(NIMUserInfoUpdateTag) : NSString},
+ *  @discussion   这个接口可以一次性修改多个属性,如昵称,头像等,传入的数据键值对是 {@(NIMUserInfoUpdateTag) : NSString/NSNumber},
  *                无效数据将被过滤。一些字段有修改限制，具体请参看 NIMUserInfoUpdateTag 的相关说明
  */
-- (void)updateMyUserInfo:(NSDictionary<NSNumber *,NSString *> *)values
+- (void)updateMyUserInfo:(NSDictionary<NSNumber *,id> *)values
               completion:(nullable NIMUserBlock)completion;
 
 /**

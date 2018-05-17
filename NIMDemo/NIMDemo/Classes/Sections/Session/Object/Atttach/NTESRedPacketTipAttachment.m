@@ -51,7 +51,7 @@
     label.autoDetectLinks = NO;
     label.numberOfLines = 0;
     
-    CGFloat padding = [NIMKitUIConfig sharedConfig].maxNotificationTipPadding;
+    CGFloat padding = [NIMKit sharedKit].config.maxNotificationTipPadding;
     CGSize size = [label sizeThatFits:CGSizeMake(width - 2 * padding, CGFLOAT_MAX)];
     CGFloat cellPadding = 11.f;
     CGSize contentSize = CGSizeMake(messageWidth, size.height + 2 * cellPadding);;

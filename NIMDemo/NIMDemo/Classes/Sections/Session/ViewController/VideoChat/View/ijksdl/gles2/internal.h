@@ -23,10 +23,10 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "ijksdl/ijksdl_fourcc.h"
-#include "ijksdl/ijksdl_log.h"
-#include "ijksdl/ijksdl_gles2.h"
-#include "ijksdl/ijksdl_vout.h"
+#include "ijksdl_fourcc.h"
+#include "ijksdl_log.h"
+#include "ijksdl_gles2.h"
+#include "ijksdl_vout.h"
 
 #define IJK_GLES_STRINGIZE(x)   #x
 #define IJK_GLES_STRINGIZE2(x)  IJK_GLES_STRINGIZE(x)

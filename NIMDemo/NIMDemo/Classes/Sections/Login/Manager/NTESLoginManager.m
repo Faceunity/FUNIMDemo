@@ -13,11 +13,11 @@
 #define NIMAccount      @"account"
 #define NIMToken        @"token"
 
-@interface LoginData ()<NSCoding>
+@interface NTESLoginData ()<NSCoding>
 
 @end
 
-@implementation LoginData
+@implementation NTESLoginData
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
@@ -50,7 +50,7 @@
     static NTESLoginManager *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSString *filepath = [[NTESFileLocationHelper getAppDocumentPath] stringByAppendingPathComponent:@"nim_sdk_login_data"];
+        NSString *filepath = [[NTESFileLocationHelper getAppDocumentPath] stringByAppendingPathComponent:@"nim_sdk_ntes_login_data"];
         instance = [[NTESLoginManager alloc] initWithPath:filepath];
     });
     return instance;
@@ -68,7 +68,7 @@
 }
 
 
-- (void)setCurrentLoginData:(LoginData *)currentLoginData
+- (void)setCurrentLoginData:(NTESLoginData *)currentLoginData
 {
     _currentLoginData = currentLoginData;
     [self saveData];
@@ -81,7 +81,7 @@
     if ([[NSFileManager defaultManager] fileExistsAtPath:filepath])
     {
         id object = [NSKeyedUnarchiver unarchiveObjectWithFile:filepath];
-        _currentLoginData = [object isKindOfClass:[LoginData class]] ? object : nil;
+        _currentLoginData = [object isKindOfClass:[NTESLoginData class]] ? object : nil;
     }
 }
 

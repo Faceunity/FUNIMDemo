@@ -172,7 +172,7 @@
     if (!_avatarImageView) {
         _avatarImageView = [[NIMAvatarImageView alloc] initWithFrame:self.contentView.bounds];
         _avatarImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        _avatarImageView.clipPath = NO;
+        _avatarImageView.cornerRadius = 0;
         [self.contentView addSubview:_avatarImageView];
     }
     return _avatarImageView;

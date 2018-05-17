@@ -58,15 +58,25 @@ NIMEventSubscribeManagerDelegate> {
     [[NIMSDK sharedSDK].subscribeManager removeDelegate:self];
 }
 
+- (void)viewDidLayoutSubviews {
+    if (@available(iOS 11.0, *)) {
+        CGFloat height = self.view.safeAreaInsets.bottom;
+        self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height - height);
+    }
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    [self.view addSubview:self.tableView];
     self.tableView.delegate       = self;
     self.tableView.dataSource     = self;
     UIEdgeInsets separatorInset   = self.tableView.separatorInset;
     separatorInset.right          = 0;
     self.tableView.separatorInset = separatorInset;
     self.tableView.sectionIndexBackgroundColor = [UIColor clearColor];
-    self.tableView.tableFooterView = [[UIView alloc] init];
+    self.tableView.tableFooterView = [UIView new];
     
     [self prepareData];
     
@@ -181,7 +191,7 @@ NIMEventSubscribeManagerDelegate> {
                     option.joinMode   = NIMTeamJoinModeNoAuth;
                     option.postscript = @"邀请你加入群组";
                     [SVProgressHUD show];
-                    [[NIMSDK sharedSDK].teamManager createTeam:option users:members completion:^(NSError *error, NSString *teamId) {
+                    [[NIMSDK sharedSDK].teamManager createTeam:option users:members completion:^(NSError *error, NSString *teamId, NSArray<NSString *> * _Nullable failedUserIds) {
                         [SVProgressHUD dismiss];
                         if (!error) {
                             NIMSession *session = [NIMSession session:teamId type:NIMSessionTypeTeam];
@@ -204,7 +214,7 @@ NIMEventSubscribeManagerDelegate> {
                     option.name       = @"讨论组";
                     option.type       = NIMTeamTypeNormal;
                     [SVProgressHUD show];
-                    [[NIMSDK sharedSDK].teamManager createTeam:option users:members completion:^(NSError *error, NSString *teamId) {
+                    [[NIMSDK sharedSDK].teamManager createTeam:option users:members completion:^(NSError *error, NSString *teamId, NSArray<NSString *> * _Nullable failedUserIds) {
                         [SVProgressHUD dismiss];
                         if (!error) {
                             NIMSession *session = [NIMSession session:teamId type:NIMSessionTypeTeam];

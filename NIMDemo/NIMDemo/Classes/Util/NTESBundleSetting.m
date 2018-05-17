@@ -59,6 +59,11 @@
 }
 
 
+- (BOOL)animatedImageThumbnailEnabled
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"animated_image_thumbnail_enabled"] boolValue];
+}
+
 - (BOOL)enableRotate
 {
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"enable_rotate"] boolValue];
@@ -73,6 +78,12 @@
 {
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"sync_when_remote_fetch_messages"] boolValue];
 }
+
+- (BOOL)countTeamNotification
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"count_team_notification"] boolValue];
+}
+
 
 - (NSArray *)ignoreTeamNotificationTypes
 {
@@ -110,6 +121,14 @@
 - (BOOL)serverRecordWhiteboardData
 {
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"server_record_whiteboard_data"] boolValue];
+}
+
+
+- (NSInteger)maximumLogDays
+{
+    id object = [[NSUserDefaults standardUserDefaults] objectForKey:@"maximum_log_days"];
+    NSInteger days = object? [object integerValue]: 7;
+    return days;
 }
 
 
@@ -257,19 +276,6 @@
     id count = [[NSUserDefaults standardUserDefaults] objectForKey:@"chatroom_enter_retry_count"];
     return count == nil ? 3 : [count integerValue];
 }
-    
-- (BOOL)webrtcCompatible
-{
-    id setting = [[NSUserDefaults standardUserDefaults] objectForKey:@"webrtc_compatible"];
-    
-    if (setting) {
-        return [setting boolValue];
-    }
-    else {
-        return NO;
-    }
-}
-
 
 - (NSString *)description
 {
@@ -281,6 +287,7 @@
                 "auto_remove_snap_message %d\n" \
                 "add_friend_need_verify %d\n" \
                 "show app %d\n" \
+                "maximum log days %zd\n" \
                 "using amr %d\n" \
                 "ignore_team_types %@ \n" \
                 "server_record_audio %d\n" \
@@ -301,7 +308,6 @@
                 "videochat_prefer_hd_audio %zd\n"\
                 "avchat_scene %zd\n"\
                 "chatroom_retry_count %zd\n"\
-                "webrtc_compatible %zd\n" \
                 "sync_when_remote_fetch_messages %zd\n"\
                 "\n\n\n",
                 [self removeSessionWhenDeleteMessages],
@@ -310,6 +316,7 @@
                 [self autoRemoveSnapMessage],
                 [self needVerifyForFriend],
                 [self showFps],
+                [self maximumLogDays],
                 [self usingAmr],
                 [self ignoreTeamNotificationTypes],
                 [self serverRecordAudio],
@@ -330,7 +337,6 @@
                 [self preferHDAudio],
                 [self scene],
                 [self chatroomRetryCount],
-                [self webrtcCompatible],
                 [self enableSyncWhenFetchRemoteMessages]
             ];
 }

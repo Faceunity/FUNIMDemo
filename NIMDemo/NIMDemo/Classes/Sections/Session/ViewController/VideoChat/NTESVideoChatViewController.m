@@ -19,12 +19,12 @@
 #import "NTESRecordSelectView.h"
 #import "UIView+NTES.h"
 
-#import <FUAPIDemoBar/FUAPIDemoBar.h>
 #import "FUManager.h"
+#import <FUAPIDemoBar/FUAPIDemoBar.h>
 
 #define NTESUseGLView
 
-@interface NTESVideoChatViewController ()<FUAPIDemoBarDelegate>
+@interface NTESVideoChatViewController () <FUAPIDemoBarDelegate>
 @property (nonatomic,assign) NIMNetCallCamera cameraType;
 
 @property (nonatomic,strong) CALayer *localVideoLayer;
@@ -42,143 +42,121 @@
 
 @property (nonatomic, assign) BOOL calleeBasy;
 
-/**--- FU ---**/
-@property (nonatomic, strong) FUAPIDemoBar *bar ;
+
+@property (nonatomic, strong) FUAPIDemoBar *demoBar ;
 @end
 
 @implementation NTESVideoChatViewController
 
 
+
+#pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
+// 发起通话
+- (void)processVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
+    [super processVideoCallWithBuffer:sampleBuffer];
+    
+    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
+    
+    [[NIMAVChatSDK sharedSDK].netCallManager sendVideoSampleBuffer:sampleBuffer];
+}
+// 接听通话
+- (void)responVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
+    [super responVideoCallWithBuffer:sampleBuffer];
+    
+    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
+    
+    [[NIMAVChatSDK sharedSDK].netCallManager sendVideoSampleBuffer:sampleBuffer];
+}
+#pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
+
+
+
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    /**  FaceUnity  **/
-    
-    [self addFaceUnityUI] ;
-    
     [[FUManager shareManager] loadItems];
+    [self.view addSubview:self.demoBar];
 }
 
-#pragma mark ----- 以下FaceUnity
-
-- (void)addFaceUnityUI {
-    
-    UIButton *filterBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    filterBtn.frame = CGRectMake(16, self.view.frame.size.height - 150, 55, 55) ;
-    [filterBtn setImage:[UIImage imageNamed:@"camera_btn_filter_normal"] forState:UIControlStateNormal];
-    [filterBtn addTarget:self action:@selector(hideDemoBar) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:filterBtn];
-    
-    [self.view addSubview:self.bar];
-}
-
-// 发起
--(void)processVideoBuffer:(CMSampleBufferRef)sampleBuffer {
-    
-    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) ;
-    
-    [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
-    
-    CFRetain(sampleBuffer);
-    dispatch_async(dispatch_get_main_queue(), ^{
+-(FUAPIDemoBar *)demoBar {
+    if (!_demoBar) {
         
-        [[NIMAVChatSDK sharedSDK].netCallManager sendVideoSampleBuffer:sampleBuffer];
-        CFRelease(sampleBuffer);
-    });
-}
-
-// 接听
--(void)responVideoBuffer:(CMSampleBufferRef)sampleBuffer {
-    
-    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) ;
-    
-    [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
-    
-    CFRetain(sampleBuffer);
-    dispatch_async(dispatch_get_main_queue(), ^{
+        _demoBar = [[FUAPIDemoBar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 164 - 166, self.view.frame.size.width, 164)];
         
-        [[NIMAVChatSDK sharedSDK].netCallManager sendVideoSampleBuffer:sampleBuffer];
-        CFRelease(sampleBuffer);
-    });
-}
-
-
-/**---- FUAPIDemoBar----**/
-
-- (void)hideDemoBar {
-    
-    [UIView animateWithDuration:0.4 animations:^{
-        self.bar.frame = CGRectMake(0, self.view.frame.size.height - 208 - 50, self.view.frame.size.width, 208) ;
-    }];
-}
-
--(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    
-    [UIView animateWithDuration:0.4 animations:^{
-        self.bar.frame = CGRectMake(0, self.view.frame.size.height, self.view.frame.size.width, 208);
-    }];
-}
-
--(FUAPIDemoBar *)bar {
-    
-    if (!_bar) {
-        _bar = [[FUAPIDemoBar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 208 - 50, [UIScreen mainScreen].bounds.size.width, 208)];
+        _demoBar.itemsDataSource = [FUManager shareManager].itemsDataSource;
+        _demoBar.selectedItem = [FUManager shareManager].selectedItem ;
         
-        _bar.itemsDataSource = [FUManager shareManager].itemsDataSource;
-        _bar.selectedItem = [FUManager shareManager].selectedItem;
+        _demoBar.filtersDataSource = [FUManager shareManager].filtersDataSource ;
+        _demoBar.beautyFiltersDataSource = [FUManager shareManager].beautyFiltersDataSource ;
+        _demoBar.filtersCHName = [FUManager shareManager].filtersCHName ;
+        _demoBar.selectedFilter = [FUManager shareManager].selectedFilter ;
+        [_demoBar setFilterLevel:[FUManager shareManager].selectedFilterLevel forFilter:[FUManager shareManager].selectedFilter] ;
         
-        _bar.filtersDataSource = [FUManager shareManager].filtersDataSource;
-        _bar.selectedFilter = [FUManager shareManager].selectedFilter;
+        _demoBar.skinDetectEnable = [FUManager shareManager].skinDetectEnable;
+        _demoBar.blurShape = [FUManager shareManager].blurShape ;
+        _demoBar.blurLevel = [FUManager shareManager].blurLevel ;
+        _demoBar.whiteLevel = [FUManager shareManager].whiteLevel ;
+        _demoBar.redLevel = [FUManager shareManager].redLevel;
+        _demoBar.eyelightingLevel = [FUManager shareManager].eyelightingLevel ;
+        _demoBar.beautyToothLevel = [FUManager shareManager].beautyToothLevel ;
+        _demoBar.faceShape = [FUManager shareManager].faceShape ;
         
-        _bar.selectedBlur = [FUManager shareManager].selectedBlur;
+        _demoBar.enlargingLevel = [FUManager shareManager].enlargingLevel ;
+        _demoBar.thinningLevel = [FUManager shareManager].thinningLevel ;
+        _demoBar.enlargingLevel_new = [FUManager shareManager].enlargingLevel_new ;
+        _demoBar.thinningLevel_new = [FUManager shareManager].thinningLevel_new ;
+        _demoBar.jewLevel = [FUManager shareManager].jewLevel ;
+        _demoBar.foreheadLevel = [FUManager shareManager].foreheadLevel ;
+        _demoBar.noseLevel = [FUManager shareManager].noseLevel ;
+        _demoBar.mouthLevel = [FUManager shareManager].mouthLevel ;
         
-        _bar.beautyLevel = [FUManager shareManager].beautyLevel;
-        
-        _bar.redLevel = [FUManager shareManager].redLevel;
-        
-        _bar.thinningLevel = [FUManager shareManager].thinningLevel;
-        
-        _bar.enlargingLevel = [FUManager shareManager].enlargingLevel;
-        
-        _bar.faceShapeLevel = [FUManager shareManager].faceShapeLevel;
-        
-        _bar.faceShape = [FUManager shareManager].faceShape;
-        
-        _bar.delegate = self ;
+        _demoBar.delegate = self;
     }
-    
-    return _bar;
+    return _demoBar ;
 }
 
-- (void)demoBarDidSelectedItem:(NSString *)item {
-    
-    [[FUManager shareManager] loadItem:item];
-}
+/**      FUAPIDemoBarDelegate       **/
 
-- (void)demoBarDidSelectedFilter:(NSString *)filter {
+- (void)demoBarDidSelectedItem:(NSString *)itemName {
     
-    [FUManager shareManager].selectedFilter = filter;
+    [[FUManager shareManager] loadItem:itemName];
 }
 
 - (void)demoBarBeautyParamChanged {
     
-    [FUManager shareManager].selectedBlur = self.bar.selectedBlur;
-    [FUManager shareManager].redLevel = self.bar.redLevel ;
-    [FUManager shareManager].faceShapeLevel = self.bar.faceShapeLevel ;
-    [FUManager shareManager].faceShape = self.bar.faceShape ;
-    [FUManager shareManager].beautyLevel = self.bar.beautyLevel ;
-    [FUManager shareManager].thinningLevel = self.bar.thinningLevel ;
-    [FUManager shareManager].enlargingLevel = self.bar.enlargingLevel ;
+    [FUManager shareManager].skinDetectEnable = _demoBar.skinDetectEnable;
+    [FUManager shareManager].blurShape = _demoBar.blurShape;
+    [FUManager shareManager].blurLevel = _demoBar.blurLevel ;
+    [FUManager shareManager].whiteLevel = _demoBar.whiteLevel;
+    [FUManager shareManager].redLevel = _demoBar.redLevel;
+    [FUManager shareManager].eyelightingLevel = _demoBar.eyelightingLevel;
+    [FUManager shareManager].beautyToothLevel = _demoBar.beautyToothLevel;
+    [FUManager shareManager].faceShape = _demoBar.faceShape;
+    [FUManager shareManager].enlargingLevel = _demoBar.enlargingLevel;
+    [FUManager shareManager].thinningLevel = _demoBar.thinningLevel;
+    [FUManager shareManager].enlargingLevel_new = _demoBar.enlargingLevel_new;
+    [FUManager shareManager].thinningLevel_new = _demoBar.thinningLevel_new;
+    [FUManager shareManager].jewLevel = _demoBar.jewLevel;
+    [FUManager shareManager].foreheadLevel = _demoBar.foreheadLevel;
+    [FUManager shareManager].noseLevel = _demoBar.noseLevel;
+    [FUManager shareManager].mouthLevel = _demoBar.mouthLevel;
+    
+    [FUManager shareManager].selectedFilter = _demoBar.selectedFilter ;
+    [FUManager shareManager].selectedFilterLevel = _demoBar.selectedFilterLevel;
 }
 
-// 销毁道具
 -(void)dealloc {
+    
+    /**     -----  FaceUnity  ----     **/
     [[FUManager shareManager] destoryItems];
+    /**     -----  FaceUnity  ----     **/
 }
 
-#pragma mark ----- 以上FaceUnity
 
 
+#pragma mark /**---- 以上 FaceUnity ----**/
 
 - (instancetype)initWithCallInfo:(NTESNetCallChatInfo *)callInfo
 {
@@ -218,8 +196,6 @@
     
     [self initUI];
 }
-
-
 
 - (void)initUI
 {
@@ -361,7 +337,7 @@
     [self.switchModelBtn setTitle:@"语音模式" forState:UIControlStateNormal];
     [self.hungUpBtn removeTarget:self action:NULL forControlEvents:UIControlEventTouchUpInside];
     [self.hungUpBtn addTarget:self action:@selector(hangup) forControlEvents:UIControlEventTouchUpInside];
-//    self.localVideoLayer.hidden = NO;
+    self.localVideoLayer.hidden = NO;
     self.localPreView.hidden = NO;
 }
 
@@ -410,8 +386,10 @@
     [[NIMAVChatSDK sharedSDK].netCallManager switchCamera:self.cameraType];
     self.switchCameraBtn.selected = (self.cameraType == NIMNetCallCameraBack);
     
-#warning mark ---- FaceUnity 切换摄像头要调用
+    
+    /**     -----  FaceUnity  ----     **/
     [[FUManager shareManager] onCameraChange];
+    /**     -----  FaceUnity  ----     **/
 }
 
 
@@ -491,6 +469,7 @@
     displayView.frame = self.localView.bounds;
 
     [self.localView addSubview:displayView];
+    
 }
 
 #if defined(NTESUseGLView)

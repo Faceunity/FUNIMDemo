@@ -12,6 +12,8 @@
 #import "NTESSearchLocalHistoryObject.h"
 #import "NTESBundleSetting.h"
 #import "UIView+NTES.h"
+#import "NTESSessionViewController.h"
+#import "NTESSessionHistoryViewController.h"
 
 #define EntranceCellIdentity @"entrance"
 #define EntranceCellHeight   45
@@ -175,6 +177,10 @@
         self.lastOption      = option;
         [self.searchController setActive:NO];
         [self showSearchData:option loadMore:YES];
+    }
+    else {
+        NTESSessionHistoryViewController *sessionVC = [[NTESSessionHistoryViewController alloc] initWithSession:self.session andSearchMsg:object.message];
+        [self.navigationController pushViewController:sessionVC animated:YES];
     }
 }
 

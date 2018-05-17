@@ -21,6 +21,8 @@
     NIMSession *_currentSession;
     NSString *_currentRedpacketId;
     NSString *_currentRedpacketFrom;
+    
+    BOOL _onceToken;
 }
 
 @end
@@ -43,14 +45,22 @@
     if (self)
     {
         [[NIMSDK sharedSDK].loginManager addDelegate:self];
-        
+        extern NSString *NTESNotificationLogout;
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onLogout:) name:NTESNotificationLogout object:nil];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [[NIMSDK sharedSDK].loginManager removeDelegate:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)start
 {
     DDLogInfo(@"RedPacketManager setup");
+    DDLogInfo(@"start jrmf packet, current version: %@",[JrmfPacket getCurrentVersion]);
 }
 
 - (void)updateUserInfo
@@ -105,6 +115,7 @@
     NSString *nickName = [NTESSessionUtil showNick:me inSession:session];
     NSString *headUrl = [[NIMKit sharedKit] infoByUser:me option:nil].avatarUrlString;
     BOOL isGroup = session.sessionType == NIMSessionTypeTeam;
+    
     [jrmf doActionPresentOpenViewController:self.currentTopViewController thirdToken:[JRMFSington GetPacketSington].JrmfThirdToken withUserName:nickName userHead:headUrl userID:me envelopeID:redpacketId isGroup:isGroup];
     
     _currentSession = session;
@@ -168,30 +179,39 @@
     {
         case NIMLoginStepSyncOK:
         {
-            NIMRedPacketTokenRequest *request = [[NIMRedPacketTokenRequest alloc] init];
-            request.type = NIMRedPacketServiceTypeJRMF;
-            NSString *envelopeName = @"云信红包";
-            BOOL isOnLine = [NTESDemoConfig sharedConfig].redPacketConfig.useOnlineEnv;
-            NSString *aliPaySchemeUrl = [NTESDemoConfig sharedConfig].redPacketConfig.aliPaySchemeUrl;
-            NSString *weChatSchemeUrl = [NTESDemoConfig sharedConfig].redPacketConfig.weChatSchemeUrl;
-            [[NIMSDK sharedSDK].redPacketManager fetchTokenWithRedPacketRequest:request completion:^(NSError * _Nullable error, NSString * _Nullable token) {
-                if (!error)
-                {
-                    [JRMFSington GetPacketSington].JrmfThirdToken = token;
-                    //云信渠道不区分线上和测试环境，全部使用线上环境，保证 APPKey 隔离即可。
-                    [JrmfPacket instanceJrmfPacketWithPartnerId:[JRMFSington GetPacketSington].JrmfPartnerId EnvelopeName:envelopeName aliPaySchemeUrl:aliPaySchemeUrl weChatSchemeUrl:weChatSchemeUrl appMothod:isOnLine];
-                    [JrmfWalletSDK instanceJrmfWalletSDKWithPartnerId:[JRMFSington GetPacketSington].JrmfPartnerId AppMethod:isOnLine];
-                }
-                else
-                {
-                    DDLogError(@"fetch red packet token error : %@",error);
-                }
-            }];
+            if (!_onceToken)
+            {
+                NIMRedPacketTokenRequest *request = [[NIMRedPacketTokenRequest alloc] init];
+                request.type = NIMRedPacketServiceTypeJRMF;
+                NSString *envelopeName = @"云信红包";
+                BOOL isOnLine = [NTESDemoConfig sharedConfig].redPacketConfig.useOnlineEnv;
+                NSString *aliPaySchemeUrl = [NTESDemoConfig sharedConfig].redPacketConfig.aliPaySchemeUrl;
+                NSString *weChatSchemeUrl = [NTESDemoConfig sharedConfig].redPacketConfig.weChatSchemeUrl;
+                [[NIMSDK sharedSDK].redPacketManager fetchTokenWithRedPacketRequest:request completion:^(NSError * _Nullable error, NSString * _Nullable token) {
+                    if (!error)
+                    {
+                        [JRMFSington GetPacketSington].JrmfThirdToken = token;
+                        
+                        [JrmfPacket instanceJrmfPacketWithPartnerId:[JRMFSington GetPacketSington].JrmfPartnerId EnvelopeName:envelopeName aliPaySchemeUrl:aliPaySchemeUrl weChatSchemeUrl:weChatSchemeUrl appMothod:isOnLine];
+                        [JrmfWalletSDK instanceJrmfWalletSDKWithPartnerId:[JRMFSington GetPacketSington].JrmfPartnerId AppMethod:isOnLine];
+                    }
+                    else
+                    {
+                        DDLogError(@"fetch red packet token error : %@",error);
+                    }
+                }];
+                _onceToken = YES;
+            }
         }
             break;
         default:
             break;
     }
+}
+
+- (void)onLogout:(id)sender
+{
+    _onceToken = NO;
 }
 
 

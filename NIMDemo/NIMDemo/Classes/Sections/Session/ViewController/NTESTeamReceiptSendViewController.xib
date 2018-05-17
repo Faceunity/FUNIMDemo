@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="NTESTeamReceiptSendViewController">
+            <connections>
+                <outlet property="sendButton" destination="WVt-qO-bh7" id="RdN-rg-Z5H"/>
+                <outlet property="sendTextView" destination="O2m-Y0-EVg" id="VvF-MD-jQu"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hL1-sF-3Dt">
+                    <rect key="frame" x="0.0" y="243" width="375" height="424"/>
+                    <connections>
+                        <action selector="hideKeyboard:" destination="-1" eventType="touchUpInside" id="mi2-kR-pnr"/>
+                    </connections>
+                </button>
+                <textView autoresizesSubviews="NO" opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="scaleToFill" bounces="NO" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" editable="NO" text="已读回执能力支持文本、图片、音频、视频、文件、自定义等消息类型。此处仅以文本消息作为演示，开发者可以根据具体业务场景进行功能设计" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mco-RR-72m">
+                    <rect key="frame" x="46" y="407" width="278" height="240"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <color key="textColor" red="0.59999999999999998" green="0.59999999999999998" blue="0.59999999999999998" alpha="1" colorSpace="calibratedRGB"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                </textView>
+                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="O2m-Y0-EVg">
+                    <rect key="frame" x="0.0" y="64" width="377" height="179"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="179" id="Ci9-sd-pA8"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                </textView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WVt-qO-bh7">
+                    <rect key="frame" x="46" y="350" width="278" height="47"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="47" id="fkr-xU-Otn"/>
+                        <constraint firstAttribute="width" constant="278" id="pIl-jL-KiU"/>
+                    </constraints>
+                    <state key="normal" title="发送">
+                        <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </state>
+                    <connections>
+                        <action selector="send:" destination="-1" eventType="touchUpInside" id="1G7-4i-zNs"/>
+                    </connections>
+                </button>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="hL1-sF-3Dt" secondAttribute="bottom" id="2Aw-Oi-lmK"/>
+                <constraint firstItem="hL1-sF-3Dt" firstAttribute="top" secondItem="mco-RR-72m" secondAttribute="top" constant="-164" id="73I-i5-6jk"/>
+                <constraint firstItem="mco-RR-72m" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="bottom" constant="-260" id="7e4-uQ-IH7"/>
+                <constraint firstAttribute="trailing" secondItem="O2m-Y0-EVg" secondAttribute="trailing" constant="-2" id="C0k-q0-MDT"/>
+                <constraint firstItem="O2m-Y0-EVg" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="64" id="Cnk-rP-9cF"/>
+                <constraint firstAttribute="bottom" secondItem="WVt-qO-bh7" secondAttribute="bottom" constant="270" id="FNQ-zN-baT"/>
+                <constraint firstAttribute="trailing" secondItem="WVt-qO-bh7" secondAttribute="trailing" constant="51" id="FYR-tg-TOx"/>
+                <constraint firstItem="hL1-sF-3Dt" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="IpC-dw-KXt"/>
+                <constraint firstAttribute="trailing" secondItem="mco-RR-72m" secondAttribute="trailing" constant="51" id="UFp-5X-vkN"/>
+                <constraint firstItem="WVt-qO-bh7" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="46" id="X0b-Oe-EHl"/>
+                <constraint firstItem="O2m-Y0-EVg" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="fV5-Sn-Igv"/>
+                <constraint firstItem="mco-RR-72m" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" constant="193.5" id="fdF-zV-TEq"/>
+                <constraint firstItem="mco-RR-72m" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="46" id="iTU-nk-CcO"/>
+                <constraint firstItem="mco-RR-72m" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="46" id="p7u-ED-wwe"/>
+                <constraint firstAttribute="trailing" secondItem="hL1-sF-3Dt" secondAttribute="trailing" id="q76-2S-XYS"/>
+                <constraint firstAttribute="trailing" secondItem="mco-RR-72m" secondAttribute="trailing" constant="51" id="ree-N3-mKX"/>
+            </constraints>
+            <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
+            <point key="canvasLocation" x="24.5" y="51.5"/>
+        </view>
+    </objects>
+</document>

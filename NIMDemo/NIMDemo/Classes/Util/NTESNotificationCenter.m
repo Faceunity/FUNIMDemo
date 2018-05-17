@@ -30,7 +30,8 @@
 
 NSString *NTESCustomNotificationCountChanged = @"NTESCustomNotificationCountChanged";
 
-@interface NTESNotificationCenter () <NIMSystemNotificationManagerDelegate,NIMNetCallManagerDelegate,NIMRTSManagerDelegate,NIMChatManagerDelegate>
+@interface NTESNotificationCenter () <NIMSystemNotificationManagerDelegate,NIMNetCallManagerDelegate,
+NIMRTSManagerDelegate,NIMChatManagerDelegate,NIMBroadcastManagerDelegate>
 
 @property (nonatomic,strong) AVAudioPlayer *player; //播放提示音
 @property (nonatomic,strong) NTESAVNotifier *notifier;
@@ -65,7 +66,7 @@ NSString *NTESCustomNotificationCountChanged = @"NTESCustomNotificationCountChan
         [[NIMAVChatSDK sharedSDK].netCallManager addDelegate:self];
         [[NIMAVChatSDK sharedSDK].rtsManager addDelegate:self];
         [[NIMSDK sharedSDK].chatManager addDelegate:self];
-        
+        [[NIMSDK sharedSDK].broadcastManager addDelegate:self];
     }
     return self;
 }
@@ -76,6 +77,7 @@ NSString *NTESCustomNotificationCountChanged = @"NTESCustomNotificationCountChan
     [[NIMAVChatSDK sharedSDK].netCallManager removeDelegate:self];
     [[NIMAVChatSDK sharedSDK].rtsManager removeDelegate:self];
     [[NIMSDK sharedSDK].chatManager removeDelegate:self];
+    [[NIMSDK sharedSDK].broadcastManager removeDelegate:self];
 }
 
 #pragma mark - NIMChatManagerDelegate
@@ -224,7 +226,7 @@ NSString *NTESCustomNotificationCountChanged = @"NTESCustomNotificationCountChan
                         [[NSNotificationCenter defaultCenter] postNotificationName:NTESCustomNotificationCountChanged object:nil];
                     }
                     NSString *content  = [dict jsonString:NTESCustomContent];
-                    [[NTESMainTabController instance].selectedViewController.view makeToast:content duration:2.0 position:CSToastPositionCenter];
+                    [self makeToast:content];
                 }
                     break;
                 case NTESTeamMeetingCall:{
@@ -366,6 +368,12 @@ NSString *NTESCustomNotificationCountChanged = @"NTESCustomNotificationCountChan
     [tabVC.presentedViewController isKindOfClass:[NTESTeamMeetingViewController class]];
 }
 
+#pragma mark - NIMBroadcastManagerDelegate
+- (void)onReceiveBroadcastMessage:(NIMBroadcastMessage *)broadcastMessage
+{
+    [self makeToast:broadcastMessage.content];
+}
+
 #pragma mark - format
 - (NSString *)textByCaller:(NSString *)caller type:(NIMNetCallMediaType)type
 {
@@ -443,6 +451,11 @@ NSString *NTESCustomNotificationCountChanged = @"NTESCustomNotificationCountChan
         }
     }
     return nil;
+}
+
+- (void)makeToast:(NSString *)content
+{
+    [[NTESMainTabController instance].selectedViewController.view makeToast:content duration:2.0 position:CSToastPositionCenter];
 }
 
 @end

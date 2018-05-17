@@ -67,15 +67,18 @@
     {
         hour = hour - 12;
     }
-    if(nowDateComponents.day == msgDateComponents.day) //同一天,显示时间
+    
+    BOOL isSameMonth = (nowDateComponents.year == msgDateComponents.year) && (nowDateComponents.month == msgDateComponents.month);
+    
+    if(isSameMonth && (nowDateComponents.day == msgDateComponents.day)) //同一天,显示时间
     {
         result = [[NSString alloc] initWithFormat:@"%@ %zd:%02d",result,hour,(int)msgDateComponents.minute];
     }
-    else if(nowDateComponents.day == (msgDateComponents.day+1))//昨天
+    else if(isSameMonth && (nowDateComponents.day == (msgDateComponents.day+1)))//昨天
     {
         result = showDetail?  [[NSString alloc] initWithFormat:@"昨天%@ %zd:%02d",result,hour,(int)msgDateComponents.minute] : @"昨天";
     }
-    else if(nowDateComponents.day == (msgDateComponents.day+2)) //前天
+    else if(isSameMonth && (nowDateComponents.day == (msgDateComponents.day+2))) //前天
     {
         result = showDetail? [[NSString alloc] initWithFormat:@"前天%@ %zd:%02d",result,hour,(int)msgDateComponents.minute] : @"前天";
     }
@@ -237,9 +240,9 @@
                                 formatedMessage = [NSString stringWithFormat:@"%@更新了群资料修改权限",source];
                                 break;
                             case NIMTeamUpdateTagMuteMode:{
-                                NIMTeam *team = [[NIMSDK sharedSDK].teamManager teamById:message.session.sessionId];
-                                BOOL inAllMuteMode = [team inAllMuteMode];
-                                formatedMessage = inAllMuteMode? [NSString stringWithFormat:@"%@设置了群全体禁言",source]: [NSString stringWithFormat:@"%@取消了全体禁言",source];
+                                NSString *muteState = teamAttachment.values.allValues.firstObject;
+                                BOOL muted = [muteState isEqualToString:@"0"] ? NO : YES;
+                                formatedMessage = muted? [NSString stringWithFormat:@"%@设置了群全体禁言",source]: [NSString stringWithFormat:@"%@取消了全体禁言",source];
                                 break;
                             }
                             default:
@@ -344,7 +347,8 @@
         }
 
     }
-    NSString *targetText =[targetNicks componentsJoinedByString:@","];
+    NSString *opeText    = content.source.nick;
+    NSString *targetText = [targetNicks componentsJoinedByString:@","];
     switch (content.eventType) {
         case NIMChatroomEventTypeEnter:
         {
@@ -432,6 +436,9 @@
         {
             return @"解除全体禁言";
         }
+        case NIMChatroomEventTypeQueueChange:
+        case NIMChatroomEventTypeQueueBatchChange:
+            return [NSString stringWithFormat:@"%@改变了聊天室队列",opeText];
         default:
             break;
     }
