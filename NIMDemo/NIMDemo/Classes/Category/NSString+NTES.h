@@ -20,4 +20,6 @@
 
 - (NSString *)tokenByPassword;
 
++ (NSString *)randomStringWithLength:(NSUInteger)length;
+
 @end

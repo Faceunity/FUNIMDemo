@@ -104,13 +104,6 @@
 }
 
 - (NSArray<NSNumber *> *)inputBarItemTypes{
-    if (self.session.sessionType == NIMSessionTypeP2P && [[NIMSDK sharedSDK].robotManager isValidRobot:self.session.sessionId])
-    {
-        //和机器人 点对点 聊天
-        return @[
-                 @(NIMInputBarItemTypeTextAndRecord),
-                ];
-    }
     return @[
              @(NIMInputBarItemTypeVoice),
              @(NIMInputBarItemTypeTextAndRecord),
@@ -150,6 +143,10 @@
 
 - (BOOL)disableProximityMonitor{
     return [[NTESBundleSetting sharedConfig] disableProximityMonitor];
+}
+
+- (BOOL)autoFetchAttachment {
+    return [[NTESBundleSetting sharedConfig] autoFetchAttachment];
 }
 
 - (NIMAudioType)recordType
@@ -195,5 +192,9 @@
     return res;
 }
 
+- (BOOL)enableRobot
+{
+    return NO;
+}
 
 @end

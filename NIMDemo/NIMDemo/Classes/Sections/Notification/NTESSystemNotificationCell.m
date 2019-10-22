@@ -90,7 +90,8 @@
         case NIMSystemNotificationTypeTeamInvite:
         {
             NIMTeam *team = [[NIMSDK sharedSDK].teamManager teamById:self.notification.targetID];
-            self.detailTextLabel.text = [NSString stringWithFormat:@"群 %@ 邀请你加入", team.teamName];
+            
+            self.detailTextLabel.text = [NSString stringWithFormat:@"群 %@ 邀请你加入 attach:%@", team.teamName, self.notification.notifyExt ? : @""];
         }
             break;
         case NIMSystemNotificationTypeTeamIviteReject:

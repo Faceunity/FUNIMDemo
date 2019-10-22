@@ -28,6 +28,7 @@
 #import <UserNotifications/UserNotifications.h>
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
+#import "NTESPrivatizationManager.h"
 
 @import PushKit;
 
@@ -42,7 +43,6 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
 
     [self setupNIMSDK];
     [self setupServices];
@@ -71,6 +71,11 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 
 
 #pragma mark - ApplicationDelegate
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    [self userPreferencesConfig];
+}
+
 - (void)applicationWillResignActive:(UIApplication *)application {
 }
 
@@ -80,9 +85,6 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application {
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
@@ -103,6 +105,13 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 - (void)application:(UIApplication *)app didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
     DDLogError(@"fail to get apns token :%@",error);
+}
+
+- (void)userPreferencesConfig {
+    [[NIMSDKConfig sharedConfig] setFetchAttachmentAutomaticallyAfterReceiving:[[NTESBundleSetting sharedConfig] autoFetchAttachment]];
+    [[NIMSDKConfig sharedConfig] setFetchAttachmentAutomaticallyAfterReceivingInChatroom:[[NTESBundleSetting sharedConfig] autoFetchAttachment]];
+    [[NIMSDKConfig sharedConfig] setFileQuickTransferEnabled:[[NTESBundleSetting sharedConfig] fileQuickTransferEnabled]];
+
 }
 
 #pragma mark PKPushRegistryDelegate
@@ -181,6 +190,9 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
     pushRegistry.delegate = self;
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 
+    
+    // 注册push权限，用于显示本地推送
+    [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge) categories:nil]];
 }
 
 
@@ -283,6 +295,9 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
 
 - (void)setupNIMSDK
 {
+    // 私有化配置检查
+    [[NTESPrivatizationManager sharedInstance] setupPrivatization];
+    
     //配置额外配置信息 （需要在注册 appkey 前完成
     self.sdkConfigDelegate = [[NTESSDKConfigDelegate alloc] init];
     [[NIMSDKConfig sharedConfig] setDelegate:self.sdkConfigDelegate];
@@ -291,8 +306,13 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
     [[NIMSDKConfig sharedConfig] setMaximumLogDays:[[NTESBundleSetting sharedConfig] maximumLogDays]];
     [[NIMSDKConfig sharedConfig] setShouldCountTeamNotification:[[NTESBundleSetting sharedConfig] countTeamNotification]];
     [[NIMSDKConfig sharedConfig] setAnimatedImageThumbnailEnabled:[[NTESBundleSetting sharedConfig] animatedImageThumbnailEnabled]];
+    [[NIMSDKConfig sharedConfig] setFetchAttachmentAutomaticallyAfterReceiving:[[NTESBundleSetting sharedConfig] autoFetchAttachment]];
+    [[NIMSDKConfig sharedConfig] setFetchAttachmentAutomaticallyAfterReceivingInChatroom:[[NTESBundleSetting sharedConfig] autoFetchAttachment]];
     
-
+    
+    //多端登录时，告知其他端，这个端的登录类型，目前对于android的TV端，手表端使用。
+    [[NIMSDKConfig sharedConfig] setCustomTag:[NSString stringWithFormat:@"%ld",(long)NIMLoginClientTypeiOS]];
+    
     //appkey 是应用的标识，不同应用之间的数据（用户、消息、群组等）是完全隔离的。
     //如需打网易云信 Demo 包，请勿修改 appkey ，开发自己的应用时，请替换为自己的 appkey 。
     //并请对应更换 Demo 代码中的获取好友列表、个人信息等网易云信 SDK 未提供的接口。
@@ -310,6 +330,13 @@ NSString *NTESNotificationLogout = @"NTESNotificationLogout";
     
     BOOL isUsingDemoAppKey = [[NIMSDK sharedSDK] isUsingDemoAppKey];
     [[NIMSDKConfig sharedConfig] setTeamReceiptEnabled:isUsingDemoAppKey];
+    
+    //场景配置
+    NSDictionary *dict = @{@"nim_custom1":@1};
+    NSMutableDictionary *dict1 = [NIMSDK sharedSDK].sceneDict;
+    [NIMSDK sharedSDK].sceneDict = (NSMutableDictionary *)dict;
+    NSMutableDictionary *dict2 = [NIMSDK sharedSDK].sceneDict;
+    NSLog(@"%@,%@",dict1,dict2);
 }
 
 - (void)setupCrashlytics

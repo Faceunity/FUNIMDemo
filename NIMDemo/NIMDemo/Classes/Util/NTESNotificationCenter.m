@@ -28,10 +28,11 @@
 #import "NTESAVNotifier.h"
 #import "NTESRedPacketTipAttachment.h"
 
+
 NSString *NTESCustomNotificationCountChanged = @"NTESCustomNotificationCountChanged";
 
 @interface NTESNotificationCenter () <NIMSystemNotificationManagerDelegate,NIMNetCallManagerDelegate,
-NIMRTSManagerDelegate,NIMChatManagerDelegate,NIMBroadcastManagerDelegate>
+NIMRTSManagerDelegate,NIMChatManagerDelegate,NIMBroadcastManagerDelegate, NIMSignalManagerDelegate>
 
 @property (nonatomic,strong) AVAudioPlayer *player; //播放提示音
 @property (nonatomic,strong) NTESAVNotifier *notifier;
@@ -67,6 +68,10 @@ NIMRTSManagerDelegate,NIMChatManagerDelegate,NIMBroadcastManagerDelegate>
         [[NIMAVChatSDK sharedSDK].rtsManager addDelegate:self];
         [[NIMSDK sharedSDK].chatManager addDelegate:self];
         [[NIMSDK sharedSDK].broadcastManager addDelegate:self];
+        
+        [[NIMSDK sharedSDK].signalManager addDelegate:self];
+        
+        
     }
     return self;
 }
@@ -131,7 +136,7 @@ NIMRTSManagerDelegate,NIMChatManagerDelegate,NIMBroadcastManagerDelegate>
     
     for (NIMMessage *message in messages) {
         if ([message.apnsMemberOption.userIds containsObject:me]) {
-            [NTESSessionUtil addRecentSessionAtMark:session];
+            [NTESSessionUtil addRecentSessionMark:session type:NTESRecentSessionMarkTypeAt];
             return;
         }
     }
@@ -438,8 +443,6 @@ NIMRTSManagerDelegate,NIMChatManagerDelegate,NIMBroadcastManagerDelegate>
     return should;
 }
 
-
-#pragma mark - Misc
 - (NIMSessionViewController *)currentSessionViewController
 {
     UINavigationController *nav = [NTESMainTabController instance].selectedViewController;
@@ -457,5 +460,6 @@ NIMRTSManagerDelegate,NIMChatManagerDelegate,NIMBroadcastManagerDelegate>
 {
     [[NTESMainTabController instance].selectedViewController.view makeToast:content duration:2.0 position:CSToastPositionCenter];
 }
+
 
 @end

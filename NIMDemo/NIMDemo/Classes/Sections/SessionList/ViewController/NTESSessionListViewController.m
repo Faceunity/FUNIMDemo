@@ -19,7 +19,6 @@
 #import "NTESWhiteboardAttachment.h"
 #import "NTESSessionUtil.h"
 #import "NTESPersonalCardViewController.h"
-#import "NTESRobotCardViewController.h"
 #import "NTESRedPacketAttachment.h"
 #import "NTESRedPacketTipAttachment.h"
 #define SessionListTitle @"云信 Demo"
@@ -135,22 +134,34 @@
              atIndexPath:(NSIndexPath *)indexPath{
     if (recent.session.sessionType == NIMSessionTypeP2P) {
         UIViewController *vc;
-        if ([[NIMSDK sharedSDK].robotManager isValidRobot:recent.session.sessionId])
-        {
-            vc = [[NTESRobotCardViewController alloc] initWithUserId:recent.session.sessionId];
-        }
-        else
-        {
-            vc = [[NTESPersonalCardViewController alloc] initWithUserId:recent.session.sessionId];
-        }
+        vc = [[NTESPersonalCardViewController alloc] initWithUserId:recent.session.sessionId];
         [self.navigationController pushViewController:vc animated:YES];
     }
 }
 
 
-- (void)onDeleteRecentAtIndexPath:(NIMRecentSession *)recent atIndexPath:(NSIndexPath *)indexPath{
-    [super onDeleteRecentAtIndexPath:recent atIndexPath:indexPath];
+- (void)onDeleteRecentAtIndexPath:(NIMRecentSession *)recent atIndexPath:(NSIndexPath *)indexPath
+{
+    id<NIMConversationManager> manager = [[NIMSDK sharedSDK] conversationManager];
+    [manager deleteRecentSession:recent];
 }
+
+- (void)onTopRecentAtIndexPath:(NIMRecentSession *)recent
+                   atIndexPath:(NSIndexPath *)indexPath
+                         isTop:(BOOL)isTop
+{
+    if (isTop)
+    {
+        [NTESSessionUtil removeRecentSessionMark:recent.session type:NTESRecentSessionMarkTypeTop];
+    }
+    else
+    {
+        [NTESSessionUtil addRecentSessionMark:recent.session type:NTESRecentSessionMarkTypeTop];
+    }
+    self.recentSessions = [self customSortRecents:self.recentSessions];
+    [self.tableView reloadData];
+}
+
 
 - (void)viewDidLayoutSubviews{
     [super viewDidLayoutSubviews];
@@ -163,6 +174,29 @@
         return @"我的电脑";
     }
     return [super nameForRecentSession:recent];
+}
+
+- (NSMutableArray *)customSortRecents:(NSMutableArray *)recentSessions
+{
+    NSMutableArray *array = [[NSMutableArray alloc] initWithArray:recentSessions];
+    [array sortUsingComparator:^NSComparisonResult(NIMRecentSession *obj1, NIMRecentSession *obj2) {
+        NSInteger score1 = [NTESSessionUtil recentSessionIsMark:obj1 type:NTESRecentSessionMarkTypeTop]? 10 : 0;
+        NSInteger score2 = [NTESSessionUtil recentSessionIsMark:obj2 type:NTESRecentSessionMarkTypeTop]? 10 : 0;
+        if (obj1.lastMessage.timestamp > obj2.lastMessage.timestamp)
+        {
+            score1 += 1;
+        }
+        else if (obj1.lastMessage.timestamp < obj2.lastMessage.timestamp)
+        {
+            score2 += 1;
+        }
+        if (score1 == score2)
+        {
+            return NSOrderedSame;
+        }
+        return score1 > score2? NSOrderedAscending : NSOrderedDescending;
+    }];
+    return array;
 }
 
 #pragma mark - SessionListHeaderDelegate
@@ -213,6 +247,10 @@
     [self refreshSubview];
 }
 
+- (void)onTeamUsersSyncFinished:(BOOL)success
+{
+    NSLog(@">> 群消息同步完成：%@",@(success));
+}
 
 
 #pragma mark - UITableViewDelegate
@@ -254,6 +292,31 @@
         NTESSessionViewController *vc = [[NTESSessionViewController alloc] initWithSession:recent.session];
         [self.navigationController showViewController:vc sender:nil];
     }
+}
+
+- (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    __weak typeof(self) weakSelf = self;
+    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"删除" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        NIMRecentSession *recentSession = weakSelf.recentSessions[indexPath.row];
+        [weakSelf onDeleteRecentAtIndexPath:recentSession atIndexPath:indexPath];
+        [tableView setEditing:NO animated:YES];
+    }];
+    
+    
+    NIMRecentSession *recentSession = weakSelf.recentSessions[indexPath.row];
+    BOOL isTop = [NTESSessionUtil recentSessionIsMark:recentSession type:NTESRecentSessionMarkTypeTop];
+    UITableViewRowAction *top = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:isTop?@"取消置顶":@"置顶" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        [weakSelf onTopRecentAtIndexPath:recentSession atIndexPath:indexPath isTop:isTop];
+        [tableView setEditing:NO animated:YES];
+    }];
+    
+    return @[delete,top];
+}
+
+- (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath
+{
+    // All tasks are handled by blocks defined in editActionsForRowAtIndexPath, however iOS8 requires this method to enable editing
 }
 
 
@@ -384,7 +447,7 @@
 
 - (void)checkNeedAtTip:(NIMRecentSession *)recent content:(NSMutableAttributedString *)content
 {
-    if ([NTESSessionUtil recentSessionIsAtMark:recent]) {
+    if ([NTESSessionUtil recentSessionIsMark:recent type:NTESRecentSessionMarkTypeAt]) {
         NSAttributedString *atTip = [[NSAttributedString alloc] initWithString:@"[有人@你] " attributes:@{NSForegroundColorAttributeName:[UIColor redColor]}];
         [content insertAttributedString:atTip atIndex:0];
     }

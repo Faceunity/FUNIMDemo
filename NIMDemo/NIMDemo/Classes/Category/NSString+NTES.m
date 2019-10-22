@@ -58,5 +58,18 @@
     return [[NIMSDK sharedSDK] isUsingDemoAppKey] ? [self MD5String] : self;
 }
 
++ (NSString *)randomStringWithLength:(NSUInteger)length {
+    if (length == 0) {
+        return @"";
+    }
+    NSString *ret = @"";
+    while (ret.length < length) {
+        NSString *append = @(arc4random()).stringValue;
+        ret = [ret stringByAppendingString:append];
+    }
+    ret = [ret substringToIndex:length];
+    
+    return ret;
+}
 
 @end

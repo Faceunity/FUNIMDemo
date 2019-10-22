@@ -29,6 +29,7 @@
 #import "NTESNetDetectViewController.h"
 #import "NTESSessionUtil.h"
 #import "JRMFHeader.h"
+#import "NTESMigrateMessageViewController.h"
 
 @interface NTESSettingViewController ()<NIMUserManagerDelegate>
 
@@ -137,10 +138,10 @@
                           HeaderTitle:@"",
                           RowContent :@[
                                           @{
-                                              Title      : @"通知显示详情",
-                                              CellClass  : @"NTESSettingSwitcherCell",
-                                              ExtraInfo  : @(setting.type == NIMPushNotificationDisplayTypeDetail? YES : NO),
-                                              CellAction :@"onActionShowPushDetailSetting:",
+                                              Title        : @"通知显示详情",
+                                              CellClass    : @"NTESSettingSwitcherCell",
+                                              ExtraInfo    : @(setting.type == NIMPushNotificationDisplayTypeDetail? YES : NO),
+                                              CellAction   : @"onActionShowPushDetailSetting:",
                                               ForbidSelect : @(YES)
                                            },
                                       ],
@@ -180,6 +181,12 @@
                                         @{
                                             Title      :@"音视频网络探测",
                                             CellAction :@"onTouchNetDetect:",
+                                            },
+                                        @{
+                                            Title      :@"本地消息迁移",
+                                            CellAction :@"onTouchMigrateMessages:",
+                                            ShowAccessory : @(YES),
+                                            
                                             },
                                         @{
                                             Title      :@"关于",
@@ -276,17 +283,26 @@
     
     __weak typeof(self) weakSelf = self;
     [_logUploader upload:^(NSString *urlString,NSError *error) {
-        [SVProgressHUD dismiss];
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (error == nil && urlString)
-        {
-            [UIPasteboard generalPasteboard].string = urlString;
-            [strongSelf.view makeToast:@"上传日志成功,URL已复制到剪切板中" duration:3.0 position:CSToastPositionCenter];
-        }
-        else
+
+        if (error || !urlString)
         {
             [strongSelf.view makeToast:@"上传日志失败" duration:3.0 position:CSToastPositionCenter];
+            [SVProgressHUD dismiss];
+            return;
         }
+        
+        [[NIMSDK sharedSDK].resourceManager fetchNOSURLWithURL:urlString completion:^(NSError * _Nullable error, NSString * _Nullable urlString)
+        {
+            [SVProgressHUD dismiss];
+            if (error || !urlString)
+            {
+                [strongSelf.view makeToast:@"上传日志失败" duration:3.0 position:CSToastPositionCenter];
+                return;
+            }
+            [UIPasteboard generalPasteboard].string = urlString;
+            [strongSelf.view makeToast:@"上传日志成功,URL已复制到剪切板中" duration:3.0 position:CSToastPositionCenter];
+        }];
     }];
 }
 
@@ -361,6 +377,11 @@
                 break;
         }
     }];
+}
+
+- (void)onTouchMigrateMessages:(id)sender {
+    NTESMigrateMessageViewController *migrateMessageController = [[NTESMigrateMessageViewController alloc] init];
+    [self.navigationController pushViewController:migrateMessageController animated:YES];
 }
 
 #pragma mark - Notification

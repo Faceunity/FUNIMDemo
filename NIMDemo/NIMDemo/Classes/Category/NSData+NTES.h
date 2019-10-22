@@ -10,4 +10,8 @@
 
 @interface NSData (NTES)
 - (NSString *)MD5String;
+
+- (NSData *)aes256EncryptWithKey:(NSString *)key vector:(NSString *)vector;
+- (NSData *)aes256DecryptWithKey:(NSString *)key vector:(NSString *)vector;
+
 @end

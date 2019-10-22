@@ -72,6 +72,7 @@
     [self.player stop];
 }
 
+
 #pragma mark - NTESTimerHolderDelegate
 - (void)onNTESTimerFired:(NTESTimerHolder *)holder
 {
@@ -104,6 +105,47 @@
 }
 
 - (void)checkServiceEnable:(void(^)(BOOL))result{
+    AVAuthorizationStatus audioStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
+    AVAuthorizationStatus videoStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    
+    if (videoStatus == AVAuthorizationStatusRestricted
+        || videoStatus == AVAuthorizationStatusDenied) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"相机权限受限,无法视频聊天"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"确定"
+                                              otherButtonTitles:nil];
+        [alert showAlertWithCompletionHandler:^(NSInteger idx) {
+            if (result) {
+                result(NO);
+            }
+        }];
+        return;
+    }
+    
+    if (audioStatus == AVAuthorizationStatusRestricted
+        || audioStatus == AVAuthorizationStatusDenied ) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"麦克风权限受限,无法聊天"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"确定"
+                                              otherButtonTitles:nil];
+        [alert showAlertWithCompletionHandler:^(NSInteger idx) {
+            if (result) {
+                result(NO);
+            }
+        }];
+        return;
+    }
+    
+    if (audioStatus == AVAuthorizationStatusAuthorized
+        && videoStatus == AVAuthorizationStatusAuthorized) {
+        if (result) {
+            result(YES);
+        }
+        return;
+    }
+    
     if ([[AVAudioSession sharedInstance] respondsToSelector:@selector(requestRecordPermission:)]) {
         [[AVAudioSession sharedInstance] performSelector:@selector(requestRecordPermission:) withObject:^(BOOL granted) {
             dispatch_async_main_safe(^{
@@ -142,6 +184,12 @@
                 
             });
         }];
+    } else {
+        dispatch_async_main_safe(^{
+            if (result) {
+                result(NO);
+            }
+        });
     }
 }
 

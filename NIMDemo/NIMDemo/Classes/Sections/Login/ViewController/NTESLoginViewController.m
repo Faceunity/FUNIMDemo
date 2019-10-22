@@ -111,6 +111,24 @@ NTES_USE_CLEAR_BAR
     
     NSString *loginAccount = username;
     NSString *loginToken   = [password tokenByPassword];
+
+    BOOL isPrivate = NO;
+    id setting = nil;
+    setting = [[NSUserDefaults standardUserDefaults] valueForKey:@"privatization_enabled"];
+    if(setting) {
+        isPrivate = [setting boolValue];
+    }
+    
+    if(isPrivate) {
+        setting = [[NSUserDefaults standardUserDefaults] valueForKey:@"privatization_password_md5_enabled"];
+        BOOL md5Enable = NO;
+        if(setting) {
+            md5Enable = [setting boolValue];
+        }
+        if(md5Enable) {
+            loginToken = [password MD5String];
+        }
+    }
     
     //NIM SDK 只提供消息通道，并不依赖用户业务逻辑，开发者需要为每个APP用户指定一个NIM帐号，NIM只负责验证NIM的帐号即可(在服务器端集成)
     //用户APP的帐号体系和 NIM SDK 并没有直接关系

@@ -498,8 +498,10 @@
 - (void)checkAt:(NSString *)text
 {
     if ([text isEqualToString:NIMInputAtStartChar]) {
-        switch (self.session.sessionType) {
-            case NIMSessionTypeTeam:{
+        switch (self.session.sessionType)
+        {
+            case NIMSessionTypeTeam:
+            {
                 NIMContactTeamMemberSelectConfig *config = [[NIMContactTeamMemberSelectConfig alloc] init];
                 if ([self.inputConfig respondsToSelector:@selector(enableRobot)])
                 {
@@ -520,18 +522,8 @@
             }
                 break;
             case NIMSessionTypeP2P:
-            case NIMSessionTypeChatroom:{
-                if (([self.inputConfig respondsToSelector:@selector(enableRobot)] && self.inputConfig.enableRobot) || [NIMSDK sharedSDK].isUsingDemoAppKey)
-                {
-                    NIMContactRobotSelectConfig *config = [[NIMContactRobotSelectConfig alloc] init];
-                    config.needMutiSelected = NO;
-                    NIMContactSelectViewController *vc = [[NIMContactSelectViewController alloc] initWithConfig:config];
-                    vc.delegate = self;
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [vc show];
-                    });
-                }
-            }
+                break;
+            case NIMSessionTypeChatroom:
                 break;
             default:
                 break;

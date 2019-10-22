@@ -29,7 +29,6 @@
 - (void)responVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer ;
 #pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
 
-
 //主叫方是自己，发起通话，初始化方法
 - (instancetype)initWithCallee:(NSString *)callee;
 //被叫方是自己，接听界面，初始化方法

@@ -21,6 +21,35 @@
 }
 
 
+- (instancetype)init
+{
+    if(self = [super init]) {
+        [self checkSocks5DefaultSetting];
+    }
+    return self;
+}
+
+- (void)checkSocks5DefaultSetting {
+    NSString *settingBundlePath = [[NSBundle mainBundle] pathForResource:@"Settings" ofType:@"bundle"];
+    NSString *plistPath = [settingBundlePath stringByAppendingPathComponent:@"Root.plist"];
+    NSDictionary *plistDict = [[NSDictionary alloc] initWithContentsOfFile:plistPath];
+    NSArray *preferences = [plistDict valueForKey:@"PreferenceSpecifiers"];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    for(NSDictionary *setting in preferences) {
+        // 如果NSUserDefaults里有，则优先使用UserDefaults里的
+        NSString *key = [setting valueForKey:@"Key"];
+        
+        if (key && key.length>0 && [key containsString:@"socks5"]) {
+            // 从Plist中获取值填充
+            id value = [setting valueForKey:@"DefaultValue"];
+            if(value) {
+                [userDefaults setObject:value forKey:key];
+            }
+        }
+    }
+}
+
 - (BOOL)removeSessionWhenDeleteMessages{
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"enabled_remove_recent_session"] boolValue];
 }
@@ -36,11 +65,18 @@
 }
 
 
-- (BOOL)autoRemoveRemoteSession{
+- (BOOL)autoRemoveRemoteSession
+{
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"auto_remove_remote_session"] boolValue];
 }
 
-- (BOOL)autoRemoveSnapMessage{
+- (BOOL)autoRemoveAlias
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"auto_remove_alias"] boolValue];
+}
+
+- (BOOL)autoRemoveSnapMessage
+{
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"auto_remove_snap_message"] boolValue];
 }
 
@@ -58,7 +94,6 @@
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"disable_proxmity_monitor"] boolValue];
 }
 
-
 - (BOOL)animatedImageThumbnailEnabled
 {
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"animated_image_thumbnail_enabled"] boolValue];
@@ -72,6 +107,36 @@
 - (BOOL)usingAmr
 {
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"using_amr"] boolValue];
+}
+
+- (BOOL)fileQuickTransferEnabled
+{
+    id value = [[NSUserDefaults standardUserDefaults] objectForKey:@"enable_file_quick_transfer"];
+    if(value) {
+        return [value boolValue];
+    }else {
+        return YES;
+    }
+}
+
+- (BOOL)enableAPNsPrefix
+{
+    id value = [[NSUserDefaults standardUserDefaults] objectForKey:@"enable_apns_prefix"];
+    if(value) {
+        return [value boolValue];
+    }else {
+        return YES;
+    }
+}
+
+- (BOOL)enableTeamAPNsForce
+{
+    id value = [[NSUserDefaults standardUserDefaults] objectForKey:@"enable_team_apns_force"];
+    if(value) {
+        return [value boolValue];
+    }else {
+        return NO;
+    }
 }
 
 - (BOOL)enableSyncWhenFetchRemoteMessages
@@ -117,6 +182,68 @@
 {
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"server_record_video"] boolValue];
 }
+
+- (BOOL)serverRecordHost
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"server_record_host"] boolValue];
+}
+
+- (int)serverRecordMode
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"server_record_mode"] intValue];
+}
+
+- (BOOL)useSocks
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"use_socks5"] boolValue];
+}
+
+- (NSString *)socks5Addr
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:@"socks5_addr"]? : @"";
+}
+
+- (NSUInteger)socks5Type
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"socks5_type"] intValue];
+}
+            
+- (NSString *)socksUsername
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:@"socks5_username"]? : @"";
+}
+
+- (NSString *)socksPassword
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:@"socks5_password"] ?: @"";
+}
+
+- (BOOL)useRTSSocks
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"use_rts_socks5"] boolValue];
+}
+
+- (NSString *)socks5RTSAddr
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:@"rts_socks5_addr"]? : @"";
+}
+
+- (NSUInteger )socks5RTSType
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@"rts_socks5_type"] intValue];
+}
+
+- (NSString *)socksRTSUsername
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:@"rts_socks5_username"]? : @"";
+}
+
+- (NSString *)socksRTSPassword
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:@"rts_socks5_password"] ?: @"";
+}
+
+
 
 - (BOOL)serverRecordWhiteboardData
 {
@@ -196,6 +323,11 @@
     return [[[NSUserDefaults standardUserDefaults] objectForKey:@"videochat_local_record_video_kbps"] integerValue];
 }
 
+- (NSUInteger)localRecordVideoQuality
+{
+    return [[[NSUserDefaults standardUserDefaults] objectForKey:@""] unsignedIntegerValue];
+}
+
 - (BOOL)autoDeactivateAudioSession
 {
     id setting = [[NSUserDefaults standardUserDefaults] objectForKey:@"videochat_auto_disable_audiosession"];
@@ -220,19 +352,6 @@
     }
     
 }
-
-- (BOOL)audioHowlingSuppress
-{
-    id setting = [[NSUserDefaults standardUserDefaults] objectForKey:@"videochat_audio_howling_suppress"];
-    
-    if (setting) {
-        return [setting boolValue];
-    }
-    else {
-        return NO;
-    }
-}
-
 
 - (BOOL)voiceDetect
 {
@@ -277,6 +396,16 @@
     return count == nil ? 3 : [count integerValue];
 }
 
+- (BOOL)autoFetchAttachment
+{
+    id setting = [[NSUserDefaults standardUserDefaults] objectForKey:@"auto_fetch_attachment"];
+    if (setting) {
+        return [setting boolValue];
+    } else {
+        return YES;
+    }
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:
@@ -284,6 +413,7 @@
                 "enabled_remove_recent_session %d\n" \
                 "local_search_time_order_desc %d\n" \
                 "auto_remove_remote_session %d\n" \
+                "auto_remove_alias %d\n" \
                 "auto_remove_snap_message %d\n" \
                 "add_friend_need_verify %d\n" \
                 "show app %d\n" \
@@ -301,10 +431,10 @@
                 "videochat_preferred_video_decoder %zd\n" \
                 "videochat_video_encode_max_kbps %zd\n" \
                 "videochat_local_record_video_kbps %zd\n" \
+                "videochat_local_record_video_quality %zd\n" \
                 "videochat_auto_disable_audiosession %zd\n" \
                 "videochat_audio_denoise %zd\n" \
                 "videochat_voice_detect %zd\n" \
-                "videochat_audio_howling_suppress %zd\n" \
                 "videochat_prefer_hd_audio %zd\n"\
                 "avchat_scene %zd\n"\
                 "chatroom_retry_count %zd\n"\
@@ -313,6 +443,7 @@
                 [self removeSessionWhenDeleteMessages],
                 [self localSearchOrderByTimeDesc],
                 [self autoRemoveRemoteSession],
+                [self autoRemoveAlias],
                 [self autoRemoveSnapMessage],
                 [self needVerifyForFriend],
                 [self showFps],
@@ -330,10 +461,10 @@
                 [self perferredVideoDecoder],
                 [self videoMaxEncodeKbps],
                 [self localRecordVideoKbps],
+                [self localRecordVideoQuality],
                 [self autoDeactivateAudioSession],
                 [self audioDenoise],
                 [self voiceDetect],
-                [self audioHowlingSuppress],
                 [self preferHDAudio],
                 [self scene],
                 [self chatroomRetryCount],

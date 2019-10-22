@@ -8,7 +8,7 @@
 
 #import "NTESFilePreViewController.h"
 #import <MobileCoreServices/MobileCoreServices.h>
-@interface NTESFilePreViewController ()
+@interface NTESFilePreViewController ()<NIMChatManagerDelegate>
 
 @property(nonatomic,strong)NIMFileObject *fileObject;
 
@@ -24,12 +24,14 @@
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         _fileObject = object;
+        [[NIMSDK sharedSDK].chatManager addDelegate:self];
     }
     return self;
 }
 
 - (void)dealloc{
-    [[NIMSDK sharedSDK].resourceManager cancelTask:_fileObject.path];
+    [[NIMSDK sharedSDK].chatManager cancelFetchingMessageAttachment:_fileObject.message];
+    [[NIMSDK sharedSDK].chatManager removeDelegate:self];
 }
 
 - (void)viewDidLoad {
@@ -52,7 +54,7 @@
         [self openWithOtherApp];
     }else{
         if (self.isDownLoading) {
-            [[NIMSDK sharedSDK].resourceManager cancelTask:filePath];
+            [[NIMSDK sharedSDK].chatManager cancelFetchingMessageAttachment:self.fileObject.message];
             self.progressView.hidden   = YES;
             self.progressView.progress = 0.0;
             [self.actionBtn setTitle:@"下载文件" forState:UIControlStateNormal];
@@ -65,24 +67,41 @@
 
 #pragma mark - 文件下载
 
-- (void)downLoadFile{
-    NSString *url = self.fileObject.url;
-    __weak typeof(self) wself = self;
-    [[NIMSDK sharedSDK].resourceManager download:url filepath:self.fileObject.path progress:^(float progress) {
-        wself.isDownLoading = YES;
-        wself.progressView.hidden = NO;
-        wself.progressView.progress = progress;
-        [wself.actionBtn setTitle:@"取消下载" forState:UIControlStateNormal];
-    } completion:^(NSError *error) {
-        wself.isDownLoading = NO;
-        wself.progressView.hidden = YES;
-        if (!error) {
-            [wself.actionBtn setTitle:@"用其他应用程序打开" forState:UIControlStateNormal];
-        }else{
-            wself.progressView.progress = 0.0f;
-            [wself.actionBtn setTitle:@"下载失败，点击重新下载" forState:UIControlStateNormal];
+- (void)downLoadFile
+{
+    [[NIMSDK sharedSDK].chatManager fetchMessageAttachment:self.fileObject.message error:nil];
+}
+
+- (void)fetchMessageAttachment:(NIMMessage *)message
+                      progress:(float)progress
+{
+    if ([message.messageId isEqualToString:self.fileObject.message.messageId])
+    {
+        self.isDownLoading = YES;
+        self.progressView.hidden = NO;
+        self.progressView.progress = progress;
+        [self.actionBtn setTitle:@"取消下载" forState:UIControlStateNormal];
+    }
+}
+
+
+- (void)fetchMessageAttachment:(NIMMessage *)message
+          didCompleteWithError:(nullable NSError *)error
+{
+    if ([message.messageId isEqualToString:self.fileObject.message.messageId])
+    {
+        self.isDownLoading = NO;
+        self.progressView.hidden = YES;
+        if (!error)
+        {
+            [self.actionBtn setTitle:@"用其他应用程序打开" forState:UIControlStateNormal];
         }
-    }];
+        else
+        {
+            self.progressView.progress = 0.0f;
+            [self.actionBtn setTitle:@"下载失败，点击重新下载" forState:UIControlStateNormal];
+        }
+    }
 }
 
 

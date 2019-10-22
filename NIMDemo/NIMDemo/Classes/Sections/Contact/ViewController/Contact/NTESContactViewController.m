@@ -25,7 +25,7 @@
 #import "NTESContactDataCell.h"
 #import "NIMContactSelectViewController.h"
 #import "NTESUserUtil.h"
-
+#import "NTESBundleSetting.h"
 
 @interface NTESContactViewController ()<NIMUserManagerDelegate,
 NIMSystemNotificationManagerDelegate,
@@ -126,11 +126,6 @@ NIMEventSubscribeManagerDelegate> {
                   contactCellUtilTitle:@"讨论组",
                   contactCellUtilVC:@"NTESNormalTeamListViewController"
                 },
-              @{
-                  contactCellUtilIcon:@"icon_robot_normal",
-                  contactCellUtilTitle:@"智能机器人",
-                  contactCellUtilVC:@"NTESRobotListViewController"
-                  },
               @{
                   contactCellUtilIcon:@"icon_blacklist_normal",
                   contactCellUtilTitle:@"黑名单",
@@ -324,7 +319,9 @@ NIMEventSubscribeManagerDelegate> {
                 id<NTESContactItem,NTESGroupMemberProtocol> contactItem = (id<NTESContactItem,NTESGroupMemberProtocol>)[_contacts memberOfIndex:indexPath];
                 NSString *userId = [contactItem userId];
                 __weak typeof(self) wself = self;
-                [[NIMSDK sharedSDK].userManager deleteFriend:userId completion:^(NSError *error) {
+                [[NIMSDK sharedSDK].userManager deleteFriend:userId
+                                                 removeAlias:[[NTESBundleSetting sharedConfig] autoRemoveAlias]
+                                                  completion:^(NSError *error) {
                     [SVProgressHUD dismiss];
                     if (!error) {
                         [_contacts removeGroupMember:contactItem];

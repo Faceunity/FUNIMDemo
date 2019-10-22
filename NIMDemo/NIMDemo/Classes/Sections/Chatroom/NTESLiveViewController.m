@@ -185,12 +185,12 @@ NTES_USE_CLEAR_BAR
 }
 
 #pragma mark - NIMChatroomManagerDelegate
-- (void)chatroom:(NSString *)roomId beKicked:(NIMChatroomKickReason)reason
+- (void)chatroomBeKicked:(NIMChatroomBeKickedResult *)result
 {
-    if ([roomId isEqualToString:self.chatroom.roomId]) {
+    if ([result.roomId isEqualToString:self.chatroom.roomId]) {
         NSString *toast = [NSString stringWithFormat:@"你被踢出聊天室"];
-        DDLogInfo(@"chatroom be kicked, roomId:%@  rease:%zd",roomId,reason);
-        [[NIMSDK sharedSDK].chatroomManager exitChatroom:roomId completion:nil];
+        DDLogInfo(@"chatroom be kicked, roomId:%@  rease:%zd ext:%@",result.roomId,result.reason,result.ext);
+        [[NIMSDK sharedSDK].chatroomManager exitChatroom:result.roomId completion:nil];
         
         [self.view.window makeToast:toast duration:2.0 position:CSToastPositionCenter];
         [self.navigationController popViewControllerAnimated:YES];

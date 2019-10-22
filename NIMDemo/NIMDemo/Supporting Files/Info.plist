@@ -66,6 +66,11 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>云信想使用您的摄像头</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -77,6 +82,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>remote-notification</string>
 		<string>voip</string>
 	</array>
 	<key>UIFileSharingEnabled</key>

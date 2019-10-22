@@ -226,7 +226,7 @@
     __weak typeof(self) wself = self;
     if (success) {
         [SVProgressHUD show];
-        [[NIMSDK sharedSDK].resourceManager upload:filePath progress:nil completion:^(NSString *urlString, NSError *error) {
+        [[NIMSDK sharedSDK].resourceManager upload:filePath scene:NIMNOSSceneTypeAvatar progress:nil completion:^(NSString *urlString, NSError *error) {
             [SVProgressHUD dismiss];
             if (!error && wself) {
                 [[NIMSDK sharedSDK].userManager updateMyUserInfo:@{@(NIMUserInfoUpdateTagAvatar):urlString} completion:^(NSError *error) {

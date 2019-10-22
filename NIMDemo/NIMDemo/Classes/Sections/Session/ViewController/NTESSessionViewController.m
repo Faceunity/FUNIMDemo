@@ -53,7 +53,6 @@
 #import "NTESTeamMeetingViewController.h"
 #import "NTESTeamMeetingCallerInfo.h"
 #import "NIMInputAtCache.h"
-#import "NTESRobotCardViewController.h"
 #import "NTESRedPacketManager.h"
 #import "NTESSessionRedPacketContentView.h"
 #import "NTESSessionRedPacketTipContentView.h"
@@ -70,7 +69,10 @@ NIMSystemNotificationManagerDelegate,
 NIMMediaManagerDelegate,
 NTESTimerHolderDelegate,
 NIMContactSelectDelegate,
-NIMEventSubscribeManagerDelegate>
+NIMEventSubscribeManagerDelegate,
+NIMNormalTeamCardVCProtocol,
+NIMAdvancedTeamCardVCProtocol,
+NIMContactSelectDelegate>
 
 @property (nonatomic,strong)    NTESCustomSysNotificationSender *notificaionSender;
 @property (nonatomic,strong)    NTESSessionConfig       *sessionConfig;
@@ -112,7 +114,7 @@ NIMEventSubscribeManagerDelegate>
     }
     
     //删除最近会话列表中有人@你的标记
-    [NTESSessionUtil removeRecentSessionAtMark:self.session];
+    [NTESSessionUtil removeRecentSessionMark:self.session type:NTESRecentSessionMarkTypeAt];
     
 }
 
@@ -151,6 +153,41 @@ NIMEventSubscribeManagerDelegate>
     return _sessionConfig;
 }
 
+#pragma mark - NIMNormalTeamCardVCProtocol, NIMAdvancedTeamCardVCProtocol
+- (void)NIMNormalTeamCardVCDidSetTop:(BOOL)isTop {
+    [self doTopSession:isTop];
+}
+
+- (void)NIMAdvancedTeamCardVCDidSetTop:(BOOL)isTop {
+    [self doTopSession:isTop];
+}
+
+- (void)doTopSession:(BOOL)isTop {
+    NIMRecentSession *recent = [[NIMSDK sharedSDK].conversationManager recentSessionBySession:self.session];
+    if (isTop) {
+        if (!recent) {
+            [[NIMSDK sharedSDK].conversationManager addEmptyRecentSessionBySession:self.session];
+        }
+        [NTESSessionUtil addRecentSessionMark:self.session type:NTESRecentSessionMarkTypeTop];
+    } else {
+        if (recent) {
+            [NTESSessionUtil removeRecentSessionMark:self.session type:NTESRecentSessionMarkTypeTop];
+        } else {}
+    }
+}
+
+#pragma mark - NIMContactSelectDelegate
+
+- (void)didFinishedSelect:(NSArray *)selectedContacts
+{
+    [[NIMSDK sharedSDK].teamManager fetchInviterAccids:self.session.sessionId
+                                     withTargetMembers:selectedContacts
+                                            completion:^(NSError * _Nullable error, NSDictionary<NSString *,NSString *> * _Nullable inviters)
+    {
+        DDLogInfo(@"Fetching Member Inviter result: %@, error: = %@",inviters, error);
+    }];
+}
+
 #pragma mark - NIMEventSubscribeManagerDelegate
 - (void)onRecvSubscribeEvents:(NSArray *)events
 {
@@ -160,6 +197,7 @@ NIMEventSubscribeManagerDelegate>
         }
     }
 }
+
 #pragma mark - NIMSystemNotificationManagerDelegate
 - (void)onReceiveCustomSystemNotification:(NIMCustomSystemNotification *)notification
 {
@@ -296,11 +334,19 @@ NIMEventSubscribeManagerDelegate>
     NTESFileTransSelectViewController *vc = [[NTESFileTransSelectViewController alloc]
                                              initWithNibName:nil bundle:nil];
     __weak typeof(self) wself = self;
+    __weak typeof(vc)   wVC = vc;
     vc.completionBlock = ^void(id sender,NSString *ext){
         if ([sender isKindOfClass:[NSString class]]) {
-            [wself sendMessage:[NTESSessionMsgConverter msgWithFilePath:sender]];
+            [wself sendMessage:[NTESSessionMsgConverter msgWithFilePath:sender] completion:^(NSError *err) {
+                if(wVC) {
+                    [wself.navigationController popViewControllerAnimated:YES];
+                }
+            }];
         }else if ([sender isKindOfClass:[NSData class]]){
             [wself sendMessage:[NTESSessionMsgConverter msgWithFileData:sender extension:ext]];
+            if(wVC) {
+                [wself.navigationController popViewControllerAnimated:YES];
+            }
         }
     };
     [self.navigationController pushViewController:vc animated:YES];
@@ -531,14 +577,7 @@ NIMEventSubscribeManagerDelegate>
 - (BOOL)onTapAvatar:(NIMMessage *)message{
     NSString *userId = [self messageSendSource:message];
     UIViewController *vc = nil;
-    if ([[NIMSDK sharedSDK].robotManager isValidRobot:userId])
-    {
-        vc = [[NTESRobotCardViewController alloc] initWithUserId:userId];
-    }
-    else
-    {
-        vc = [[NTESPersonalCardViewController alloc] initWithUserId:userId];
-    }
+    vc = [[NTESPersonalCardViewController alloc] initWithUserId:userId];
     
     [self.navigationController pushViewController:vc animated:YES];
     return YES;
@@ -688,14 +727,17 @@ NIMEventSubscribeManagerDelegate>
     [self.navigationController pushViewController:vc animated:YES];
 }
 
-- (void)enterRobotInfoCard:(id)sender{
-    NTESRobotCardViewController *vc = [[NTESRobotCardViewController alloc] initWithUserId:self.session.sessionId];
-    [self.navigationController pushViewController:vc animated:YES];
-}
-
 - (void)enterHistory:(id)sender{
     [self.view endEditing:YES];
-    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"选择操作" delegate:nil cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"云消息记录",@"搜索本地消息记录",@"清空本地聊天记录", nil];
+    
+    UIActionSheet *sheet = nil;
+    if (self.session.sessionType == NIMSessionTypeP2P)
+    {
+        sheet = [[UIActionSheet alloc] initWithTitle:@"选择操作" delegate:nil cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"云消息记录",@"搜索本地消息记录",@"清空本地聊天记录",@"清空点对点历史消息" ,nil];
+    } else {
+        sheet = [[UIActionSheet alloc] initWithTitle:@"选择操作" delegate:nil cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"云消息记录",@"搜索本地消息记录",@"清空本地聊天记录",@"获取群成员邀请人",nil];
+    }
+    
     [sheet showInView:self.view completionHandler:^(NSInteger index) {
         switch (index) {
             case 0:{ //查看云端消息
@@ -724,6 +766,61 @@ NIMEventSubscribeManagerDelegate>
                 }];
                 break;
             }
+            case 3: { // 清空点对点历史消息
+                if (self.session.sessionType == NIMSessionTypeTeam)
+                {
+                    //获取自己id
+                    NSString *currentUserId = [[NIMSDK sharedSDK].loginManager currentAccount];
+                    NIMContactTeamMemberSelectConfig *config = [[NIMContactTeamMemberSelectConfig alloc] init];
+                    config.teamId = self.session.sessionId;
+                    config.filterIds = @[currentUserId];
+                    config.needMutiSelected = YES;
+                    config.maxSelectMemberCount = 200;
+                    config.showSelectDetail = YES;
+
+                    
+                    NIMContactSelectViewController *vc = [[NIMContactSelectViewController alloc] initWithConfig:config];
+                    vc.delegate = self;
+                    [vc show];
+                    break;
+                }
+                
+                UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"确定清空自己点对点历史消息？" delegate:nil cancelButtonTitle:@"取消" destructiveButtonTitle:@"确定" otherButtonTitles:@"确认但保留漫游", nil];
+                [sheet showInView:self.view completionHandler:^(NSInteger index)
+                {
+
+                    NIMClearMessagesOption *option = nil;
+                    if (index == 2)
+                    {
+                        return;
+                    }
+                    
+                    if (index == 1)
+                    {
+                        option = [[NIMClearMessagesOption alloc] init];
+                        option.removeRoam = NO;
+                    }
+                    {
+                        BOOL removeRecentSession = [NTESBundleSetting sharedConfig].removeSessionWhenDeleteMessages;
+                        BOOL removeTable = [NTESBundleSetting sharedConfig].dropTableWhenDeleteMessages;
+                        NIMDeleteMessagesOption *option = [[NIMDeleteMessagesOption alloc] init];
+                        option.removeSession = removeRecentSession;
+                        option.removeTable = removeTable;
+                        [[NIMSDK sharedSDK].conversationManager deleteAllmessagesInSession:self.session
+                                                                                    option:option];
+                    }
+
+                    [[NIMSDK sharedSDK].conversationManager deleteSelfRemoteSession:self.session
+                                                                                option:option
+                                                                         completion:^(NSError * _Nullable error)
+                    {
+                                                                             
+                        
+                    }];
+                }];
+                
+            }
+                break;
             default:
                 break;
         }
@@ -733,10 +830,16 @@ NIMEventSubscribeManagerDelegate>
 - (void)enterTeamCard:(id)sender{
     NIMTeam *team = [[NIMSDK sharedSDK].teamManager teamById:self.session.sessionId];
     UIViewController *vc;
+    NIMRecentSession *recent = [[NIMSDK sharedSDK].conversationManager recentSessionBySession:self.session];
+    BOOL isTop = [NTESSessionUtil recentSessionIsMark:recent type:NTESRecentSessionMarkTypeTop];
     if (team.type == NIMTeamTypeNormal) {
-        vc = [[NIMNormalTeamCardViewController alloc] initWithTeam:team];
+        vc = [[NIMNormalTeamCardViewController alloc] initWithTeam:team
+                                                          exConfig:@{kNIMNormalTeamCardConfigTopKey:@(isTop)}];
+        ((NIMNormalTeamCardViewController *)vc).delegate = self;
     }else if(team.type == NIMTeamTypeAdvanced){
-        vc = [[NIMAdvancedTeamCardViewController alloc] initWithTeam:team];
+        vc = [[NIMAdvancedTeamCardViewController alloc] initWithTeam:team
+                                                            exConfig:@{kNIMAdvancedTeamCardConfigTopKey:@(isTop)}];
+        ((NIMAdvancedTeamCardViewController *)vc).delegate = self;
     }
     [self.navigationController pushViewController:vc animated:YES];
 }
@@ -762,8 +865,18 @@ NIMEventSubscribeManagerDelegate>
         [items addObject:[[UIMenuItem alloc] initWithTitle:@"转文字" action:@selector(audio2Text:)]];
     }
     
+    if ([NTESSessionUtil canMessageBeCanceled:message]) {
+        [items addObject:[[UIMenuItem alloc] initWithTitle:@"取消上传" action:@selector(cancelMessage:)]];
+    }
+    
     return items;
     
+}
+
+- (void)cancelMessage:(id)sender {
+    NIMMessage *message = [self messageForMenu];
+
+    [[NIMSDK sharedSDK].chatManager cancelSendingMessage:message];
 }
 
 - (void)audio2Text:(id)sender
@@ -823,7 +936,12 @@ NIMEventSubscribeManagerDelegate>
 - (void)revokeMessage:(id)sender
 {
     NIMMessage *message = [self messageForMenu];
+    // 如果需要撤回的时候能附带 apns 通知，可以填上 apnsContent 和 apnsPayload 字段
+    message.apnsContent = nil;
+    message.apnsPayload = nil;
+    
     __weak typeof(self) weakSelf = self;
+    //
     [[NIMSDK sharedSDK].chatManager revokeMessage:message completion:^(NSError * _Nullable error) {
         if (error) {
             if (error.code == NIMRemoteErrorCodeDomainExpireOld) {
@@ -963,14 +1081,6 @@ NIMEventSubscribeManagerDelegate>
     [historyBtn setImage:[UIImage imageNamed:@"icon_history_pressed"] forState:UIControlStateHighlighted];
     [historyBtn sizeToFit];
     UIBarButtonItem *historyButtonItem = [[UIBarButtonItem alloc] initWithCustomView:historyBtn];
-    
-    
-    UIButton *robotInfoBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [robotInfoBtn addTarget:self action:@selector(enterRobotInfoCard:) forControlEvents:UIControlEventTouchUpInside];
-    [robotInfoBtn setImage:[UIImage imageNamed:@"icon_robot_card_normal"] forState:UIControlStateNormal];
-    [robotInfoBtn setImage:[UIImage imageNamed:@"icon_robot_card_pressed"] forState:UIControlStateHighlighted];
-    [robotInfoBtn sizeToFit];
-    UIBarButtonItem *robotInfoButtonItem = [[UIBarButtonItem alloc] initWithCustomView:robotInfoBtn];
 
     
     if (self.session.sessionType == NIMSessionTypeTeam)
@@ -982,10 +1092,6 @@ NIMEventSubscribeManagerDelegate>
         if ([self.session.sessionId isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]])
         {
             self.navigationItem.rightBarButtonItems = @[historyButtonItem];
-        }
-        else if([[NIMSDK sharedSDK].robotManager isValidRobot:self.session.sessionId])
-        {
-            self.navigationItem.rightBarButtonItems = @[historyButtonItem,robotInfoButtonItem];
         }
         else
         {

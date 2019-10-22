@@ -50,6 +50,16 @@
 
 @implementation NTESNetChatViewController
 
+
+#pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
+// 发起通话
+- (void)processVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
+}
+// 接听通话
+- (void)responVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
+}
+#pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
+
 NTES_FORBID_INTERACTIVE_POP
 
 - (instancetype)initWithCallee:(NSString *)callee{
@@ -110,6 +120,7 @@ NTES_FORBID_INTERACTIVE_POP
             [wself dismiss:nil];
         }
     }];
+
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -171,16 +182,6 @@ NTES_FORBID_INTERACTIVE_POP
     }
 }
 
-
-#pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
-// 发起通话
-- (void)processVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
-}
-// 接听通话
-- (void)responVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
-}
-#pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
-
 - (void)doStartByCaller
 {
     self.callInfo.isStart = YES;
@@ -193,14 +194,15 @@ NTES_FORBID_INTERACTIVE_POP
     [self fillUserSetting:option];
     
     option.videoCaptureParam.startWithCameraOn = (self.callInfo.callType == NIMNetCallTypeVideo);
+
+    __weak typeof(self) wself = self;
     
 #pragma mark /**---- FaceUnity 获取视频数据 ----**/
-    __weak typeof(self) wself = self;
     option.videoCaptureParam.videoHandler = ^(CMSampleBufferRef  _Nonnull sampleBuffer) {
         [wself processVideoCallWithBuffer:sampleBuffer ];
     };
 #pragma mark /**---- FaceUnity 获取视频数据 ----**/
-    
+
     [[NIMAVChatSDK sharedSDK].netCallManager start:callees type:wself.callInfo.callType option:option completion:^(NSError *error, UInt64 callID) {
         if (!error && wself) {
             wself.callInfo.callID = callID;
@@ -262,11 +264,6 @@ NTES_FORBID_INTERACTIVE_POP
     [self fillUserSetting:option];
     
     __weak typeof(self) wself = self;
-#pragma mark /**---- FaceUnity 获取视频数据 ----**/
-    option.videoCaptureParam.videoHandler = ^(CMSampleBufferRef  _Nonnull sampleBuffer) {
-        [wself responVideoCallWithBuffer:sampleBuffer ];
-    };
-#pragma mark /**---- FaceUnity 获取视频数据 ----**/
 
     [[NIMAVChatSDK sharedSDK].netCallManager response:self.callInfo.callID accept:accept option:option completion:^(NSError *error, UInt64 callID) {
         if (!error) {
@@ -344,10 +341,14 @@ NTES_FORBID_INTERACTIVE_POP
     NSURL *filePath = [[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject] URLByAppendingPathComponent:pathComponent];
     
     BOOL startAccepted;
-    startAccepted = [[NIMAVChatSDK sharedSDK].netCallManager startRecording:filePath
-                                                               videoBitrate:(UInt32)[[NTESBundleSetting sharedConfig] localRecordVideoKbps] * 1000
-                                                                        uid:[[NIMSDK sharedSDK].loginManager currentAccount]
-];
+    NIMNetCallMP4RecordOption *option = [[NIMNetCallMP4RecordOption alloc] init];
+    option.videoBitrate = (UInt32)[[NTESBundleSetting sharedConfig] localRecordVideoKbps] * 1000;
+    option.videoQuality = (NIMNetCallVideoQuality)[[NTESBundleSetting sharedConfig] localRecordVideoQuality];
+    
+    startAccepted = [[NIMAVChatSDK sharedSDK].netCallManager
+                                                startRecording:filePath
+                                                        option:option
+                     uid:[[NIMSDK sharedSDK].loginManager currentAccount]];
     return startAccepted;
 }
 
@@ -765,6 +766,39 @@ NTES_FORBID_INTERACTIVE_POP
 
 #pragma mark - Misc
 - (void)checkServiceEnable:(void(^)(BOOL))result{
+    AVAuthorizationStatus audioStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
+    AVAuthorizationStatus videoStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    
+    if (videoStatus == AVAuthorizationStatusRestricted
+        || videoStatus == AVAuthorizationStatusDenied) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"相机权限受限,无法视频聊天"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"确定"
+                                              otherButtonTitles:nil];
+        [alert showAlertWithCompletionHandler:^(NSInteger idx) {
+            if (result) {
+                result(NO);
+            }
+        }];
+        return;
+    }
+    
+    if (audioStatus == AVAuthorizationStatusRestricted
+        || audioStatus == AVAuthorizationStatusDenied ) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"麦克风权限受限,无法聊天"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"确定"
+                                              otherButtonTitles:nil];
+        [alert showAlertWithCompletionHandler:^(NSInteger idx) {
+            if (result) {
+                result(NO);
+            }
+        }];
+        return;
+    }
+    
     if ([[AVAudioSession sharedInstance] respondsToSelector:@selector(requestRecordPermission:)]) {
         [[AVAudioSession sharedInstance] performSelector:@selector(requestRecordPermission:) withObject:^(BOOL granted) {
             dispatch_async_main_safe(^{
@@ -800,9 +834,15 @@ NTES_FORBID_INTERACTIVE_POP
                         }
                     }];
                 }
-
+                
             });
         }];
+    } else {
+        dispatch_async_main_safe(^{
+            if (result) {
+                result(NO);
+            }
+        });
     }
 }
 
@@ -903,15 +943,28 @@ NTES_FORBID_INTERACTIVE_POP
 - (void)fillUserSetting:(NIMNetCallOption *)option
 {
     option.autoRotateRemoteVideo = [[NTESBundleSetting sharedConfig] videochatAutoRotateRemoteVideo];
-    option.serverRecordAudio     = [[NTESBundleSetting sharedConfig] serverRecordAudio];
-    option.serverRecordVideo     = [[NTESBundleSetting sharedConfig] serverRecordVideo];
+
+    NIMNetCallServerRecord *serverRecord = [[NIMNetCallServerRecord alloc] init];
+    serverRecord.enableServerAudioRecording     = [[NTESBundleSetting sharedConfig] serverRecordAudio];
+    serverRecord.enableServerVideoRecording     = [[NTESBundleSetting sharedConfig] serverRecordVideo];
+    serverRecord.enableServerHostRecording      = [[NTESBundleSetting sharedConfig] serverRecordHost];
+    serverRecord.serverRecordingMode            = [[NTESBundleSetting sharedConfig] serverRecordMode];
+    option.serverRecord = serverRecord;
+    
+    NIMNetCallSocksParam *socks5Info =  [[NIMNetCallSocksParam alloc] init];
+    socks5Info.useSocks5Proxy    =  [[NTESBundleSetting sharedConfig] useSocks];
+    socks5Info.socks5Addr        =  [[NTESBundleSetting sharedConfig] socks5Addr];
+    socks5Info.socks5Username    =  [[NTESBundleSetting sharedConfig] socksUsername];
+    socks5Info.socks5Password    =  [[NTESBundleSetting sharedConfig] socksPassword];
+    socks5Info.socks5Type        =  [[NTESBundleSetting sharedConfig] socks5Type];
+    [[NIMAVChatSDK sharedSDK].netCallManager setUpNetCallSocksWithParam:socks5Info];
+    
     option.preferredVideoEncoder = [[NTESBundleSetting sharedConfig] perferredVideoEncoder];
     option.preferredVideoDecoder = [[NTESBundleSetting sharedConfig] perferredVideoDecoder];
     option.videoMaxEncodeBitrate = [[NTESBundleSetting sharedConfig] videoMaxEncodeKbps] * 1000;
     option.autoDeactivateAudioSession = [[NTESBundleSetting sharedConfig] autoDeactivateAudioSession];
     option.audioDenoise = [[NTESBundleSetting sharedConfig] audioDenoise];
     option.voiceDetect = [[NTESBundleSetting sharedConfig] voiceDetect];
-    option.audioHowlingSuppress = [[NTESBundleSetting sharedConfig] audioHowlingSuppress];
     option.preferHDAudio =  [[NTESBundleSetting sharedConfig] preferHDAudio];
     option.scene = [[NTESBundleSetting sharedConfig] scene];
     
