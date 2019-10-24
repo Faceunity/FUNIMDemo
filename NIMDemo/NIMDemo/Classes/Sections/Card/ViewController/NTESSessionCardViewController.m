@@ -16,6 +16,7 @@
 #import "NIMContactSelectConfig.h"
 #import "NIMContactSelectViewController.h"
 #import "NTESSessionViewController.h"
+#import "NTESSessionUtil.h"
 
 @interface NTESSessionCardViewController ()<NIMMemberGroupViewDelegate,NIMContactSelectDelegate>
 
@@ -66,6 +67,8 @@
 
 - (void)buildData{
     BOOL needNotify    = [[NIMSDK sharedSDK].userManager notifyForNewMsg:self.session.sessionId];
+    NIMRecentSession *recent = [[NIMSDK sharedSDK].conversationManager recentSessionBySession:self.session];
+    BOOL isTop = [NTESSessionUtil recentSessionIsMark:recent type:NTESRecentSessionMarkTypeTop];
     NSArray *data = @[
                       @{
                           HeaderTitle:@"",
@@ -78,6 +81,14 @@
                                       ExtraInfo     : @(needNotify),
                                       ForbidSelect  : @(YES)
                                       },
+                                  @{
+                                      Title         : @"聊天置顶",
+                                      CellClass     : @"NTESSettingSwitcherCell",
+                                      RowHeight     : @(50),
+                                      CellAction    : @"onActionNeedTopValueChange:",
+                                      ExtraInfo     : @(isTop),
+                                      ForbidSelect  : @(YES)
+                                      }
                                   ],
                           },
                       ];
@@ -109,6 +120,20 @@
     }];
 }
 
+- (void)onActionNeedTopValueChange:(id)sender {
+    UISwitch *switcher = sender;
+    NIMRecentSession *recent = [[NIMSDK sharedSDK].conversationManager recentSessionBySession:_session];
+    if (switcher.isOn) {
+        if (!recent) {
+            [[NIMSDK sharedSDK].conversationManager addEmptyRecentSessionBySession:_session];
+        }
+        [NTESSessionUtil addRecentSessionMark:_session type:NTESRecentSessionMarkTypeTop];
+    } else {
+        if (recent) {
+            [NTESSessionUtil removeRecentSessionMark:_session type:NTESRecentSessionMarkTypeTop];
+        } else {}
+    }
+}
 
 - (void)didSelectOperator:(NIMKitCardHeaderOpeator )opera{
     if (opera == CardHeaderOpeatorAdd) {

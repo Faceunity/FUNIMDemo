@@ -98,10 +98,10 @@
 
 -(void)onTouchUpInside:(id)sender
 {
-    if ([self.model.message attachmentDownloadState]== NIMMessageAttachmentDownloadStateFailed) {
-        if (self.audioUIDelegate && [self.audioUIDelegate respondsToSelector:@selector(retryDownloadMsg)]) {
-            [self.audioUIDelegate retryDownloadMsg];
-        }
+    if ([self.model.message attachmentDownloadState]== NIMMessageAttachmentDownloadStateFailed
+        || [self.model.message attachmentDownloadState] == NIMMessageAttachmentDownloadStateNeedDownload) {
+        [[[NIMSDK sharedSDK] chatManager] fetchMessageAttachment:self.model.message
+                                                           error:nil];
         return;
     }
     if ([self.model.message attachmentDownloadState] == NIMMessageAttachmentDownloadStateDownloaded) {

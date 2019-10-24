@@ -7,6 +7,8 @@
 //
 
 #import "NTESFileTransSelectViewController.h"
+#import <SVProgressHUD/SVProgressHUD.h>
+
 #define FileName @"fileName"
 #define FileExt  @"fileExt"
 
@@ -17,6 +19,10 @@
 @end
 
 @implementation NTESFileTransSelectViewController
+
+- (void)dealloc {
+    [SVProgressHUD dismiss];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -29,10 +35,14 @@
 #pragma mark - UITableViewDelegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    [self.navigationController popViewControllerAnimated:YES];
     NSString *filePath = self.data[indexPath.row];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD showWithStatus:@"加载中"];
+    
     if (self.completionBlock) {
-        if (indexPath.row % 2 == 0) {
+        unsigned long long fileSize = [self fileSizeWithPath:filePath];
+        if(fileSize > 200 * 1024 * 1024) {
             self.completionBlock(filePath,filePath.pathExtension);
             self.completionBlock = nil;
         }else{
@@ -40,6 +50,8 @@
             self.completionBlock(data,filePath.pathExtension);
             self.completionBlock = nil;
         }
+    }else {
+        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 
@@ -61,6 +73,22 @@
     return cell;
 }
 
+
+- (unsigned long long)fileSizeWithPath:(NSString *)filepath
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    unsigned long long fileSize = 0;
+    if ([filepath length]  && [fileManager fileExistsAtPath:filepath])
+    {
+        NSDictionary *attributes = [fileManager attributesOfItemAtPath:filepath
+                                                          error:nil];
+        id item = [attributes objectForKey:NSFileSize];
+        fileSize = [item isKindOfClass:[NSNumber class]] ? [item unsignedLongLongValue] : 0;
+    }
+    return fileSize;
+    
+    
+}
 
 
 

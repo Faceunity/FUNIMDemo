@@ -108,6 +108,8 @@ static const NSTimeInterval SendCmdIntervalSeconds = 0.06;
     [manager addDelegate:self];
     [self updateButton];
     
+    [[NIMAVChatSDK sharedSDK].rtsManager setUpGlobalSocksWithParam:[self globalSocksSetting]];
+    
     NIMKitInfo *info = [[NIMKit sharedKit] infoByUser:_peerID option:nil];
     NSURL *avatarURL;
     if (info.avatarUrlString.length) {
@@ -321,7 +323,7 @@ static const NSTimeInterval SendCmdIntervalSeconds = 0.06;
             continue;
         }
         NSArray *cmd = [cmdString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@":,"]];
-        NSAssert(cmd.count == 3, @"Invalid cmd");
+        NSAssert(cmd.count >= 3, @"Invalid cmd");
         
         NSInteger c = [cmd[0] integerValue];
         NSArray *point = [NSArray arrayWithObjects:
@@ -454,7 +456,7 @@ static const NSTimeInterval SendCmdIntervalSeconds = 0.06;
 {
     NIMRTSOption *option = [[NIMRTSOption alloc] init];    
     [self fillUserSetting:option];
-
+    
     __weak typeof(self) wself = self;
     [[NIMAVChatSDK sharedSDK].rtsManager responseRTS:_sessionID
                                         accept:accepted
@@ -639,9 +641,11 @@ static const NSTimeInterval SendCmdIntervalSeconds = 0.06;
 
 - (void)sendMessage:(NIMMessage *)message
 {
+    NSError *error;
     [[[NIMSDK sharedSDK] chatManager] sendMessage:message
                                         toSession:[NIMSession session:_peerID type:NIMSessionTypeP2P]
-                                            error:nil];
+                                            error:&error];
+    NSLog(@"%s %@",__func__, error);
 }
 
 //发送纯命令, 不带参数
@@ -668,10 +672,19 @@ static const NSTimeInterval SendCmdIntervalSeconds = 0.06;
     option.autoDeactivateAudioSession = [[NTESBundleSetting sharedConfig] autoDeactivateAudioSession];
     option.audioDenoise = [[NTESBundleSetting sharedConfig] audioDenoise];
     option.voiceDetect = [[NTESBundleSetting sharedConfig] voiceDetect];
-    option.audioHowlingSuppress = [[NTESBundleSetting sharedConfig] audioHowlingSuppress];
     option.preferHDAudio =  [[NTESBundleSetting sharedConfig] preferHDAudio];
     option.scene = [[NTESBundleSetting sharedConfig] scene];
 }
 
+- (NIMRTSSocksParam *)globalSocksSetting
+{
+    NIMRTSSocksParam *socksParam = [[NIMRTSSocksParam alloc] init];
+    socksParam.enableProxy   = [[NTESBundleSetting sharedConfig] useRTSSocks];
+    socksParam.socksUsername = [[NTESBundleSetting sharedConfig] socksRTSUsername];
+    socksParam.socksPassword = [[NTESBundleSetting sharedConfig] socksRTSPassword];
+    socksParam.socksAddr = [[NTESBundleSetting sharedConfig] socks5RTSAddr];
+    socksParam.socksType = [[NTESBundleSetting sharedConfig] socks5RTSType];
+    return socksParam;
+}
 
 @end

@@ -20,6 +20,7 @@
 @property (nonatomic,copy)    NSString    *apnsCername;
 @property (nonatomic,copy)    NSString    *pkCername;
 @property (nonatomic,strong)  NTESRedPacketConfig *redPacketConfig;
+@property (nonatomic,copy)    NSString    *chatroomListURL;
 
 - (void)registerConfig:(NSDictionary *)config;
 @end

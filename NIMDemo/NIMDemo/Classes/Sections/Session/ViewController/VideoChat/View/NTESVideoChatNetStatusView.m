@@ -55,19 +55,13 @@
     self.statusImageView.hidden = NO;
     NSString *netState;
     switch (status) {
-        case NIMNetCallNetStatusVeryGood:
-            netState = @"网络通畅:";
-            break;
         case NIMNetCallNetStatusGood:
-            netState = @"网络正常:";
+            netState = @"网络通畅:";
             break;
         case NIMNetCallNetStatusPoor:
             netState = @"网络一般:";
             break;
         case NIMNetCallNetStatusBad:
-            netState = @"网络较差:";
-            break;
-        case NIMNetCallNetStatusVeryBad:
             netState = @"网络很差:";
             break;
         default:

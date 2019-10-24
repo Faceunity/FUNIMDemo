@@ -24,7 +24,9 @@
 
 double OnedayTimeIntervalValue = 24*60*60;  //一天的秒数
 
-static NSString *const NTESRecentSessionAtMark = @"NTESRecentSessionAtMark";
+static NSString *const NTESRecentSessionAtMark  = @"NTESRecentSessionAtMark";
+static NSString *const NTESRecentSessionTopMark = @"NTESRecentSessionTopMark";
+
 
 @implementation NTESSessionUtil
 
@@ -231,58 +233,70 @@ static NSString *const NTESRecentSessionAtMark = @"NTESRecentSessionAtMark";
 }
 
 
-+ (NSString *)tipOnMessageRevoked:(NIMRevokeMessageNotification *)notificaton
++ (NSString *)tipOnMessageRevoked:(NIMRevokeMessageNotification *)notification
 {
-    NSString *fromUid = nil;
-    NIMSession *session = nil;
     NSString *tip = @"";
-    BOOL isFromMe = NO;
-    if([notificaton isKindOfClass:[NIMRevokeMessageNotification class]])
-    {
-        fromUid = [notificaton fromUserId];
-        session = [notificaton session];
-        isFromMe = [fromUid isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
-
-    }
-    else if(!notificaton)
-    {
-        isFromMe = YES;
-    }
-    else
-    {
-        assert(0);
-    }
-    if (isFromMe)
-    {
-        tip = @"你";
-    }
-    else{
-        switch (session.sessionType) {
-            case NIMSessionTypeP2P:
-                tip = @"对方";
-                break;
-            case NIMSessionTypeTeam:{
-                NIMTeam *team = [[NIMSDK sharedSDK].teamManager teamById:session.sessionId];
-                NIMTeamMember *member = [[NIMSDK sharedSDK].teamManager teamMember:fromUid inTeam:session.sessionId];
-                if ([fromUid isEqualToString:team.owner])
-                {
-                    tip = @"群主";
-                }
-                else if(member.type == NIMTeamMemberTypeManager)
-                {
-                    tip = @"管理员";
-                }
-                NIMKitInfoFetchOption *option = [[NIMKitInfoFetchOption alloc] init];
-                option.session = session;
-                NIMKitInfo *info = [[NIMKit sharedKit] infoByUser:fromUid option:option];
-                tip = [tip stringByAppendingString:info.showName];
-            }
-                break;
-            default:
-                break;
+    do {
+        if (!notification || ![notification isKindOfClass:[NIMRevokeMessageNotification class]]) {
+            tip = @"你";
+            break;
         }
-    }
-    return [NSString stringWithFormat:@"%@撤回了一条消息",tip];
+        //
+        NIMSession *session = notification.session;
+        if (session.sessionType == NIMSessionTypeTeam) {
+            tip = [self tipTitleFromMessageRevokeNotificationTeam:notification];
+            break;
+        }
+        //
+        tip = [self tipTitleFromMessageRevokeNotificationP2P:notification];
+    } while (false);
+    
+    return [NSString stringWithFormat:@"%@撤回了一条消息", tip];
+}
+
++ (NSString *)tipTitleFromMessageRevokeNotificationP2P:(NIMRevokeMessageNotification *)notification {
+    NSString *fromUid = notification.messageFromUserId;
+    BOOL fromMe = [fromUid isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
+    return fromMe ? @"你" : @"对方";
+}
+
++ (NSString *)tipTitleFromMessageRevokeNotificationTeam:(NIMRevokeMessageNotification *)notification {
+    NSString *tipTitle = @"";
+    
+    do {
+        NSString *fromUid = notification.messageFromUserId;
+        NSString *operatorUid = notification.fromUserId;
+        BOOL revokeBySender = !operatorUid || [operatorUid isEqualToString:fromUid];
+        BOOL fromMe = [fromUid isEqualToString:[[NIMSDK sharedSDK].loginManager currentAccount]];
+        
+        // 自己撤回自己的
+        if (revokeBySender && fromMe) {
+            tipTitle = @"你";
+            break;
+        }
+        
+        NIMSession *session = notification.session;
+        NIMKitInfoFetchOption *option = [[NIMKitInfoFetchOption alloc] init];
+        option.session = session;
+        NIMKitInfo *info = [[NIMKit sharedKit] infoByUser:(revokeBySender ? fromUid : operatorUid) option:option];
+        
+        // 别人撤回自己的
+        if (revokeBySender) {
+            tipTitle = info.showName;
+            break;
+        }
+        
+        NIMTeamMember *member = [[NIMSDK sharedSDK].teamManager teamMember:operatorUid inTeam:session.sessionId];
+        // 被群主/管理员撤回的
+        if (member.type == NIMTeamMemberTypeOwner) {
+            tipTitle = [@"群主" stringByAppendingString:info.showName];
+        }
+        else if (member.type == NIMTeamMemberTypeManager) {
+            tipTitle = [@"管理员" stringByAppendingString:info.showName];
+        }
+    } while (false);
+    
+    return tipTitle;
 }
 
 
@@ -330,6 +344,12 @@ static NSString *const NTESRecentSessionAtMark = @"NTESRecentSessionAtMark";
     return YES;
 }
 
++ (BOOL)canMessageBeCanceled:(NIMMessage *)message
+{
+    return [self canMessageBeRevoked:message] &&
+    message.deliveryState == NIMMessageDeliveryStateDelivering;
+}
+
 
 + (BOOL)canRevokeMessageByRole:(NIMMessage *)message
 {
@@ -348,43 +368,57 @@ static NSString *const NTESRecentSessionAtMark = @"NTESRecentSessionAtMark";
         NIMRobotObject *robotObject = (NIMRobotObject *)messageObject;
         isRobotMessage = robotObject.isFromRobot;
     }
-    //我发出去的消息并且不是发给我的电脑的消息并且不是机器人的消息，可以撤回
+    //我发出去的消息并且不是发给我的电脑的消息，可以撤回
     //群消息里如果我是管理员可以撤回以上所有消息
     return (isFromMe && !isToMe && !isRobotMessage) || isTeamManager;
 }
 
 
-+ (void)addRecentSessionAtMark:(NIMSession *)session
++ (void)addRecentSessionMark:(NIMSession *)session type:(NTESRecentSessionMarkType)type
 {
     NIMRecentSession *recent = [[NIMSDK sharedSDK].conversationManager recentSessionBySession:session];
     if (recent)
     {
         NSDictionary *localExt = recent.localExt?:@{};
         NSMutableDictionary *dict = [localExt mutableCopy];
-        [dict setObject:@(YES) forKey:NTESRecentSessionAtMark];
+        NSString *key = [NTESSessionUtil keyForMarkType:type];
+        [dict setObject:@(YES) forKey:key];
         [[NIMSDK sharedSDK].conversationManager updateRecentLocalExt:dict recentSession:recent];
     }
 
 
 }
 
-+ (void)removeRecentSessionAtMark:(NIMSession *)session
++ (void)removeRecentSessionMark:(NIMSession *)session type:(NTESRecentSessionMarkType)type
 {
     NIMRecentSession *recent = [[NIMSDK sharedSDK].conversationManager recentSessionBySession:session];
     if (recent) {
         NSMutableDictionary *localExt = [recent.localExt mutableCopy];
-        [localExt removeObjectForKey:NTESRecentSessionAtMark];
+        NSString *key = [NTESSessionUtil keyForMarkType:type];
+        [localExt removeObjectForKey:key];
         [[NIMSDK sharedSDK].conversationManager updateRecentLocalExt:localExt recentSession:recent];
     }
 }
 
-+ (BOOL)recentSessionIsAtMark:(NIMRecentSession *)recent
++ (BOOL)recentSessionIsMark:(NIMRecentSession *)recent type:(NTESRecentSessionMarkType)type
 {
     NSDictionary *localExt = recent.localExt;
-    return [localExt[NTESRecentSessionAtMark] boolValue] == YES;
+    NSString *key = [NTESSessionUtil keyForMarkType:type];
+    return [localExt[key] boolValue] == YES;
 }
 
-
++ (NSString *)keyForMarkType:(NTESRecentSessionMarkType)type
+{
+    static NSDictionary *keys;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        keys = @{
+                 @(NTESRecentSessionMarkTypeAt)  : NTESRecentSessionAtMark,
+                 @(NTESRecentSessionMarkTypeTop) : NTESRecentSessionTopMark
+                 };
+    });
+    return [keys objectForKey:@(type)];
+}
 
 + (NSString *)onlineState:(NSString *)userId detail:(BOOL)detail
 {
@@ -393,9 +427,6 @@ static NSString *const NTESRecentSessionAtMark = @"NTESRecentSessionAtMark";
     {
         //没有开启订阅服务或是自己  不显示在线状态
         return state;
-    }
-    if ([[NIMSDK sharedSDK].robotManager isValidRobot:userId]) {
-        return @"在线";
     }
     
     NSDictionary *dict = [[NTESSubscribeManager sharedManager] eventsForType:NIMSubscribeSystemEventTypeOnline];

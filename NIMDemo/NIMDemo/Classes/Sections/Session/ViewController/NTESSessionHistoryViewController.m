@@ -15,7 +15,6 @@
 #import "NIMNormalTeamCardViewController.h"
 #import "NIMAdvancedTeamCardViewController.h"
 #import "NTESSessionCardViewController.h"
-#import "NTESRobotCardViewController.h"
 #import "UIScrollView+NTESDirection.h"
 
 #pragma mark - sessionConfig
@@ -65,7 +64,6 @@
 - (BOOL)autoFetchWhenOpenSession {
     return YES;
 }
-
 
 @end
 
@@ -231,11 +229,6 @@
 
 - (void)enterPersonInfoCard:(id)sender{
     NTESSessionCardViewController *vc = [[NTESSessionCardViewController alloc] initWithSession:self.session];
-    [self.navigationController pushViewController:vc animated:YES];
-}
-
-- (void)enterRobotInfoCard:(id)sender{
-    NTESRobotCardViewController *vc = [[NTESRobotCardViewController alloc] initWithUserId:self.session.sessionId];
     [self.navigationController pushViewController:vc animated:YES];
 }
 

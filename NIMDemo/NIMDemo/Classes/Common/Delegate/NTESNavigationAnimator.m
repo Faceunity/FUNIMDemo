@@ -9,8 +9,42 @@
 #import "NTESNavigationAnimator.h"
 #import "UIView+NTES.h"
 #import "NTESMainTabController.h"
+#import <objc/runtime.h>
 
 @implementation NTESNavigationAnimator
+CG_INLINE BOOL
+OverrideImplementation(Class targetClass, SEL targetSelector, id (^implementationBlock)(Class originClass, SEL originCMD, IMP originIMP)) {
+    Method originMethod = class_getInstanceMethod(targetClass, targetSelector);
+    if (!originMethod) {
+        return NO;
+    }
+    IMP originIMP = method_getImplementation(originMethod);
+    method_setImplementation(originMethod, imp_implementationWithBlock(implementationBlock(targetClass, targetSelector, originIMP)));
+    return YES;
+}
+
++ (void)load
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        if (@available(iOS 12.1, *)) { // 解决12.1 的UITabbar 位置显示异常
+            OverrideImplementation(NSClassFromString(@"UITabBarButton"), @selector(setFrame:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP originIMP) {
+                return ^(UIView *selfObject, CGRect firstArgv) {
+                    
+                    if ([selfObject isKindOfClass:originClass]) {
+                        if (!CGRectIsEmpty(selfObject.frame) && CGRectIsEmpty(firstArgv)) {
+                            return;
+                        }
+                    }
+                    
+                    void (*originSelectorIMP)(id, SEL, CGRect);
+                    originSelectorIMP = (void (*)(id, SEL, CGRect))originIMP;
+                    originSelectorIMP(selfObject, originCMD, firstArgv);
+                };
+            });
+        }
+    });
+}
 
 - (instancetype)initWithNavigationController:(UINavigationController *)navigationController
 {
@@ -92,7 +126,7 @@
     CGFloat snapshootHeight = [UIApplication sharedApplication].statusBarFrame.size.height + fromViewController.navigationController.navigationBar.height;
     
     UIView          *fakeBar = [fromViewController.navigationController.view
-                        resizableSnapshotViewFromRect:CGRectMake(0, 0,fromViewController.view.width, snapshootHeight) afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
+                                resizableSnapshotViewFromRect:CGRectMake(0, 0,fromViewController.view.width, snapshootHeight) afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
     UINavigationBar *tureBar = toViewController.navigationController.navigationBar;
     
     BOOL hidesBottomBar = toViewController.hidesBottomBarWhenPushed && self.navigationController.viewControllers.firstObject != toViewController;

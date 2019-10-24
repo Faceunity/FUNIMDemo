@@ -9,6 +9,14 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
+// 最近会话本地扩展标记类型
+typedef NS_ENUM(NSInteger, NTESRecentSessionMarkType){
+    // @ 标记
+    NTESRecentSessionMarkTypeAt,
+    // 置顶标记
+    NTESRecentSessionMarkTypeTop,
+};
+
 @interface NTESSessionUtil : NSObject
 
 + (CGSize)getImageSizeWithImageOriginSize:(CGSize)originSize
@@ -33,13 +41,17 @@
 
 + (BOOL)canMessageBeRevoked:(NIMMessage *)message;
 
++ (BOOL)canMessageBeCanceled:(NIMMessage *)message;
+
 + (NSString *)tipOnMessageRevoked:(NIMRevokeMessageNotification *)notificaton;
 
-+ (void)addRecentSessionAtMark:(NIMSession *)session;
++ (void)addRecentSessionMark:(NIMSession *)session type:(NTESRecentSessionMarkType)type;
 
-+ (void)removeRecentSessionAtMark:(NIMSession *)session;
++ (void)removeRecentSessionMark:(NIMSession *)session type:(NTESRecentSessionMarkType)type;
 
-+ (BOOL)recentSessionIsAtMark:(NIMRecentSession *)recent;
++ (BOOL)recentSessionIsMark:(NIMRecentSession *)recent type:(NTESRecentSessionMarkType)type;
+
+
 
 + (NSString *)onlineState:(NSString *)userId detail:(BOOL)detail;
 

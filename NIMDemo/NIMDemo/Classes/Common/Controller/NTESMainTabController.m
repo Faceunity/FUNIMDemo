@@ -191,8 +191,6 @@ typedef NS_ENUM(NSInteger,NTESMainTabType) {
     [self refreshSettingBadge];
 }
 
-
-
 - (void)refreshSessionBadge{
     UINavigationController *nav = self.viewControllers[NTESMainTabTypeMessageList];
     nav.tabBarItem.badgeValue = self.sessionUnreadCount ? @(self.sessionUnreadCount).stringValue : nil;

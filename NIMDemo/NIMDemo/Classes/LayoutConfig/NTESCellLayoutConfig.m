@@ -9,7 +9,6 @@
 #import "NTESCellLayoutConfig.h"
 #import "NTESSessionCustomContentConfig.h"
 #import "NTESChatroomTextContentConfig.h"
-#import "NTESChatroomRobotContentConfig.h"
 #import "NTESWhiteboardAttachment.h"
 #import "NTESRedPacketTipAttachment.h"
 
@@ -17,7 +16,6 @@
 @property (nonatomic,strong)    NSArray    *types;
 @property (nonatomic,strong)    NTESSessionCustomContentConfig  *sessionCustomconfig;
 @property (nonatomic,strong)    NTESChatroomTextContentConfig   *chatroomTextConfig;
-@property (nonatomic,strong)    NTESChatroomRobotContentConfig  *chatroomRobotConfig;
 @end
 
 @implementation NTESCellLayoutConfig
@@ -36,7 +34,6 @@
                    ];
         _sessionCustomconfig = [[NTESSessionCustomContentConfig alloc] init];
         _chatroomTextConfig  = [[NTESChatroomTextContentConfig alloc] init];
-        _chatroomRobotConfig = [[NTESChatroomRobotContentConfig alloc] init];
     }
     return self;
 }
@@ -54,12 +51,6 @@
     if ([self isChatroomTextMessage:message])
     {
         return [_chatroomTextConfig contentSize:width message:message];
-    }
-    
-    //检查是不是聊天室机器人消息
-    if ([self isChatroomRobotMessage:message])
-    {
-        return [_chatroomRobotConfig contentSize:width message:message];
     }
     
     //如果没有特殊需求，就走默认处理流程
@@ -81,12 +72,6 @@
         return [_chatroomTextConfig cellContent:message];
     }
     
-    //检查是不是聊天室机器人消息
-    if ([self isChatroomRobotMessage:message])
-    {
-        return [_chatroomRobotConfig cellContent:message];
-    }
-    
     //如果没有特殊需求，就走默认处理流程
     return [super cellContent:model];
 }
@@ -102,12 +87,6 @@
     //检查是不是聊天室文本消息
     if ([self isChatroomTextMessage:message]) {
         return [_chatroomTextConfig contentViewInsets:message];
-    }
-    
-    //检查是不是聊天室机器人消息
-    if ([self isChatroomRobotMessage:message])
-    {
-        return [_chatroomRobotConfig contentViewInsets:message];
     }
     
     //如果没有特殊需求，就走默认处理流程

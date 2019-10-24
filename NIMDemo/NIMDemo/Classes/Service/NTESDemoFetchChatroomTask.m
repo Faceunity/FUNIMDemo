@@ -14,7 +14,13 @@
 @implementation NTESDemoFetchChatroomTask
 - (NSURLRequest *)taskRequest
 {
-    NSString *urlString = [[[NTESDemoConfig sharedConfig] apiURL] stringByAppendingString:@"/chatroom/homeList"];
+    NSString *urlString = nil;
+    if([[NIMSDK sharedSDK] isUsingDemoAppKey]) {
+        urlString = [[[NTESDemoConfig sharedConfig] apiURL] stringByAppendingString:@"/chatroom/homeList"];
+    }else {
+        urlString = [NTESDemoConfig sharedConfig].chatroomListURL;
+    }
+    
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:urlString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30];
     [request setHTTPMethod:@"GET"];
     [request addValue:[NTESDemoConfig sharedConfig].appKey forHTTPHeaderField:@"appkey"];

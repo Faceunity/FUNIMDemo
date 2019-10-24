@@ -121,6 +121,10 @@
     return [[NTESBundleSetting sharedConfig] disableProximityMonitor];
 }
 
+- (BOOL)autoFetchAttachment {
+    return [[NTESBundleSetting sharedConfig] autoFetchAttachment];
+}
+
 - (BOOL)disableInputView{
     return YES;
 }

@@ -14,6 +14,7 @@
 #import "NTESWhiteboardAttachment.h"
 #import "NTESRedPacketAttachment.h"
 #import "NTESRedPacketTipAttachment.h"
+#import "NTESBundleSetting.h"
 
 @implementation NTESSessionMsgConverter
 
@@ -22,6 +23,11 @@
 {
     NIMMessage *textMessage = [[NIMMessage alloc] init];
     textMessage.text        = text;
+    textMessage.setting = [[NIMMessageSetting alloc] init];
+    textMessage.setting.apnsWithPrefix = [[NTESBundleSetting sharedConfig] enableAPNsPrefix];
+    textMessage.apnsMemberOption = [[NIMMessageApnsMemberOption alloc] init];
+    textMessage.apnsMemberOption.forcePush = [[NTESBundleSetting sharedConfig] enableTeamAPNsForce];
+    
     return textMessage;
 }
 
@@ -49,6 +55,12 @@
     NIMMessage *message     = [[NIMMessage alloc] init];
     message.messageObject   = imageObject;
     message.apnsContent = @"发来了一张图片";
+    NIMMessageSetting *setting = [[NIMMessageSetting alloc] init];
+    setting.scene = NIMNOSSceneTypeMessage;
+    message.setting = setting;
+    setting.apnsWithPrefix = [[NTESBundleSetting sharedConfig] enableAPNsPrefix];
+    message.apnsMemberOption = [[NIMMessageApnsMemberOption alloc] init];
+    message.apnsMemberOption.forcePush = [[NTESBundleSetting sharedConfig] enableTeamAPNsForce];
     return message;
 }
 
@@ -59,6 +71,9 @@
     NIMMessage *message = [[NIMMessage alloc] init];
     message.messageObject = audioObject;
     message.apnsContent = @"发来了一段语音";
+    NIMMessageSetting *setting = [[NIMMessageSetting alloc] init];
+    setting.scene = NIMNOSSceneTypeMessage;
+    message.setting = setting;
     return message;
 }
 
@@ -72,6 +87,9 @@
     NIMMessage *message = [[NIMMessage alloc] init];
     message.messageObject = videoObject;
     message.apnsContent = @"发来了一段视频";
+    NIMMessageSetting *setting = [[NIMMessageSetting alloc] init];
+    setting.scene = NIMNOSSceneTypeMessage;
+    message.setting = setting;
     return message;
 }
 
@@ -83,6 +101,10 @@
     customObject.attachment           = attachment;
     message.messageObject             = customObject;
     message.apnsContent = @"发来了猜拳信息";
+    message.setting = [[NIMMessageSetting alloc] init];
+    message.setting.apnsWithPrefix = [[NTESBundleSetting sharedConfig] enableAPNsPrefix];
+    message.apnsMemberOption = [[NIMMessageApnsMemberOption alloc] init];
+    message.apnsMemberOption.forcePush = [[NTESBundleSetting sharedConfig] enableTeamAPNsForce];
     return message;
 }
 
@@ -111,6 +133,12 @@
     NIMMessage *message       = [[NIMMessage alloc] init];
     message.messageObject     = fileObject;
     message.apnsContent = @"发来了一个文件";
+    NIMMessageSetting *setting = [[NIMMessageSetting alloc] init];
+    setting.scene = NIMNOSSceneTypeMessage;
+    message.setting = setting;
+    message.setting.apnsWithPrefix = [[NTESBundleSetting sharedConfig] enableAPNsPrefix];
+    message.apnsMemberOption = [[NIMMessageApnsMemberOption alloc] init];
+    message.apnsMemberOption.forcePush = [[NTESBundleSetting sharedConfig] enableTeamAPNsForce];
     return message;
 }
 
@@ -126,6 +154,9 @@
     NIMMessage *message       = [[NIMMessage alloc] init];
     message.messageObject     = fileObject;
     message.apnsContent = @"发来了一个文件";
+    NIMMessageSetting *setting = [[NIMMessageSetting alloc] init];
+    setting.scene = NIMNOSSceneTypeMessage;
+    message.setting = setting;
     return message;
 }
 
@@ -136,6 +167,10 @@
     customObject.attachment           = attachment;
     message.messageObject             = customObject;
     message.apnsContent = @"[贴图]";
+    message.setting = [[NIMMessageSetting alloc] init];
+    message.setting.apnsWithPrefix = [[NTESBundleSetting sharedConfig] enableAPNsPrefix];
+    message.apnsMemberOption = [[NIMMessageApnsMemberOption alloc] init];
+    message.apnsMemberOption.forcePush = [[NTESBundleSetting sharedConfig] enableTeamAPNsForce];
     return message;
 }
 
@@ -149,6 +184,7 @@
     NIMMessageSetting *setting = [[NIMMessageSetting alloc] init];
     setting.apnsEnabled        = NO;
     message.setting            = setting;
+    
 
     return message;
 }

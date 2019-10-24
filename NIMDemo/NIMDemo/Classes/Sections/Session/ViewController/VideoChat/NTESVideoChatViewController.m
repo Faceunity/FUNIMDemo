@@ -24,7 +24,7 @@
 
 #define NTESUseGLView
 
-@interface NTESVideoChatViewController () <FUAPIDemoBarDelegate>
+@interface NTESVideoChatViewController ()
 @property (nonatomic,assign) NIMNetCallCamera cameraType;
 
 @property (nonatomic,strong) CALayer *localVideoLayer;
@@ -50,15 +50,19 @@
 
 
 
+
 #pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
 // 发起通话
 - (void)processVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
     [super processVideoCallWithBuffer:sampleBuffer];
     
     CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    
     [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
     
     [[NIMAVChatSDK sharedSDK].netCallManager sendVideoSampleBuffer:sampleBuffer];
+    
+    NSLog(@"--- 111");
 }
 // 接听通话
 - (void)responVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
@@ -118,7 +122,6 @@
 }
 
 /**      FUAPIDemoBarDelegate       **/
-
 - (void)demoBarDidSelectedItem:(NSString *)itemName {
     
     [[FUManager shareManager] loadItem:itemName];
@@ -156,7 +159,7 @@
 
 
 
-#pragma mark /**---- 以上 FaceUnity ----**/
+
 
 - (instancetype)initWithCallInfo:(NTESNetCallChatInfo *)callInfo
 {
@@ -171,6 +174,11 @@
             self.localPreView = [NIMAVChatSDK sharedSDK].netCallManager.localPreview;
         }
         [[NIMAVChatSDK sharedSDK].netCallManager switchType:NIMNetCallMediaTypeVideo];
+        
+        [[NIMAVChatSDK sharedSDK].netCallManager switchVideoQuality:NIMNetCallVideoQuality480pLevel];
+        
+        [[NIMAVChatSDK sharedSDK].netCallManager setSmoothFilterIntensity:0];
+        [[NIMAVChatSDK sharedSDK].netCallManager selectBeautifyType:0];
     }
     return self;
 }
@@ -337,7 +345,7 @@
     [self.switchModelBtn setTitle:@"语音模式" forState:UIControlStateNormal];
     [self.hungUpBtn removeTarget:self action:NULL forControlEvents:UIControlEventTouchUpInside];
     [self.hungUpBtn addTarget:self action:@selector(hangup) forControlEvents:UIControlEventTouchUpInside];
-    self.localVideoLayer.hidden = NO;
+//    self.localVideoLayer.hidden = NO;
     self.localPreView.hidden = NO;
 }
 
@@ -385,11 +393,6 @@
     }
     [[NIMAVChatSDK sharedSDK].netCallManager switchCamera:self.cameraType];
     self.switchCameraBtn.selected = (self.cameraType == NIMNetCallCameraBack);
-    
-    
-    /**     -----  FaceUnity  ----     **/
-    [[FUManager shareManager] onCameraChange];
-    /**     -----  FaceUnity  ----     **/
 }
 
 
@@ -436,6 +439,13 @@
     [self switchToAudio];
 }
 
+- (IBAction)swichPetsiton:(UISegmentedControl *)sender {
+    if (sender.selectedSegmentIndex == 0) {
+        [[NIMAVChatSDK sharedSDK].netCallManager switchVideoQuality:NIMNetCallVideoQuality480pLevel];
+    }else{
+        [[NIMAVChatSDK sharedSDK].netCallManager switchVideoQuality:NIMNetCallVideoQuality720pLevel];
+    }
+}
 
 #pragma mark - NTESRecordSelectViewDelegate
 
@@ -469,7 +479,6 @@
     displayView.frame = self.localView.bounds;
 
     [self.localView addSubview:displayView];
-    
 }
 
 #if defined(NTESUseGLView)

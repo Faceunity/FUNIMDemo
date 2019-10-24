@@ -508,15 +508,29 @@ typedef NS_ENUM(NSInteger,NTESTeamMeetingRoleType) {
 - (void)fillUserSetting:(NIMNetCallOption *)option
 {
     option.autoRotateRemoteVideo = [[NTESBundleSetting sharedConfig] videochatAutoRotateRemoteVideo];
-    option.serverRecordAudio     = [[NTESBundleSetting sharedConfig] serverRecordAudio];
-    option.serverRecordVideo     = [[NTESBundleSetting sharedConfig] serverRecordVideo];
+    
+    NIMNetCallServerRecord *serverRecord = [[NIMNetCallServerRecord alloc] init];
+    serverRecord.enableServerAudioRecording     = [[NTESBundleSetting sharedConfig] serverRecordAudio];
+    serverRecord.enableServerVideoRecording     = [[NTESBundleSetting sharedConfig] serverRecordVideo];
+    serverRecord.enableServerHostRecording      = [[NTESBundleSetting sharedConfig] serverRecordHost];
+    serverRecord.serverRecordingMode            = [[NTESBundleSetting sharedConfig] serverRecordMode];
+    option.serverRecord = serverRecord;
+
+    
+    NIMNetCallSocksParam *socks5Info =  [[NIMNetCallSocksParam alloc] init];
+    socks5Info.useSocks5Proxy    =  [[NTESBundleSetting sharedConfig] useSocks];
+    socks5Info.socks5Addr        =  [[NTESBundleSetting sharedConfig] socks5Addr];
+    socks5Info.socks5Username    =  [[NTESBundleSetting sharedConfig] socksUsername];
+    socks5Info.socks5Password    =  [[NTESBundleSetting sharedConfig] socksPassword];
+    socks5Info.socks5Type        =  [[NTESBundleSetting sharedConfig] socks5Type];
+    option.socks5Info            =  socks5Info;
+    
     option.preferredVideoEncoder = [[NTESBundleSetting sharedConfig] perferredVideoEncoder];
     option.preferredVideoDecoder = [[NTESBundleSetting sharedConfig] perferredVideoDecoder];
     option.videoMaxEncodeBitrate = [[NTESBundleSetting sharedConfig] videoMaxEncodeKbps] * 1000;
     option.autoDeactivateAudioSession = [[NTESBundleSetting sharedConfig] autoDeactivateAudioSession];
     option.audioDenoise = [[NTESBundleSetting sharedConfig] audioDenoise];
     option.voiceDetect = [[NTESBundleSetting sharedConfig] voiceDetect];
-    option.audioHowlingSuppress = [[NTESBundleSetting sharedConfig] audioHowlingSuppress];
     option.preferHDAudio =  [[NTESBundleSetting sharedConfig] preferHDAudio];
     option.scene = [[NTESBundleSetting sharedConfig] scene];
     
@@ -668,6 +682,39 @@ typedef NS_ENUM(NSInteger,NTESTeamMeetingRoleType) {
 
 
 - (void)checkServiceEnable:(void(^)(BOOL))result{
+    AVAuthorizationStatus audioStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
+    AVAuthorizationStatus videoStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    
+    if (videoStatus == AVAuthorizationStatusRestricted
+        || videoStatus == AVAuthorizationStatusDenied) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"相机权限受限,无法视频聊天"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"确定"
+                                              otherButtonTitles:nil];
+        [alert showAlertWithCompletionHandler:^(NSInteger idx) {
+            if (result) {
+                result(NO);
+            }
+        }];
+        return;
+    }
+    
+    if (audioStatus == AVAuthorizationStatusRestricted
+        || audioStatus == AVAuthorizationStatusDenied ) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"麦克风权限受限,无法聊天"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"确定"
+                                              otherButtonTitles:nil];
+        [alert showAlertWithCompletionHandler:^(NSInteger idx) {
+            if (result) {
+                result(NO);
+            }
+        }];
+        return;
+    }
+    
     if ([[AVAudioSession sharedInstance] respondsToSelector:@selector(requestRecordPermission:)]) {
         [[AVAudioSession sharedInstance] performSelector:@selector(requestRecordPermission:) withObject:^(BOOL granted) {
             dispatch_async_main_safe(^{
@@ -706,6 +753,12 @@ typedef NS_ENUM(NSInteger,NTESTeamMeetingRoleType) {
                 
             });
         }];
+    } else {
+        dispatch_async_main_safe(^{
+            if (result) {
+                result(NO);
+            }
+        });
     }
 }
 
