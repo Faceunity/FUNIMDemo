@@ -264,6 +264,9 @@ NTES_FORBID_INTERACTIVE_POP
     [self fillUserSetting:option];
     
     __weak typeof(self) wself = self;
+    option.videoCaptureParam.videoHandler = ^(CMSampleBufferRef  _Nonnull sampleBuffer) {
+        [wself processVideoCallWithBuffer:sampleBuffer ];
+    };
 
     [[NIMAVChatSDK sharedSDK].netCallManager response:self.callInfo.callID accept:accept option:option completion:^(NSError *error, UInt64 callID) {
         if (!error) {

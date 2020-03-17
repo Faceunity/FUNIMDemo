@@ -49,9 +49,9 @@ NTES_USE_CLEAR_BAR
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.usernameTextField.tintColor = [UIColor whiteColor];
-    [self.usernameTextField setValue:UIColorFromRGBA(0xffffff, .6f) forKeyPath:@"_placeholderLabel.textColor"];
+//    [self.usernameTextField setValue:UIColorFromRGBA(0xffffff, .6f) forKeyPath:@"_placeholderLabel.textColor"];
     self.passwordTextField.tintColor = [UIColor whiteColor];
-    [self.passwordTextField setValue:UIColorFromRGBA(0xffffff, .6f) forKeyPath:@"_placeholderLabel.textColor"];
+//    [self.passwordTextField setValue:UIColorFromRGBA(0xffffff, .6f) forKeyPath:@"_placeholderLabel.textColor"];
     UIButton *pwdClearButton = [self.passwordTextField valueForKey:@"_clearButton"];
     [pwdClearButton setImage:[UIImage imageNamed:@"login_icon_clear"] forState:UIControlStateNormal];
     UIButton *userNameClearButton = [self.usernameTextField valueForKey:@"_clearButton"];

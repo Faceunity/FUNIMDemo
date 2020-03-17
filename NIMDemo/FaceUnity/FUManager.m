@@ -7,6 +7,7 @@
 //
 
 #import "FUManager.h"
+#import "funama.h"
 #import "FURenderer.h"
 #import "authpack.h"
 #import <sys/utsname.h>
@@ -29,7 +30,7 @@ static FUManager *shareManager = NULL;
     dispatch_once(&onceToken, ^{
         shareManager = [[FUManager alloc] init];
     });
-    
+
     return shareManager;
 }
 
@@ -43,13 +44,26 @@ static FUManager *shareManager = NULL;
          还有设置为YES,则需要调用FURenderer.h中的接口，不能再调用funama.h中的接口。*/
         [[FURenderer shareRenderer] setupWithDataPath:path authPackage:&g_auth_package authSize:sizeof(g_auth_package) shouldCreateContext:YES];
         
-       [self setDefaultParameters];
+        [self setDefaultParameters];
+        
+        /* 加载AI模型 */
+        [self loadAIModle];
         
         NSLog(@"faceunitySDK version:%@",[FURenderer getVersion]);
     }
     
     return self;
 }
+
+-(void)loadAIModle{
+    /* 单独使用美颜场景，只需加载 ai_facelandmarks75,注：美颜和贴纸都用场景用 ai_face_processor*/
+//    NSData *ai_facelandmarks75 = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ai_facelandmarks75.bundle" ofType:nil]];
+//    [FURenderer loadAIModelFromPackage:(void *)ai_facelandmarks75.bytes size:(int)ai_facelandmarks75.length aitype:FUAITYPE_FACELANDMARKS75];
+    
+    NSData *ai_face_processor = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ai_face_processor.bundle" ofType:nil]];
+    [FURenderer loadAIModelFromPackage:(void *)ai_face_processor.bytes size:(int)ai_face_processor.length aitype:FUAITYPE_FACEPROCESSOR];
+}
+
 
 /*设置默认参数*/
 - (void)setDefaultParameters {
@@ -66,7 +80,7 @@ static FUManager *shareManager = NULL;
     self.selectedFilterLevel    = 0.5 ;
     
     self.skinDetectEnable       = YES ;
-    self.blurShape              = 0 ;
+    self.blurShape              = 1 ;
     self.blurLevel              = 0.7 ;
     self.whiteLevel             = 0.5 ;
     self.redLevel               = 0.5 ;
@@ -147,18 +161,20 @@ static FUManager *shareManager = NULL;
  */
 - (void)loadItem:(NSString *)itemName
 {
+    NSLog(@"---- load item: %@", itemName);
     /**如果取消了道具的选择，直接销毁道具*/
     if ([itemName isEqual: @"noitem"] || itemName == nil)
     {
         if (items[1] != 0) {
             
-            NSLog(@"faceunity: destroy item");
-            [FURenderer destroyItem:items[1]];
+//            NSLog(@"faceunity: destroy item");
+//            [FURenderer destroyItem:items[1]];
+            
+            fuDestroyItem(items[1]) ;
             
             /**为避免道具句柄被销毁会后仍被使用导致程序出错，这里需要将存放道具句柄的items[1]设为0*/
             items[1] = 0;
         }
-        
         return;
     }
     
@@ -169,7 +185,8 @@ static FUManager *shareManager = NULL;
     /**销毁老的道具句柄*/
     if (items[1] != 0) {
         NSLog(@"faceunity: destroy item");
-        [FURenderer destroyItem:items[1]];
+//        [FURenderer destroyItem:items[1]];
+        fuDestroyItem(items[1]) ;
     }
     
     /**将刚刚创建的句柄存放在items[1]中*/
@@ -179,20 +196,21 @@ static FUManager *shareManager = NULL;
 }
 
 /**加载美颜道具*/
+/**加载美颜道具*/
 - (void)loadFilter
 {
     NSString *path = [[NSBundle mainBundle] pathForResource:@"face_beautification.bundle" ofType:nil];
 
     items[0] = [FURenderer itemWithContentsOfFile:path];
+    
+    /* 点位共存模式*/
+    [FURenderer itemSetParam:items[0] withName:@"landmarks_type" value:@(FUAITYPE_FACEPROCESSOR)];
 }
-
 /**设置美颜参数*/
 - (void)setBeautyParams {
     
     [FURenderer itemSetParam:items[0] withName:@"skin_detect" value:@(self.skinDetectEnable)]; //是否开启皮肤检测
     [FURenderer itemSetParam:items[0] withName:@"heavy_blur" value:@(self.blurShape)]; // 美肤类型 (0、1、) 清晰：0，朦胧：1
-    [FURenderer itemSetParam:items[0] withName:@"blur_type" value:@(0)];
-    
     [FURenderer itemSetParam:items[0] withName:@"blur_level" value:@(self.blurLevel * 6.0 )]; //磨皮 (0.0 - 6.0)
     [FURenderer itemSetParam:items[0] withName:@"color_level" value:@(self.whiteLevel)]; //美白 (0~1)
     [FURenderer itemSetParam:items[0] withName:@"red_level" value:@(self.redLevel)]; //红润 (0~1)
@@ -212,18 +230,26 @@ static FUManager *shareManager = NULL;
     [FURenderer itemSetParam:items[0] withName:@"filter_level" value:@(self.selectedFilterLevel)]; //滤镜程度
 }
 
+#pragma mark -  render
 /**将道具绘制到pixelBuffer*/
-- (CVPixelBufferRef)renderItemsToPixelBuffer:(CVPixelBufferRef)pixelBuffer
-{
-    /**设置美颜参数*/
+- (CVPixelBufferRef)renderItemsToPixelBuffer:(CVPixelBufferRef)pixelBuffer{
+    
     [self setBeautyParams];
-    
-    /*Faceunity核心接口，将道具及美颜效果绘制到pixelBuffer中，执行完此函数后pixelBuffer即包含美颜及贴纸效果*/
-    CVPixelBufferRef buffer = [[FURenderer shareRenderer] renderPixelBuffer:pixelBuffer withFrameId:frameID items:items itemCount:sizeof(items)/sizeof(int) flipx:NO];//flipxNO 参数设为YES可以使道具做水平方向的镜像翻转
-    
+   
+    CVPixelBufferRef buffer = [[FURenderer shareRenderer] renderPixelBuffer:pixelBuffer withFrameId:frameID items:items itemCount:sizeof(items)/sizeof(int) flipx:_flipx];//flipx 参数设为YES可以使道具做水平方向的镜像翻转
     frameID += 1;
     
     return buffer;
+}
+
+/**处理YUV*/
+- (void)processFrameWithY:(void*)y U:(void*)u V:(void*)v yStride:(int)ystride uStride:(int)ustride vStride:(int)vstride FrameWidth:(int)width FrameHeight:(int)height {
+    
+    /**设置美颜参数*/
+    [self setBeautyParams];
+    
+    [[FURenderer shareRenderer] renderFrame:y u:u  v:v  ystride:ystride ustride:ustride vstride:vstride width:width height:height frameId:frameID items:items itemCount:sizeof(items)/sizeof(int)];
+    frameID ++ ;
 }
 
 /**获取图像中人脸中心点*/

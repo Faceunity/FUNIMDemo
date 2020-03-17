@@ -1,7 +1,5 @@
 # FUNIMDemo 快速接入文档
 
-**编译时注意：由于网易SDK>100M,没有和demo一块提交。[下载sdk](https://netease.im/im-sdk-demo) 加入vendors目录**
-
 FUNIMDemo 是集成了 [Faceunity](https://github.com/Faceunity/FULiveDemo/tree/dev) 面部跟踪和虚拟道具功能 和 网易云信视频通话功能的 Demo。
 
 本文是 FaceUnity SDK 快速对接网易云信的导读说明，关于 FaceUnity SDK 的更多详细说明，请参看 [FULiveDemo](https://github.com/Faceunity/FULiveDemo/tree/dev)

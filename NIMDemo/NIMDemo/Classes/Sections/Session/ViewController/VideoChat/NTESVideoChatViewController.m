@@ -62,7 +62,6 @@
     
     [[NIMAVChatSDK sharedSDK].netCallManager sendVideoSampleBuffer:sampleBuffer];
     
-    NSLog(@"--- 111");
 }
 // 接听通话
 - (void)responVideoCallWithBuffer:(CMSampleBufferRef)sampleBuffer {
@@ -72,6 +71,7 @@
     [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
     
     [[NIMAVChatSDK sharedSDK].netCallManager sendVideoSampleBuffer:sampleBuffer];
+    NSLog(@"1111111111");
 }
 #pragma mark /**---- 子类重写，在此加入 FaceUnity 效果 ----**/
 
@@ -388,7 +388,9 @@
 - (IBAction)switchCamera:(id)sender{
     if (self.cameraType == NIMNetCallCameraFront) {
         self.cameraType = NIMNetCallCameraBack;
+        [FUManager shareManager].flipx = YES;
     }else{
+        [FUManager shareManager].flipx = NO;
         self.cameraType = NIMNetCallCameraFront;
     }
     [[NIMAVChatSDK sharedSDK].netCallManager switchCamera:self.cameraType];
