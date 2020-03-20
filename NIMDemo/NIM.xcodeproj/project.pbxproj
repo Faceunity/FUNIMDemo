@@ -280,25 +280,26 @@
 		C1604702A371A1B3C11BAEB4 /* NMCVideoFilter.bundle in Resources */ = {isa = PBXBuildFile; fileRef = ED394EE79AB22E31DDA1F078 /* NMCVideoFilter.bundle */; };
 		D0794EB8AC4299E10E4F635A /* NMCVideoFilter.bundle in Resources */ = {isa = PBXBuildFile; fileRef = ED394EE79AB22E31DDA1F078 /* NMCVideoFilter.bundle */; };
 		D68744DEAFA9016F3EC04924 /* NMC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87C446BBB360804CDEECE17A /* NMC.framework */; };
-		E3835E5422AF87610087D31A /* FUAPIDemoBar.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3835E3F22AF87600087D31A /* FUAPIDemoBar.framework */; };
-		E3835E5522AF87610087D31A /* touhua_ztt_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4122AF87600087D31A /* touhua_ztt_fu.bundle */; };
-		E3835E5622AF87610087D31A /* yazui.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4222AF87600087D31A /* yazui.bundle */; };
-		E3835E5722AF87610087D31A /* yuguan.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4322AF87600087D31A /* yuguan.bundle */; };
-		E3835E5822AF87610087D31A /* hudie_lm_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4422AF87600087D31A /* hudie_lm_fu.bundle */; };
-		E3835E5922AF87610087D31A /* mask_hat.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4522AF87600087D31A /* mask_hat.bundle */; };
-		E3835E5A22AF87610087D31A /* juanhuzi_lm_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4622AF87610087D31A /* juanhuzi_lm_fu.bundle */; };
-		E3835E5B22AF87610087D31A /* fengya_ztt_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4722AF87610087D31A /* fengya_ztt_fu.bundle */; };
-		E3835E5C22AF87610087D31A /* FUManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E3835E4822AF87610087D31A /* FUManager.m */; };
-		E3835E5D22AF87610087D31A /* release_note.txt in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4A22AF87610087D31A /* release_note.txt */; };
-		E3835E5E22AF87610087D31A /* libnama.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E3835E4B22AF87610087D31A /* libnama.a */; };
-		E3835E5F22AF87610087D31A /* v3.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4D22AF87610087D31A /* v3.bundle */; };
-		E3835E6022AF87610087D31A /* tongue.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4E22AF87610087D31A /* tongue.bundle */; };
-		E3835E6122AF87610087D31A /* fxaa.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E4F22AF87610087D31A /* fxaa.bundle */; };
-		E3835E6222AF87610087D31A /* face_beautification.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3835E5022AF87610087D31A /* face_beautification.bundle */; };
+		E329484924177D760016E369 /* CallKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E329484824177D750016E369 /* CallKit.framework */; };
 		E3835E6922AF8C910087D31A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3835E6422AF8A920087D31A /* Accelerate.framework */; };
-		E3835E6B22AF8CB50087D31A /* FUAPIDemoBar.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = E3835E3F22AF87600087D31A /* FUAPIDemoBar.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E3B3D0ED23505BBA00263116 /* NMCBasicModuleFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3B3D0EC23505BB900263116 /* NMCBasicModuleFramework.framework */; };
 		E3B3D0EE23505BD300263116 /* NMCBasicModuleFramework.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = E3B3D0EC23505BB900263116 /* NMCBasicModuleFramework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E3B3E8882415DFA90021F7E6 /* FUAPIDemoBar.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3B3E8722415DFA80021F7E6 /* FUAPIDemoBar.framework */; };
+		E3B3E8892415DFA90021F7E6 /* touhua_ztt_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8742415DFA80021F7E6 /* touhua_ztt_fu.bundle */; };
+		E3B3E88A2415DFA90021F7E6 /* yazui.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8752415DFA80021F7E6 /* yazui.bundle */; };
+		E3B3E88B2415DFA90021F7E6 /* yuguan.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8762415DFA80021F7E6 /* yuguan.bundle */; };
+		E3B3E88C2415DFA90021F7E6 /* hudie_lm_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8772415DFA80021F7E6 /* hudie_lm_fu.bundle */; };
+		E3B3E88D2415DFA90021F7E6 /* mask_hat.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8782415DFA80021F7E6 /* mask_hat.bundle */; };
+		E3B3E88E2415DFA90021F7E6 /* juanhuzi_lm_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8792415DFA80021F7E6 /* juanhuzi_lm_fu.bundle */; };
+		E3B3E88F2415DFA90021F7E6 /* fengya_ztt_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E87A2415DFA80021F7E6 /* fengya_ztt_fu.bundle */; };
+		E3B3E8902415DFA90021F7E6 /* FUManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E3B3E87B2415DFA80021F7E6 /* FUManager.m */; };
+		E3B3E8912415DFA90021F7E6 /* release_note.txt in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E87D2415DFA80021F7E6 /* release_note.txt */; };
+		E3B3E8922415DFA90021F7E6 /* libnama.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E3B3E87E2415DFA80021F7E6 /* libnama.a */; };
+		E3B3E8932415DFA90021F7E6 /* v3.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8802415DFA80021F7E6 /* v3.bundle */; };
+		E3B3E8942415DFA90021F7E6 /* ai_face_processor.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8822415DFA80021F7E6 /* ai_face_processor.bundle */; };
+		E3B3E8952415DFA90021F7E6 /* face_beautification.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E3B3E8832415DFA80021F7E6 /* face_beautification.bundle */; };
+		E3B3E8962415DFA90021F7E6 /* libfuai.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E3B3E8872415DFA80021F7E6 /* libfuai.a */; };
+		E3B3E8972415DFCF0021F7E6 /* FUAPIDemoBar.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = E3B3E8722415DFA80021F7E6 /* FUAPIDemoBar.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E4168E291B6A364800F3D35D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4168E281B6A364800F3D35D /* AudioToolbox.framework */; };
 		E4168E2B1B6A364F00F3D35D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4168E2A1B6A364F00F3D35D /* CoreMedia.framework */; };
 		E4562D8B1CE0855A00D66909 /* NTESSDKConfigDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E4562D8A1CE0855A00D66909 /* NTESSDKConfigDelegate.m */; };
@@ -354,8 +355,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				E3835E6B22AF8CB50087D31A /* FUAPIDemoBar.framework in CopyFiles */,
 				E3B3D0EE23505BD300263116 /* NMCBasicModuleFramework.framework in CopyFiles */,
+				E3B3E8972415DFCF0021F7E6 /* FUAPIDemoBar.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -859,28 +860,29 @@
 		C716F6793D5D6D1604893032 /* Pods-NIMDemo-NIM.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NIMDemo-NIM.release.xcconfig"; path = "Pods/Target Support Files/Pods-NIMDemo-NIM/Pods-NIMDemo-NIM.release.xcconfig"; sourceTree = "<group>"; };
 		C906F5F8DDAA5F968CF58675 /* libPods-NIMDemo-NIM.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-NIMDemo-NIM.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C92B41B5BC96B13143BDAA59 /* NIMAVChat.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NIMAVChat.framework; path = ./NIMDemo/Vendors/NIMAVChat/NIMAVChat.framework; sourceTree = SOURCE_ROOT; };
-		E3835E3D22AF87600087D31A /* authpack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = authpack.h; sourceTree = "<group>"; };
-		E3835E3E22AF87600087D31A /* FUManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FUManager.h; sourceTree = "<group>"; };
-		E3835E3F22AF87600087D31A /* FUAPIDemoBar.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FUAPIDemoBar.framework; sourceTree = "<group>"; };
-		E3835E4122AF87600087D31A /* touhua_ztt_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = touhua_ztt_fu.bundle; sourceTree = "<group>"; };
-		E3835E4222AF87600087D31A /* yazui.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = yazui.bundle; sourceTree = "<group>"; };
-		E3835E4322AF87600087D31A /* yuguan.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = yuguan.bundle; sourceTree = "<group>"; };
-		E3835E4422AF87600087D31A /* hudie_lm_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = hudie_lm_fu.bundle; sourceTree = "<group>"; };
-		E3835E4522AF87600087D31A /* mask_hat.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = mask_hat.bundle; sourceTree = "<group>"; };
-		E3835E4622AF87610087D31A /* juanhuzi_lm_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = juanhuzi_lm_fu.bundle; sourceTree = "<group>"; };
-		E3835E4722AF87610087D31A /* fengya_ztt_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fengya_ztt_fu.bundle; sourceTree = "<group>"; };
-		E3835E4822AF87610087D31A /* FUManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FUManager.m; sourceTree = "<group>"; };
-		E3835E4A22AF87610087D31A /* release_note.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = release_note.txt; sourceTree = "<group>"; };
-		E3835E4B22AF87610087D31A /* libnama.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libnama.a; sourceTree = "<group>"; };
-		E3835E4D22AF87610087D31A /* v3.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = v3.bundle; sourceTree = "<group>"; };
-		E3835E4E22AF87610087D31A /* tongue.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = tongue.bundle; sourceTree = "<group>"; };
-		E3835E4F22AF87610087D31A /* fxaa.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fxaa.bundle; sourceTree = "<group>"; };
-		E3835E5022AF87610087D31A /* face_beautification.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = face_beautification.bundle; sourceTree = "<group>"; };
-		E3835E5222AF87610087D31A /* funama.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = funama.h; sourceTree = "<group>"; };
-		E3835E5322AF87610087D31A /* FURenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FURenderer.h; sourceTree = "<group>"; };
+		E329484824177D750016E369 /* CallKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CallKit.framework; path = System/Library/Frameworks/CallKit.framework; sourceTree = SDKROOT; };
 		E3835E6422AF8A920087D31A /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		E3835E6622AF8AB90087D31A /* CoreML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreML.framework; path = System/Library/Frameworks/CoreML.framework; sourceTree = SDKROOT; };
 		E3B3D0EC23505BB900263116 /* NMCBasicModuleFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = NMCBasicModuleFramework.framework; sourceTree = "<group>"; };
+		E3B3E8702415DFA80021F7E6 /* authpack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = authpack.h; sourceTree = "<group>"; };
+		E3B3E8712415DFA80021F7E6 /* FUManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FUManager.h; sourceTree = "<group>"; };
+		E3B3E8722415DFA80021F7E6 /* FUAPIDemoBar.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FUAPIDemoBar.framework; sourceTree = "<group>"; };
+		E3B3E8742415DFA80021F7E6 /* touhua_ztt_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = touhua_ztt_fu.bundle; sourceTree = "<group>"; };
+		E3B3E8752415DFA80021F7E6 /* yazui.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = yazui.bundle; sourceTree = "<group>"; };
+		E3B3E8762415DFA80021F7E6 /* yuguan.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = yuguan.bundle; sourceTree = "<group>"; };
+		E3B3E8772415DFA80021F7E6 /* hudie_lm_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = hudie_lm_fu.bundle; sourceTree = "<group>"; };
+		E3B3E8782415DFA80021F7E6 /* mask_hat.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = mask_hat.bundle; sourceTree = "<group>"; };
+		E3B3E8792415DFA80021F7E6 /* juanhuzi_lm_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = juanhuzi_lm_fu.bundle; sourceTree = "<group>"; };
+		E3B3E87A2415DFA80021F7E6 /* fengya_ztt_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fengya_ztt_fu.bundle; sourceTree = "<group>"; };
+		E3B3E87B2415DFA80021F7E6 /* FUManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FUManager.m; sourceTree = "<group>"; };
+		E3B3E87D2415DFA80021F7E6 /* release_note.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = release_note.txt; sourceTree = "<group>"; };
+		E3B3E87E2415DFA80021F7E6 /* libnama.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libnama.a; sourceTree = "<group>"; };
+		E3B3E8802415DFA80021F7E6 /* v3.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = v3.bundle; sourceTree = "<group>"; };
+		E3B3E8822415DFA80021F7E6 /* ai_face_processor.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_face_processor.bundle; sourceTree = "<group>"; };
+		E3B3E8832415DFA80021F7E6 /* face_beautification.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = face_beautification.bundle; sourceTree = "<group>"; };
+		E3B3E8852415DFA80021F7E6 /* funama.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = funama.h; sourceTree = "<group>"; };
+		E3B3E8862415DFA80021F7E6 /* FURenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FURenderer.h; sourceTree = "<group>"; };
+		E3B3E8872415DFA80021F7E6 /* libfuai.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libfuai.a; sourceTree = "<group>"; };
 		E4168E281B6A364800F3D35D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E4168E2A1B6A364F00F3D35D /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		E4562D891CE0855A00D66909 /* NTESSDKConfigDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTESSDKConfigDelegate.h; sourceTree = "<group>"; };
@@ -941,28 +943,30 @@
 				A14A89242022E88C00718366 /* Foundation.framework in Frameworks */,
 				A14A89222022E81B00718366 /* UIKit.framework in Frameworks */,
 				A14A89202022E7F800718366 /* CoreText.framework in Frameworks */,
+				E329484924177D760016E369 /* CallKit.framework in Frameworks */,
 				A14A891E2022E7AE00718366 /* QuartzCore.framework in Frameworks */,
 				8368EA6A1F273B3300C63840 /* CFNetwork.framework in Frameworks */,
 				8368EA681F273B2B00C63840 /* Security.framework in Frameworks */,
 				834DC5A51F1C61B900C9E0B3 /* CoreMotion.framework in Frameworks */,
+				E3B3E8882415DFA90021F7E6 /* FUAPIDemoBar.framework in Frameworks */,
 				8368EA611F271CA300C63840 /* libSPaySDK.a in Frameworks */,
 				61AE12861DD95947005980B5 /* libNIMKit.a in Frameworks */,
 				834DC59D1F18BE1900C9E0B3 /* JYangToolKit.framework in Frameworks */,
 				61530BEB1BABAD8200FE50CC /* libz.tbd in Frameworks */,
-				E3835E5E22AF87610087D31A /* libnama.a in Frameworks */,
 				834DC59C1F18BE1900C9E0B3 /* JrmfWalletKit.framework in Frameworks */,
-				E3835E5422AF87610087D31A /* FUAPIDemoBar.framework in Frameworks */,
 				61530BE71BABAD3B00FE50CC /* libsqlite3.0.tbd in Frameworks */,
 				E3B3D0ED23505BBA00263116 /* NMCBasicModuleFramework.framework in Frameworks */,
 				BDA64F1A1CA38A3800BCF04D /* VideoToolbox.framework in Frameworks */,
 				E4168E2B1B6A364F00F3D35D /* CoreMedia.framework in Frameworks */,
 				E4168E291B6A364800F3D35D /* AudioToolbox.framework in Frameworks */,
 				86B7F5B61AE88C040040A547 /* CoreTelephony.framework in Frameworks */,
+				E3B3E8962415DFA90021F7E6 /* libfuai.a in Frameworks */,
 				61E8F9121AA16E5300F51DAF /* CoreLocation.framework in Frameworks */,
 				61E8F90E1AA169F000F51DAF /* MapKit.framework in Frameworks */,
 				8368EA631F271CA300C63840 /* libWeChatSDK.a in Frameworks */,
 				AEA87FE11A81CAD600ACC3BA /* AVFoundation.framework in Frameworks */,
 				834DC59B1F18BE1900C9E0B3 /* JrmfPacketKit.framework in Frameworks */,
+				E3B3E8922415DFA90021F7E6 /* libnama.a in Frameworks */,
 				61CF576F1A787DB000B43072 /* MobileCoreServices.framework in Frameworks */,
 				AE58995A1A6FA7AC0070536A /* SystemConfiguration.framework in Frameworks */,
 				834DC5A31F1C5C6A00C9E0B3 /* AlipaySDK.framework in Frameworks */,
@@ -1018,6 +1022,7 @@
 		5176189D0086B38FE643A26A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E329484824177D750016E369 /* CallKit.framework */,
 				E3835E6622AF8AB90087D31A /* CoreML.framework */,
 				E3835E6422AF8A920087D31A /* Accelerate.framework */,
 				A14A89282024047100718366 /* NIMAVChat.framework */,
@@ -2062,7 +2067,7 @@
 		AE5882DC1A6F47E10070536A = {
 			isa = PBXGroup;
 			children = (
-				E3835E3C22AF87600087D31A /* FaceUnity */,
+				E3B3E86F2415DFA80021F7E6 /* FaceUnity */,
 				AE5882E71A6F47E10070536A /* NIMDemo */,
 				A1A95A1920D2BF0600754E64 /* NotificationScene */,
 				A104323420DA42000079CE28 /* NotificationService */,
@@ -2216,60 +2221,68 @@
 			name = Vendors;
 			sourceTree = "<group>";
 		};
-		E3835E3C22AF87600087D31A /* FaceUnity */ = {
+		E3B3E86F2415DFA80021F7E6 /* FaceUnity */ = {
 			isa = PBXGroup;
 			children = (
-				E3835E3D22AF87600087D31A /* authpack.h */,
-				E3835E3E22AF87600087D31A /* FUManager.h */,
-				E3835E3F22AF87600087D31A /* FUAPIDemoBar.framework */,
-				E3835E4022AF87600087D31A /* items */,
-				E3835E4822AF87610087D31A /* FUManager.m */,
-				E3835E4922AF87610087D31A /* FaceUnity-SDK-iOS */,
+				E3B3E8702415DFA80021F7E6 /* authpack.h */,
+				E3B3E8712415DFA80021F7E6 /* FUManager.h */,
+				E3B3E87B2415DFA80021F7E6 /* FUManager.m */,
+				E3B3E8722415DFA80021F7E6 /* FUAPIDemoBar.framework */,
+				E3B3E8732415DFA80021F7E6 /* items */,
+				E3B3E87C2415DFA80021F7E6 /* FaceUnity-SDK-iOS */,
 			);
 			path = FaceUnity;
 			sourceTree = "<group>";
 		};
-		E3835E4022AF87600087D31A /* items */ = {
+		E3B3E8732415DFA80021F7E6 /* items */ = {
 			isa = PBXGroup;
 			children = (
-				E3835E4122AF87600087D31A /* touhua_ztt_fu.bundle */,
-				E3835E4222AF87600087D31A /* yazui.bundle */,
-				E3835E4322AF87600087D31A /* yuguan.bundle */,
-				E3835E4422AF87600087D31A /* hudie_lm_fu.bundle */,
-				E3835E4522AF87600087D31A /* mask_hat.bundle */,
-				E3835E4622AF87610087D31A /* juanhuzi_lm_fu.bundle */,
-				E3835E4722AF87610087D31A /* fengya_ztt_fu.bundle */,
+				E3B3E8742415DFA80021F7E6 /* touhua_ztt_fu.bundle */,
+				E3B3E8752415DFA80021F7E6 /* yazui.bundle */,
+				E3B3E8762415DFA80021F7E6 /* yuguan.bundle */,
+				E3B3E8772415DFA80021F7E6 /* hudie_lm_fu.bundle */,
+				E3B3E8782415DFA80021F7E6 /* mask_hat.bundle */,
+				E3B3E8792415DFA80021F7E6 /* juanhuzi_lm_fu.bundle */,
+				E3B3E87A2415DFA80021F7E6 /* fengya_ztt_fu.bundle */,
 			);
 			path = items;
 			sourceTree = "<group>";
 		};
-		E3835E4922AF87610087D31A /* FaceUnity-SDK-iOS */ = {
+		E3B3E87C2415DFA80021F7E6 /* FaceUnity-SDK-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				E3835E4A22AF87610087D31A /* release_note.txt */,
-				E3835E4B22AF87610087D31A /* libnama.a */,
-				E3835E4C22AF87610087D31A /* Resources */,
-				E3835E5122AF87610087D31A /* Headers */,
+				E3B3E87D2415DFA80021F7E6 /* release_note.txt */,
+				E3B3E87E2415DFA80021F7E6 /* libnama.a */,
+				E3B3E8872415DFA80021F7E6 /* libfuai.a */,
+				E3B3E87F2415DFA80021F7E6 /* Resources */,
+				E3B3E8842415DFA80021F7E6 /* Headers */,
 			);
 			path = "FaceUnity-SDK-iOS";
 			sourceTree = "<group>";
 		};
-		E3835E4C22AF87610087D31A /* Resources */ = {
+		E3B3E87F2415DFA80021F7E6 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				E3835E4D22AF87610087D31A /* v3.bundle */,
-				E3835E4E22AF87610087D31A /* tongue.bundle */,
-				E3835E4F22AF87610087D31A /* fxaa.bundle */,
-				E3835E5022AF87610087D31A /* face_beautification.bundle */,
+				E3B3E8802415DFA80021F7E6 /* v3.bundle */,
+				E3B3E8812415DFA80021F7E6 /* AI_model */,
+				E3B3E8832415DFA80021F7E6 /* face_beautification.bundle */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		E3835E5122AF87610087D31A /* Headers */ = {
+		E3B3E8812415DFA80021F7E6 /* AI_model */ = {
 			isa = PBXGroup;
 			children = (
-				E3835E5222AF87610087D31A /* funama.h */,
-				E3835E5322AF87610087D31A /* FURenderer.h */,
+				E3B3E8822415DFA80021F7E6 /* ai_face_processor.bundle */,
+			);
+			path = AI_model;
+			sourceTree = "<group>";
+		};
+		E3B3E8842415DFA80021F7E6 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				E3B3E8852415DFA80021F7E6 /* funama.h */,
+				E3B3E8862415DFA80021F7E6 /* FURenderer.h */,
 			);
 			path = Headers;
 			sourceTree = "<group>";
@@ -2363,7 +2376,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AE5883081A6F47E10070536A /* Build configuration list for PBXNativeTarget "NIM" */;
 			buildPhases = (
-				E3DA4872235EEF59007CF6E3 /* ShellScript */,
+				E3B3E898241610510021F7E6 /* ShellScript */,
 				BB0FF6D323B6C7B68134CBAC /* [CP] Check Pods Manifest.lock */,
 				AE5882E11A6F47E10070536A /* Sources */,
 				AE5882E21A6F47E10070536A /* Frameworks */,
@@ -2478,11 +2491,12 @@
 				83BA2325207C962F00B58D8E /* nim_strip_archs.sh in Resources */,
 				8343827D1EFCB9D30052254A /* NTESSystemNotificationViewController.xib in Resources */,
 				61E471441B7D963E00F4A1BF /* NTESFileTransSelectViewController.xib in Resources */,
-				E3835E5B22AF87610087D31A /* fengya_ztt_fu.bundle in Resources */,
+				E3B3E88F2415DFA90021F7E6 /* fengya_ztt_fu.bundle in Resources */,
+				E3B3E8952415DFA90021F7E6 /* face_beautification.bundle in Resources */,
 				61E471591B7D963E00F4A1BF /* NTESMutiClientsCell.xib in Resources */,
-				E3835E5622AF87610087D31A /* yazui.bundle in Resources */,
+				E3B3E88A2415DFA90021F7E6 /* yazui.bundle in Resources */,
 				612583D720B5B284007EFF3C /* nim_embeded_frameworks.sh in Resources */,
-				E3835E5722AF87610087D31A /* yuguan.bundle in Resources */,
+				E3B3E88B2415DFA90021F7E6 /* yuguan.bundle in Resources */,
 				610B1E051AFDDE04006454EA /* video_chat_tip_OnCall.aac in Resources */,
 				8368EA621F271CA300C63840 /* SPaySDKResource.bundle in Resources */,
 				83C2E1111F308B10004C7076 /* NIMDemoChartlet.bundle in Resources */,
@@ -2490,23 +2504,22 @@
 				611ABF111B42321600B8706C /* Settings.bundle in Resources */,
 				61E471081B7D963E00F4A1BF /* NTESSearchTeamViewController.xib in Resources */,
 				61E471531B7D963E00F4A1BF /* NTESAudioChatViewController.xib in Resources */,
-				E3835E6022AF87610087D31A /* tongue.bundle in Resources */,
 				61E4714D1B7D963E00F4A1BF /* NTESWhiteboardViewController.xib in Resources */,
-				E3835E5922AF87610087D31A /* mask_hat.bundle in Resources */,
+				E3B3E88D2415DFA90021F7E6 /* mask_hat.bundle in Resources */,
 				BDB02D271E09172F00262A50 /* NTESNetDetectViewController.xib in Resources */,
 				8343827B1EFCB9D30052254A /* NTESSystemNotificationCell.xib in Resources */,
 				610B1E041AFDDE04006454EA /* video_chat_tip_HangUp.aac in Resources */,
 				610B1E021AFDDE04006454EA /* video_connect_chat_tip_sender.aac in Resources */,
-				E3835E5822AF87610087D31A /* hudie_lm_fu.bundle in Resources */,
+				E3B3E88C2415DFA90021F7E6 /* hudie_lm_fu.bundle in Resources */,
 				61E4712B1B7D963E00F4A1BF /* NTESLoginViewController.xib in Resources */,
 				834DC5A21F1C5C6A00C9E0B3 /* AlipaySDK.bundle in Resources */,
 				834BF0A61FFCB085007E530F /* NTESAboutViewController.xib in Resources */,
 				AE5882F61A6F47E10070536A /* Images.xcassets in Resources */,
 				E48D25CB1EBB178000078BCD /* video_chat_push.mp3 in Resources */,
 				61A18A4B1DC73B96001FD538 /* NIMKitEmoticon.bundle in Resources */,
-				E3835E5D22AF87610087D31A /* release_note.txt in Resources */,
+				E3B3E8912415DFA90021F7E6 /* release_note.txt in Resources */,
 				834382791EFCB9D30052254A /* NTESCustomSysNotificationViewController.xib in Resources */,
-				E3835E5522AF87610087D31A /* touhua_ztt_fu.bundle in Resources */,
+				E3B3E8892415DFA90021F7E6 /* touhua_ztt_fu.bundle in Resources */,
 				E45E17821CA8CBA500C4ED69 /* NTESLogViewController.xib in Resources */,
 				83A4C4EC1EC084AA00436955 /* NTESTeamMeetingMutesViewController.xib in Resources */,
 				E4ED12DD1B6B07EA00316496 /* message.wav in Resources */,
@@ -2516,19 +2529,18 @@
 				61ED4F461AE4FA020073DBD9 /* Files in Resources */,
 				61E471031B7D963E00F4A1BF /* NTESJionTeamViewController.xib in Resources */,
 				610B1E061AFDDE04006454EA /* video_chat_tip_onTimer.aac in Resources */,
-				E3835E6122AF87610087D31A /* fxaa.bundle in Resources */,
 				61E471501B7D963E00F4A1BF /* NTESVideoViewController.xib in Resources */,
-				E3835E5A22AF87610087D31A /* juanhuzi_lm_fu.bundle in Resources */,
+				E3B3E88E2415DFA90021F7E6 /* juanhuzi_lm_fu.bundle in Resources */,
 				61A18A4D1DC74448001FD538 /* NIMKitResource.bundle in Resources */,
 				61E471421B7D963E00F4A1BF /* NTESFilePreViewController.xib in Resources */,
 				6173AEC51BAAB94400854D49 /* NTESUserInfoSettingViewController.xib in Resources */,
-				E3835E6222AF87610087D31A /* face_beautification.bundle in Resources */,
 				832BE9BA1EB9F5BA0068D234 /* NTESTeamMeetingCallingViewController.xib in Resources */,
-				E3835E5F22AF87610087D31A /* v3.bundle in Resources */,
+				E3B3E8932415DFA90021F7E6 /* v3.bundle in Resources */,
 				836454871EFFB254000E9A8E /* XMLTemplate.xml in Resources */,
 				61E4712D1B7D963E00F4A1BF /* NTESRegisterViewController.xib in Resources */,
 				610B1E071AFDDE04006454EA /* video_chat_tip_receiver.aac in Resources */,
 				61E4710D1B7D963E00F4A1BF /* NTESTeamListViewController.xib in Resources */,
+				E3B3E8942415DFA90021F7E6 /* ai_face_processor.bundle in Resources */,
 				834DC59A1F18BE1900C9E0B3 /* jrmf.cer in Resources */,
 				B4A943EE9B2E95DFA4CDADEC /* NMCVideoFilter.bundle in Resources */,
 			);
@@ -2617,7 +2629,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E3DA4872235EEF59007CF6E3 /* ShellScript */ = {
+		E3B3E898241610510021F7E6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2632,7 +2644,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n#!/bin/sh/\ncd FaceUnity/FaceUnity-SDK-iOS\nfilename=libnama.a\nzipname=libnama.zip\n\nif [ -f \"$zipname\" ];\nthen\nrm -f $filename\nunzip $zipname\nrm -f $zipname\nfi\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n#!/bin/sh/\ncd FaceUnity/FaceUnity-SDK-iOS\nfilename=libnama.a\nzipname=libnama.zip\n\nfilename2=libfuai.a\nzipname2=libfuai.zip\nmdcode=$(md5 $filename)\n\nif [ -f \"$zipname\" ];\nthen\nrm -f $filename\nunzip $zipname\nrm -f $zipname\n\nrm -f $filename2\nunzip $zipname2\nrm -f $zipname2\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2847,7 +2859,7 @@
 				185696F621C64CB2003A6CAB /* NTESExportMessageDelegateImpl.m in Sources */,
 				BDEA5AA81EEE7CF600DE78AF /* ijksdl_timer.c in Sources */,
 				61E471151B7D963E00F4A1BF /* NTESGroupedUsrInfo.m in Sources */,
-				E3835E5C22AF87610087D31A /* FUManager.m in Sources */,
+				E3B3E8902415DFA90021F7E6 /* FUManager.m in Sources */,
 				61E471961B7D96AA00F4A1BF /* NTESTimerHolder.m in Sources */,
 				BDEA5A9D1EEE7CF600DE78AF /* yuv444p10le.fsh.c in Sources */,
 				18E2EC4521BF7F2700E0E773 /* NTESMigrateCompleteView.m in Sources */,
