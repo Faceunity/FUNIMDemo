@@ -548,20 +548,17 @@ static int oldHandle = 0;
             orientation = 2;
         }
     
-    /** 自采集会使用到 */
-//    if (orientation == 0) {
-//        fuSetDefaultRotationMode(3);
-//    }
-//    else if (orientation == 1) {
-//
-//        fuSetDefaultRotationMode(0);
-//    }else if (orientation == 2){
-//
-//        fuSetDefaultRotationMode(3);
-//    }else{
-//
-//        fuSetDefaultRotationMode(2);
-//    }
+    // 使用NERtcSDK提供的pixelBuffer进行处理时需要用到
+    if (orientation == 0) {
+        fuSetDefaultRotationMode(3);
+    } else if (orientation == 1) {
+        fuSetDefaultRotationMode(0);
+    } else if (orientation == 2) {
+        fuSetDefaultRotationMode(3);
+    } else {
+        fuSetDefaultRotationMode(2);
+    }
+    
         if (self.deviceOrientation != orientation) {
             self.deviceOrientation = orientation ;
             NSLog(@"屏幕方向-----%d",self.deviceOrientation);
