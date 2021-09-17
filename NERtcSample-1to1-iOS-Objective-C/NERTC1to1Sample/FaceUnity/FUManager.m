@@ -552,11 +552,11 @@ static int oldHandle = 0;
     if (orientation == 0) {
         fuSetDefaultRotationMode(3);
     } else if (orientation == 1) {
-        fuSetDefaultRotationMode(0);
-    } else if (orientation == 2) {
-        fuSetDefaultRotationMode(3);
-    } else {
         fuSetDefaultRotationMode(2);
+    } else if (orientation == 2) {
+        fuSetDefaultRotationMode(1);
+    } else {
+        fuSetDefaultRotationMode(0);
     }
     
         if (self.deviceOrientation != orientation) {
