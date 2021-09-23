@@ -40,8 +40,8 @@
 /**faceu bar */
 @property(nonatomic, strong) FUAPIDemoBar *demoBar;
 
-/** 外部设备采集 */
-@property(nonatomic, strong) FUCamera *mCamera;
+///** 外部设备采集 */
+//@property(nonatomic, strong) FUCamera *mCamera;
 
 
 @end
@@ -53,7 +53,6 @@
     [[FUManager shareManager] destoryItems];
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    
         [NERtcEngine destroyEngine];
     });
     
@@ -90,8 +89,8 @@
     [[FUTestRecorder shareRecorder] setupRecord];
     
     [[FUManager shareManager] loadFilter];
-    [FUManager shareManager].flipx = YES;
-    [FUManager shareManager].trackFlipx = YES;
+    [FUManager shareManager].flipx = NO;
+    [FUManager shareManager].trackFlipx = NO;
     [FUManager shareManager].isRender = YES;
     
     _demoBar = [[FUAPIDemoBar alloc] init];
@@ -146,24 +145,13 @@
     }
 }
 
-
-/// 视频采集帧回调
-/// 需要同步返回，enqine 将会继续视频处理流程
-- (void)onNERtcEngineVideoFrameCaptured:(CVPixelBufferRef)bufferRef rotation:(NERtcVideoRotationType)rotation{
-            
-    [[FUTestRecorder shareRecorder] processFrameWithLog];
-    [[FUManager shareManager] renderItemsToPixelBuffer:bufferRef];
-    
-}
-
-
 #pragma mark -  Loading
 
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [self.mCamera startCapture];
-    [_mCamera changeSessionPreset:AVCaptureSessionPreset1280x720];
+//    [self.mCamera startCapture];
+//    [_mCamera changeSessionPreset:AVCaptureSessionPreset1280x720];
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     
 }
@@ -171,73 +159,61 @@
 -(void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
-    [self.mCamera resetFocusAndExposureModes];
-    [self.mCamera stopCapture];
-    
-    /* 清一下信息，防止快速切换有人脸信息缓存 */
-    [[FUManager shareManager] onCameraChange];
+//    [self.mCamera resetFocusAndExposureModes];
+//    [self.mCamera stopCapture];
+//
+//    /* 清一下信息，防止快速切换有人脸信息缓存 */
+//    [[FUManager shareManager] onCameraChange];
     
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     
 }
 
--(FUCamera *)mCamera {
-    if (!_mCamera) {
-        _mCamera = [[FUCamera alloc] init];
-        _mCamera.delegate = self ;
-    }
-    return _mCamera ;
-}
+//-(FUCamera *)mCamera {
+//    if (!_mCamera) {
+//        _mCamera = [[FUCamera alloc] init];
+//        _mCamera.delegate = self ;
+//    }
+//    return _mCamera ;
+//}
 
-#pragma mark ----------FUCameraDelegate-----
-
-- (void)didOutputVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer{
-    
-    [[FUTestRecorder shareRecorder] processFrameWithLog];
-    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-    [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
-    
-    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-    NERtcVideoFrame *videoFrame = [[NERtcVideoFrame alloc] init];
-    videoFrame.format = kNERtcVideoFormatNV12;
-    videoFrame.width = (uint32_t)CVPixelBufferGetWidth(pixelBuffer);
-    videoFrame.height = (uint32_t)CVPixelBufferGetHeight(pixelBuffer);
-    videoFrame.timestamp = 0;
-    videoFrame.buffer = (void *)pixelBuffer;
-    [[NERtcEngine sharedEngine] pushExternalVideoFrame:videoFrame];
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-    
-}
-
-
-//初始化SDK
-- (void)setupRTCEngine {
-    NERtcEngine *coreEngine = [NERtcEngine sharedEngine];
-    
-    // 内部采集美颜需打开
-//    NSDictionary *params = @{
-//           kNERtcKeyPublishSelfStreamEnabled: @YES,    // 打开推流
-//           kNERtcKeyVideoCaptureObserverEnabled: @YES  // 将摄像头采集的数据回调给用户
-//       };
+//#pragma mark ----------FUCameraDelegate-----
 //
-//    [coreEngine setParameters:params];
+//- (void)didOutputVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer{
+//
+//    [[FUTestRecorder shareRecorder] processFrameWithLog];
+//    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+//    [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
+//
+//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+//    NERtcVideoFrame *videoFrame = [[NERtcVideoFrame alloc] init];
+//    videoFrame.format = kNERtcVideoFormatNV12;
+//    videoFrame.width = (uint32_t)CVPixelBufferGetWidth(pixelBuffer);
+//    videoFrame.height = (uint32_t)CVPixelBufferGetHeight(pixelBuffer);
+//    videoFrame.timestamp = 0;
+//    videoFrame.buffer = (void *)pixelBuffer;
+//    [[NERtcEngine sharedEngine] pushExternalVideoFrame:videoFrame];
+//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+//
+//}
+
+#pragma mark - Private
+
+//初始化NERtcSDK
+- (void)setupRTCEngine {
+    // 默认情况下日志会存储在App沙盒的Documents目录下
+    NERtcLogSetting *logSetting = [[NERtcLogSetting alloc] init];
+#if DEBUG
+    logSetting.logLevel = kNERtcLogLevelInfo;
+#else
+    logSetting.logLevel = kNERtcLogLevelWarning;
+#endif
     
     NERtcEngineContext *context = [[NERtcEngineContext alloc] init];
     context.engineDelegate = self;
     context.appKey = AppKey;
-    [coreEngine setupEngineWithContext:context];
-    [coreEngine setExternalVideoSource:YES];
-    [coreEngine enableLocalAudio:YES];
-    [coreEngine enableLocalVideo:YES];
-    NERtcVideoEncodeConfiguration *config = [[NERtcVideoEncodeConfiguration alloc] init];
-    config.maxProfile = kNERtcVideoProfileHD720P;
-    config.cropMode = kNERtcVideoCropMode16_9;
-    config.frameRate = kNERtcVideoFrameRateFps30;
-    config.minFrameRate = 15; //视频最小帧率
-    config.bitrate = 0; //视频编码码率
-    config.minBitrate = 0; //视频编码最小码率
-    config.degradationPreference = kNERtcDegradationBalanced; ;//带宽受限时的视频编码降级偏好
-    [coreEngine setLocalVideoConfig:config];
+    context.logSetting = logSetting;
+    [[NERtcEngine sharedEngine] setupEngineWithContext:context];
 }
 
 //建立本地canvas模型
@@ -259,18 +235,39 @@
 //加入房间
 - (void)joinChannelWithRoomId:(NSString *)roomId
                        userId:(uint64_t)userId {
+    NERtcEngine *coreEngine = [NERtcEngine sharedEngine];
+    
+    // 1v1视频通话+美颜场景的视频推荐配置
+    // 其他场景下请联系云信技术支持获取配置
+    NERtcVideoEncodeConfiguration *config = [[NERtcVideoEncodeConfiguration alloc] init];
+    config.width = 640;
+    config.height = 360;
+    config.frameRate = kNERtcVideoFrameRateFps15;
+    [coreEngine setLocalVideoConfig:config];
+    
+    // 1v1视频通话+美颜场景的音频推荐配置
+    // 其他场景下请联系云信技术支持获取配置
+    [coreEngine setAudioProfile:kNERtcAudioProfileStandard
+                       scenario:kNERtcAudioScenarioSpeech];
+    
+    NSDictionary *params = @{
+        kNERtcKeyVideoCaptureObserverEnabled: @YES  // 将摄像头采集的数据回调给用户
+    };
+    [coreEngine setParameters:params];
+    
+    [coreEngine enableLocalAudio:YES];
+    [coreEngine enableLocalVideo:YES];
+    
     __weak typeof(self) weakSelf = self;
-    [NERtcEngine.sharedEngine joinChannelWithToken:@""
-                                       channelName:roomId
-                                             myUid:userId
-                                        completion:^(NSError * _Nullable error, uint64_t channelId, uint64_t elapesd) {
+    [coreEngine joinChannelWithToken:@""
+                         channelName:roomId
+                               myUid:userId
+                          completion:^(NSError * _Nullable error, uint64_t channelId, uint64_t elapesd) {
         if (error) {
-            
             //加入失败了，弹框之后退出当前页面
             NSString *msg = [NSString stringWithFormat:@"join channel fail.code:%@", @(error.code)];
             [weakSelf showDismissAlert:msg];
         } else {
-            
             //加入成功，建立本地canvas渲染本地视图
             NERtcVideoCanvas *canvas = [weakSelf setupLocalCanvas];
             [NERtcEngine.sharedEngine setupLocalVideoCanvas:canvas];
@@ -299,18 +296,18 @@
 
 //UI 切换摄像头按钮事件
 - (IBAction)onSwitchCameraAction:(UIButton *)sender {
-//    [NERtcEngine.sharedEngine switchCamera];
+    [NERtcEngine.sharedEngine switchCamera];
     
-    sender.selected = !sender.selected;
-    
-    [self.mCamera changeCameraInputDeviceisFront:!sender.selected];
+//    sender.selected = !sender.selected;
+//
+//    [self.mCamera changeCameraInputDeviceisFront:!sender.selected];
     [[FUManager shareManager] onCameraChange];
-//    [FUManager shareManager].flipx = ![FUManager shareManager].flipx;
-//    [FUManager shareManager].trackFlipx = ![FUManager shareManager].trackFlipx;
+    [FUManager shareManager].flipx = ![FUManager shareManager].flipx;
+    [FUManager shareManager].trackFlipx = ![FUManager shareManager].trackFlipx;
     
 }
 
-#pragma mark - SDK回调（含义请参考NERtcEngineDelegateEx定义）
+#pragma mark - NERtcSDK回调（含义请参考NERtcEngineDelegateEx定义）
 - (void)onNERtcEngineDidError:(NERtcError)errCode {
     NSString *msg = [NSString stringWithFormat:@"nertc engine did error.code:%@", @(errCode)];
     [self showDismissAlert:msg];
@@ -318,7 +315,6 @@
 
 - (void)onNERtcEngineUserDidJoinWithUserID:(uint64_t)userID
                                   userName:(NSString *)userName {
-
     //如果已经setup了一个远端的canvas，则不需要再建立了
     if (_remoteCanvas != nil) {
         return;
@@ -340,8 +336,8 @@
     //订阅远端视频流
     _remoteCanvas.subscribedVideo = YES;
     [NERtcEngine.sharedEngine subscribeRemoteVideo:YES
-                                 forUserID:userID
-                                streamType:kNERtcRemoteVideoStreamTypeHigh];
+                                         forUserID:userID
+                                        streamType:kNERtcRemoteVideoStreamTypeHigh];
 }
 
 - (void)onNERtcEngineUserVideoDidStop:(uint64_t)userID {
@@ -352,13 +348,16 @@
 
 - (void)onNERtcEngineUserDidLeaveWithUserID:(uint64_t)userID
                                      reason:(NERtcSessionLeaveReason)reason {
-    
     //如果远端的人离开了，重置远端模型和UI
     if (userID == _remoteCanvas.uid) {
         _remoteStatLab.hidden = NO;
         [_remoteCanvas resetCanvas];
         _remoteCanvas = nil;
     }
+}
+
+- (void)onNERtcEngineVideoFrameCaptured:(CVPixelBufferRef)bufferRef rotation:(NERtcVideoRotationType)rotation {
+    [[FUManager shareManager] renderItemsToPixelBuffer:bufferRef];
 }
 
 #pragma mark - Getter

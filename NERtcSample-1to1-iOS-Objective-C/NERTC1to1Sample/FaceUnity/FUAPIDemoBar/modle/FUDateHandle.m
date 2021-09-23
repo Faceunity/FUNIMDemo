@@ -112,7 +112,7 @@
 }
 
 +(NSArray<FUBeautyParam *>*)setupSticker{
-   NSArray *prams = @[@"makeup_noitem",@"sdlu",@"DaisyPig",@"fashi",@"xueqiu_lm_fu",@"wobushi",@"gaoshiqing"];//,@"chri1"
+   NSArray *prams = @[@"makeup_noitem",@"sdlu",@"DaisyPig",@"fashi",@"xueqiu_lm_fu"];//,@"chri1"
 
    
    NSMutableArray *array = [[NSMutableArray alloc] init];

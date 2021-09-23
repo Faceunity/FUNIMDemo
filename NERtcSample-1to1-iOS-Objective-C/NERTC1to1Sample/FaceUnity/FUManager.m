@@ -393,9 +393,9 @@ static int oldHandle = 0;
 #pragma mark -  render
 /**将道具绘制到pixelBuffer*/
 - (CVPixelBufferRef)renderItemsToPixelBuffer:(CVPixelBufferRef)pixelBuffer{
+    
     if ([self isDeviceMotionChange]) {
-        fuSetDefaultRotationMode(self.deviceOrientation);
-            /* 解决旋转屏幕效果异常 onCameraChange*/
+        /* 解决旋转屏幕效果异常 onCameraChange*/
         [FURenderer onCameraChange];
     }
     
@@ -415,7 +415,7 @@ static int oldHandle = 0;
         }
         if (_currentType == FUDataTypebody) {
             readerItems[1] = items[FUNamaHandleTypeBodySlim];
-            [FURenderer itemSetParam:items[FUNamaHandleTypeBodySlim] withName:@"Orientation" value:@(self.deviceOrientation)];
+            [FURenderer itemSetParam:items[FUNamaHandleTypeBodySlim] withName:@"Orientation" value:@(self.rotation)];
         }
 
         CVPixelBufferRef buffer = [[FURenderer shareRenderer] renderPixelBuffer:pixelBuffer withFrameId:frameID items:readerItems itemCount:2 flipx:_flipx];//flipx 参数设为YES可以使道具做水平方向的镜像翻转
@@ -548,20 +548,21 @@ static int oldHandle = 0;
             orientation = 2;
         }
     
-    /** 自采集会使用到 */
-//    if (orientation == 0) {
-//        fuSetDefaultRotationMode(3);
-//    }
-//    else if (orientation == 1) {
-//
-//        fuSetDefaultRotationMode(0);
-//    }else if (orientation == 2){
-//
-//        fuSetDefaultRotationMode(3);
-//    }else{
-//
-//        fuSetDefaultRotationMode(2);
-//    }
+    // 使用NERtcSDK提供的pixelBuffer进行处理时需要用到
+    if (orientation == 0) {
+        fuSetDefaultRotationMode(3);
+        self.rotation = 3;
+    } else if (orientation == 1) {
+        fuSetDefaultRotationMode(0);
+        self.rotation = 0;
+    } else if (orientation == 2) {
+        fuSetDefaultRotationMode(1);
+        self.rotation = 1;
+    } else {
+        fuSetDefaultRotationMode(2);
+        self.rotation = 2;
+    }
+    
         if (self.deviceOrientation != orientation) {
             self.deviceOrientation = orientation ;
             NSLog(@"屏幕方向-----%d",self.deviceOrientation);

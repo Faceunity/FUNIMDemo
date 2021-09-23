@@ -9,7 +9,7 @@
 #ifndef AppKey_h
 #define AppKey_h
 
-#define AppKey @"请填入您的AppKey"
+#define AppKey @""
 
 
 
