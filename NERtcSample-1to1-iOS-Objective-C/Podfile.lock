@@ -1,28 +1,28 @@
 PODS:
+  - FURenderKit (8.3.0)
   - Masonry (1.1.0)
-  - Nama (7.2.0)
-  - NERtcSDK (3.7.0)
+  - NERtcSDK (4.6.13)
   - SVProgressHUD (2.2.5)
 
 DEPENDENCIES:
+  - FURenderKit
   - Masonry
-  - Nama (~> 7.2.0)
-  - NERtcSDK (= 3.7.0)
+  - NERtcSDK
   - SVProgressHUD
 
 SPEC REPOS:
-  trunk:
+  https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
+    - FURenderKit
     - Masonry
-    - Nama
     - NERtcSDK
     - SVProgressHUD
 
 SPEC CHECKSUMS:
+  FURenderKit: 3cd05abd03134d287a1d63cbaaeb95d304ba6bd6
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  Nama: 6513d06085933c8d13b1e6360f5c1ea6996f745b
-  NERtcSDK: 077255b64ad0b28898723fc0f7ab107e91f9934d
+  NERtcSDK: d6e6a69f970f1c3ecdb5e8270b2422c9210e5911
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
 
-PODFILE CHECKSUM: 02c51c5c7f04bcaa4a46d2595aa700a2c3081495
+PODFILE CHECKSUM: 0e58f4b4ed5e38388065e8c20170e059f8de2504
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.11.3

@@ -14,15 +14,10 @@
 #import <Masonry/Masonry.h>
 
 /** faceU */
-#import "FUManager.h"
-#import "FUAPIDemoBar.h"
-#import "FUCamera.h"
+#import "FUDemoManager.h"
+#import <FURenderKit/FUCaptureCamera.h>
 
-// 将性能写入csv文件
-#import "FUTestRecorder.h"
-
-
-@interface NETSDemoP2PViewController ()<NERtcEngineDelegateEx,FUAPIDemoBarDelegate,FUCameraDelegate>
+@interface NETSDemoP2PViewController ()<NERtcEngineDelegateEx,FUCaptureCameraDelegate>
 
 //渲染视图控件，SDK需要通过设置渲染view来建立canvas
 @property (weak, nonatomic) IBOutlet UIView *localRender;  //本地渲染视图
@@ -37,27 +32,14 @@
 @property (nonatomic, strong) NTESDemoUserModel *localCanvas;  //本地
 @property (nonatomic, strong) NTESDemoUserModel *remoteCanvas; //远端
 
-/**faceu bar */
-@property(nonatomic, strong) FUAPIDemoBar *demoBar;
-
 /** 外部设备采集 */
-@property(nonatomic, strong) FUCamera *mCamera;
-
+@property(nonatomic, strong) FUCaptureCamera *mCamera;
+@property(nonatomic, strong) FUDemoManager *demoManager;
 
 @end
 
 @implementation NETSDemoP2PViewController
 
-- (void)dealloc {
-    
-    [[FUManager shareManager] destoryItems];
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    
-        [NERtcEngine destroyEngine];
-    });
-    
-}
 
 + (instancetype)instanceWithRoomId:(NSString *)roomId
                             userId:(uint64_t)userId {
@@ -73,10 +55,16 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    /** 初始化 Faceu */
-    [self setupFaceUnity];
-    
+
+    if (self.isuseFU) {
+        
+        // FaceUnity UI
+        CGFloat safeAreaBottom = 0;
+        if (@available(iOS 11.0, *)) {
+            safeAreaBottom = [UIApplication sharedApplication].delegate.window.safeAreaInsets.bottom;
+        }
+        self.demoManager = [[FUDemoManager alloc] initWithTargetController:self originY:CGRectGetHeight(self.view.frame) - FUBottomBarHeight - safeAreaBottom - 88];
+    }
     
     //直接加入channel
     [self joinChannelWithRoomId:_roomId userId:_userId];
@@ -84,77 +72,15 @@
 
 #pragma mark - Functions
 
-/// faceunity
-- (void)setupFaceUnity{
 
-    [[FUTestRecorder shareRecorder] setupRecord];
-    
-    [[FUManager shareManager] loadFilter];
-    [FUManager shareManager].flipx = YES;
-    [FUManager shareManager].trackFlipx = YES;
-    [FUManager shareManager].isRender = YES;
-    
-    _demoBar = [[FUAPIDemoBar alloc] init];
-    _demoBar.mDelegate = self;
-    [self.view addSubview:_demoBar];
-    [_demoBar mas_makeConstraints:^(MASConstraintMaker *make) {
-        
-        if (@available(iOS 11.0, *)) {
-           
-            make.left.mas_equalTo(self.view.mas_safeAreaLayoutGuideLeft);
-            make.right.mas_equalTo(self.view.mas_safeAreaLayoutGuideRight);
-            make.bottom.mas_equalTo(self.view.mas_safeAreaLayoutGuideBottom)
-            .mas_offset(-100);
-        
-        } else {
-        
-            make.left.right.mas_equalTo(0);
-            make.bottom.mas_equalTo(-100);
-        }
+#pragma mark ----NERtcEngineVideoFrameObserver
 
-        make.height.mas_equalTo(195);
-        
-    }];
-    
-}
-
-
-#pragma mark -  FUAPIDemoBarDelegate
-
--(void)filterValueChange:(FUBeautyParam *)param{
-    [[FUManager shareManager] filterValueChange:param];
-}
-
--(void)switchRenderState:(BOOL)state{
-    [FUManager shareManager].isRender = state;
-}
-
--(void)bottomDidChange:(int)index{
-    if (index < 3) {
-        [[FUManager shareManager] setRenderType:FUDataTypeBeautify];
-    }
-    if (index == 3) {
-        [[FUManager shareManager] setRenderType:FUDataTypeStrick];
-    }
-    
-    if (index == 4) {
-        [[FUManager shareManager] setRenderType:FUDataTypeMakeup];
-    }
-    if (index == 5) {
-        
-        [[FUManager shareManager] setRenderType:FUDataTypebody];
-    }
-}
-
-
-/// 视频采集帧回调
-/// 需要同步返回，enqine 将会继续视频处理流程
-- (void)onNERtcEngineVideoFrameCaptured:(CVPixelBufferRef)bufferRef rotation:(NERtcVideoRotationType)rotation{
-            
-    [[FUTestRecorder shareRecorder] processFrameWithLog];
-    [[FUManager shareManager] renderItemsToPixelBuffer:bufferRef];
-    
-}
+//- (void)onNERtcEngineVideoFrameCaptured:(CVPixelBufferRef)bufferRef rotation:(NERtcVideoRotationType)rotation{
+//
+//    if (self.isuseFU) {
+//        [[FUManager shareManager] renderItemsToPixelBuffer:bufferRef];
+//    }
+//}
 
 
 #pragma mark -  Loading
@@ -163,7 +89,6 @@
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     [self.mCamera startCapture];
-    [_mCamera changeSessionPreset:AVCaptureSessionPreset1280x720];
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     
 }
@@ -173,29 +98,39 @@
     
     [self.mCamera resetFocusAndExposureModes];
     [self.mCamera stopCapture];
-    
-    /* 清一下信息，防止快速切换有人脸信息缓存 */
-    [[FUManager shareManager] onCameraChange];
+
+    if (self.isuseFU) {
+       
+        /* 清一下信息，防止快速切换有人脸信息缓存 */
+        [[FUManager shareManager] onCameraChange];
+    }
     
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     
 }
 
--(FUCamera *)mCamera {
-    if (!_mCamera) {
-        _mCamera = [[FUCamera alloc] init];
-        _mCamera.delegate = self ;
+#pragma mark ----- FaceUnity ----
+
+- (FUCaptureCamera *)mCamera{
+
+    if (_mCamera == nil) {
+
+        _mCamera = [[FUCaptureCamera alloc] initWithCameraPosition:(AVCaptureDevicePositionFront) captureFormat:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange];
+        _mCamera.delegate = self;
     }
-    return _mCamera ;
+
+    return _mCamera;
 }
 
 #pragma mark ----------FUCameraDelegate-----
 
 - (void)didOutputVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer{
-    
-    [[FUTestRecorder shareRecorder] processFrameWithLog];
+
     CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-    [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
+    if (self.isuseFU) {
+        
+        [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
+    }
     
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     NERtcVideoFrame *videoFrame = [[NERtcVideoFrame alloc] init];
@@ -212,21 +147,20 @@
 
 //初始化SDK
 - (void)setupRTCEngine {
+    
     NERtcEngine *coreEngine = [NERtcEngine sharedEngine];
     
-    // 内部采集美颜需打开
 //    NSDictionary *params = @{
-//           kNERtcKeyPublishSelfStreamEnabled: @YES,    // 打开推流
-//           kNERtcKeyVideoCaptureObserverEnabled: @YES  // 将摄像头采集的数据回调给用户
-//       };
-//
+//        kNERtcKeyPublishSelfStreamEnabled: @YES,    // 打开推流
+//        kNERtcKeyVideoCaptureObserverEnabled: @YES  // 将摄像头采集的数据回调给用户
+//    };
 //    [coreEngine setParameters:params];
     
     NERtcEngineContext *context = [[NERtcEngineContext alloc] init];
     context.engineDelegate = self;
     context.appKey = AppKey;
     [coreEngine setupEngineWithContext:context];
-    [coreEngine setExternalVideoSource:YES];
+    [coreEngine setExternalVideoSource:YES isScreen:NO];
     [coreEngine enableLocalAudio:YES];
     [coreEngine enableLocalVideo:YES];
     NERtcVideoEncodeConfiguration *config = [[NERtcVideoEncodeConfiguration alloc] init];
@@ -260,10 +194,8 @@
 - (void)joinChannelWithRoomId:(NSString *)roomId
                        userId:(uint64_t)userId {
     __weak typeof(self) weakSelf = self;
-    [NERtcEngine.sharedEngine joinChannelWithToken:@""
-                                       channelName:roomId
-                                             myUid:userId
-                                        completion:^(NSError * _Nullable error, uint64_t channelId, uint64_t elapesd) {
+    
+    [NERtcEngine.sharedEngine joinChannelWithToken:@"" channelName:roomId myUid:userId completion:^(NSError * _Nullable error, uint64_t channelId, uint64_t elapesd, uint64_t uid) {
         if (error) {
             
             //加入失败了，弹框之后退出当前页面
@@ -281,7 +213,18 @@
 #pragma mark - Actions
 //UI 挂断按钮事件
 - (IBAction)onHungupAction:(UIButton *)sender {
+   
+    if (self.isuseFU) {
+    
+        [[FUManager shareManager] destoryItems];
+    }
+   
     [NERtcEngine.sharedEngine leaveChannel];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    
+        [NERtcEngine destroyEngine];
+    });
+    
     [self dismiss];
 }
 
@@ -299,15 +242,17 @@
 
 //UI 切换摄像头按钮事件
 - (IBAction)onSwitchCameraAction:(UIButton *)sender {
-//    [NERtcEngine.sharedEngine switchCamera];
     
     sender.selected = !sender.selected;
     
     [self.mCamera changeCameraInputDeviceisFront:!sender.selected];
-    [[FUManager shareManager] onCameraChange];
-//    [FUManager shareManager].flipx = ![FUManager shareManager].flipx;
-//    [FUManager shareManager].trackFlipx = ![FUManager shareManager].trackFlipx;
     
+//    [[NERtcEngine sharedEngine] switchCamera];
+    
+    if (self.isuseFU) {
+//        [FUManager shareManager].flipx = ![FUManager shareManager].flipx;
+        [[FUManager shareManager] onCameraChange];
+    }
 }
 
 #pragma mark - SDK回调（含义请参考NERtcEngineDelegateEx定义）
