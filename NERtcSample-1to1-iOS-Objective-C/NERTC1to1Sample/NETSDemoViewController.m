@@ -14,13 +14,26 @@
 @property (strong, nonatomic) IBOutlet UITextField *roomIDTextField; //房间输入框
 @property (strong, nonatomic) IBOutlet UIButton *joinButton;  //加入按钮
 
+@property(nonatomic, assign) BOOL isuseFU;
+
 @end
 
 @implementation NETSDemoViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    self.view.backgroundColor = [UIColor whiteColor];
+    // 默认YES
+    self.isuseFU = YES;
+    
 }
+
+- (IBAction)selectedFUChanged:(UISwitch *)sender {
+    
+    self.isuseFU = sender.isOn;
+}
+
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     [super touchesBegan:touches withEvent:event];
@@ -35,7 +48,9 @@
     //显示P2P会议页面
     NETSDemoP2PViewController *vc = [NETSDemoP2PViewController instanceWithRoomId:self.roomId
                                                                            userId:self.userId];
+    vc.isuseFU = self.isuseFU;
     [self.navigationController pushViewController:vc animated:YES];
+    
 }
 
 #pragma mark - Getter

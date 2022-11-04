@@ -2,7 +2,7 @@
 
 FUNIMDemo 是集成了 [Faceunity](https://github.com/Faceunity/FULiveDemo/tree/dev) 面部跟踪和虚拟道具功能 和 网易云信视频通话2.0功能的 Demo。
 
-本文是 FaceUnity SDK 快速对接网易云信视频通话的导读说明，关于 FaceUnity SDK 的更多详细说明，请参看 [FULiveDemo](https://github.com/Faceunity/FULiveDemo/tree/dev)
+本文是 FaceUnity SDK 快速对接自定义视频采集网易云信视频通话的导读说明，关于 FaceUnity SDK 的更多详细说明，请参看 [FULiveDemo](https://github.com/Faceunity/FULiveDemo/tree/dev) 云信音视频通话自定义视频采集请查看 [云信音视频2.0 自定义视频采集](http://dev.yunxin.163.com/docs/product/%E9%9F%B3%E8%A7%86%E9%A2%91%E9%80%9A%E8%AF%9D2.0/%E8%BF%9B%E9%98%B6%E5%8A%9F%E8%83%BD/%E8%A7%86%E9%A2%91%E7%AE%A1%E7%90%86/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%A7%86%E9%A2%91%E9%87%87%E9%9B%86?#iOS)
 
 ## 快速集成方法
 
@@ -10,7 +10,7 @@ FUNIMDemo 是集成了 [Faceunity](https://github.com/Faceunity/FULiveDemo/tree/
 
 将  FaceUnity  文件夹全部拖入工程中，NamaSDK所需依赖库为 `OpenGLES.framework`、`Accelerate.framework`、`CoreMedia.framework`、`AVFoundation.framework`、`libc++.tbd`、`CoreML.framework`
 
-- 备注: 上述NamaSDK 依赖库使用 Pods 管理 会自动添加依赖,运行在iOS11以下系统时,需要手动添加`CoreML.framework`,并在**TARGETS -> Build Phases-> Link Binary With Libraries**将`CoreML.framework`手动修改为可选**Optional**
+- 备注: 上述NamaSDK 使用 Pods 管理 会自动添加依赖,运行在iOS11以下系统时,需要手动添加`CoreML.framework`,并在**TARGETS -> Build Phases-> Link Binary With Libraries**将`CoreML.framework`手动修改为可选**Optional**
 
 ### FaceUnity 模块简介
 
@@ -43,16 +43,27 @@ FUNIMDemo 是集成了 [Faceunity](https://github.com/Faceunity/FULiveDemo/tree/
 2、初始化 UI，并遵循代理  FUAPIDemoBarDelegate ，实现代理方法 `bottomDidChange:` 切换贴纸 和 `filterValueChange:` 更新美颜参数。
 
 ```C
-// demobar 初始化
--(FUAPIDemoBar *)demoBar {
-    if (!_demoBar) {
+    _demoBar = [[FUAPIDemoBar alloc] init];
+    _demoBar.mDelegate = self;
+    [self.view addSubview:_demoBar];
+    [_demoBar mas_makeConstraints:^(MASConstraintMaker *make) {
         
-        _demoBar = [[FUAPIDemoBar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 164 - 194, self.view.frame.size.width, 194)];
+        if (@available(iOS 11.0, *)) {
+           
+            make.left.mas_equalTo(self.view.mas_safeAreaLayoutGuideLeft);
+            make.right.mas_equalTo(self.view.mas_safeAreaLayoutGuideRight);
+            make.bottom.mas_equalTo(self.view.mas_safeAreaLayoutGuideBottom)
+            .mas_offset(-100);
         
-        _demoBar.mDelegate = self;
-    }
-    return _demoBar ;
-}
+        } else {
+        
+            make.left.right.mas_equalTo(0);
+            make.bottom.mas_equalTo(-100);
+        }
+
+        make.height.mas_equalTo(195);
+        
+    }];
 
 ```
 
@@ -161,4 +172,5 @@ FUNIMDemo 是集成了 [Faceunity](https://github.com/Faceunity/FULiveDemo/tree/
 
 2 切换摄像头需要调用 `[[FUManager shareManager] onCameraChange];`切换摄像头
 
+### [云信采集美颜](http://dev.yunxin.163.com/docs/product/%E9%9F%B3%E8%A7%86%E9%A2%91%E9%80%9A%E8%AF%9D2.0/%E8%BF%9B%E9%98%B6%E5%8A%9F%E8%83%BD/%E8%A7%86%E9%A2%91%E7%AE%A1%E7%90%86/%E7%BE%8E%E9%A2%9C?#iOS)
 ### 关于 FaceUnity SDK 的更多详细说明，请参看 [FULiveDemo](https://github.com/Faceunity/FULiveDemo/tree/dev)

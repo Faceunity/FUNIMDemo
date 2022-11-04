@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)instanceWithRoomId:(NSString *)roomId
                             userId:(uint64_t)userId;
+@property(nonatomic, assign) BOOL isuseFU;
 
 @end
 
