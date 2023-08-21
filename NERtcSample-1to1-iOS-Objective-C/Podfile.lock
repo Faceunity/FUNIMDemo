@@ -1,11 +1,11 @@
 PODS:
-  - FURenderKit (8.3.0)
+  - FURenderKit (8.7.0)
   - Masonry (1.1.0)
   - NERtcSDK (4.6.13)
   - SVProgressHUD (2.2.5)
 
 DEPENDENCIES:
-  - FURenderKit
+  - FURenderKit (= 8.7.0)
   - Masonry
   - NERtcSDK
   - SVProgressHUD
@@ -18,11 +18,11 @@ SPEC REPOS:
     - SVProgressHUD
 
 SPEC CHECKSUMS:
-  FURenderKit: 3cd05abd03134d287a1d63cbaaeb95d304ba6bd6
+  FURenderKit: a73f9a86fc4b2963c6c29bd58f0b42a953cf9362
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   NERtcSDK: d6e6a69f970f1c3ecdb5e8270b2422c9210e5911
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
 
-PODFILE CHECKSUM: 0e58f4b4ed5e38388065e8c20170e059f8de2504
+PODFILE CHECKSUM: 5c333918be3bb5d4baa76a215e7b4d63715b809b
 
 COCOAPODS: 1.11.3

@@ -59,11 +59,8 @@
     if (self.isuseFU) {
         
         // FaceUnity UI
-        CGFloat safeAreaBottom = 0;
-        if (@available(iOS 11.0, *)) {
-            safeAreaBottom = [UIApplication sharedApplication].delegate.window.safeAreaInsets.bottom;
-        }
-        self.demoManager = [[FUDemoManager alloc] initWithTargetController:self originY:CGRectGetHeight(self.view.frame) - FUBottomBarHeight - safeAreaBottom - 88];
+        [FUDemoManager setupFUSDK];
+        [[FUDemoManager shared] addDemoViewToView:self.view originY:CGRectGetHeight(self.view.bounds) - FUBottomBarHeight - FUSafaAreaBottomInsets() - 88];
     }
     
     //直接加入channel
@@ -95,18 +92,7 @@
 
 -(void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    
-    [self.mCamera resetFocusAndExposureModes];
-    [self.mCamera stopCapture];
-
-    if (self.isuseFU) {
-       
-        /* 清一下信息，防止快速切换有人脸信息缓存 */
-        [[FUManager shareManager] onCameraChange];
-    }
-    
     [UIApplication sharedApplication].idleTimerDisabled = NO;
-    
 }
 
 #pragma mark ----- FaceUnity ----
@@ -124,14 +110,26 @@
 
 #pragma mark ----------FUCameraDelegate-----
 
-- (void)didOutputVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer{
-
+- (void)didOutputVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer captureDevicePosition:(AVCaptureDevicePosition)position{
+    
     CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     if (self.isuseFU) {
         
-        [[FUManager shareManager] renderItemsToPixelBuffer:pixelBuffer];
+        if(fuIsLibraryInit()){
+            [[FUDemoManager shared] checkAITrackedResult];
+            if ([FUDemoManager shared].shouldRender) {
+                [[FUTestRecorder shareRecorder] processFrameWithLog];
+                [FUDemoManager updateBeautyBlurEffect];
+                FURenderInput *input = [[FURenderInput alloc] init];
+                input.renderConfig.imageOrientation = FUImageOrientationUP;
+                input.pixelBuffer = pixelBuffer;
+                input.renderConfig.readBackToPixelBuffer = YES;
+                //开启重力感应，内部会自动计算正确方向，设置fuSetDefaultRotationMode，无须外面设置
+                input.renderConfig.gravityEnable = YES;
+                FURenderOutput *output = [[FURenderKit shareRenderKit] renderWithInput:input];
+            }
+        }
     }
-    
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     NERtcVideoFrame *videoFrame = [[NERtcVideoFrame alloc] init];
     videoFrame.format = kNERtcVideoFormatNV12;
@@ -141,7 +139,6 @@
     videoFrame.buffer = (void *)pixelBuffer;
     [[NERtcEngine sharedEngine] pushExternalVideoFrame:videoFrame];
     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-    
 }
 
 
@@ -213,18 +210,18 @@
 #pragma mark - Actions
 //UI 挂断按钮事件
 - (IBAction)onHungupAction:(UIButton *)sender {
-   
-    if (self.isuseFU) {
     
-        [[FUManager shareManager] destoryItems];
-    }
-   
+    [self.mCamera stopCapture];
     [NERtcEngine.sharedEngine leaveChannel];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
         [NERtcEngine destroyEngine];
     });
     
+    if (self.isuseFU) {
+    
+        [FUDemoManager destory];
+    }
     [self dismiss];
 }
 
@@ -251,7 +248,7 @@
     
     if (self.isuseFU) {
 //        [FUManager shareManager].flipx = ![FUManager shareManager].flipx;
-        [[FUManager shareManager] onCameraChange];
+        [FUDemoManager resetTrackedResult];
     }
 }
 
