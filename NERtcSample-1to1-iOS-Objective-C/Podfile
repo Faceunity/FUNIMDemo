@@ -8,8 +8,7 @@ target 'NERTC1to1Sample' do
   pod 'NERtcSDK'
   pod 'Masonry'
   pod 'SVProgressHUD'
-  pod 'FURenderKit'
-#  pod 'Nama'
+  pod 'FURenderKit', '8.7.0'
   
 
 end
