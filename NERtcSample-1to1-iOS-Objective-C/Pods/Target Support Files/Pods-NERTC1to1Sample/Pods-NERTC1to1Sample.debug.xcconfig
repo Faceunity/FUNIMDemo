@@ -1,0 +1,14 @@
+CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/AiDenoise" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/AiHowling" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Beauty" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/FaceDetect" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/FaceEnhance" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Nenn" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/RtcBasic" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/ScreenShare" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Segment" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/SpatialSound" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/SuperResolution" "${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/VideoDenoise"
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/Masonry"
+LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks'
+LIBRARY_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/Masonry"
+OTHER_LDFLAGS = $(inherited) -ObjC -l"Masonry" -framework "AVFoundation" -framework "AudioToolbox" -framework "CoreGraphics" -framework "CoreMedia" -framework "CoreVideo" -framework "Foundation" -framework "GLKit" -framework "Metal" -framework "MetalKit" -framework "NERtcAiDenoise" -framework "NERtcAiHowling" -framework "NERtcAudio3D" -framework "NERtcBeauty" -framework "NERtcFaceDetect" -framework "NERtcFaceEnhance" -framework "NERtcPersonSegment" -framework "NERtcReplayKit" -framework "NERtcSDK" -framework "NERtcSuperResolution" -framework "NERtcVideoDenoise" -framework "NERtcnn" -framework "OpenGLES" -framework "QuartzCore" -framework "UIKit" -framework "VideoToolbox"
+OTHER_MODULE_VERIFIER_FLAGS = $(inherited) "-F${PODS_CONFIGURATION_BUILD_DIR}/Masonry" "-F${PODS_CONFIGURATION_BUILD_DIR}/NERtcSDK"
+PODS_BUILD_DIR = ${BUILD_DIR}
+PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
+PODS_PODFILE_DIR_PATH = ${SRCROOT}/.
+PODS_ROOT = ${SRCROOT}/Pods
+PODS_XCFRAMEWORKS_BUILD_DIR = $(PODS_CONFIGURATION_BUILD_DIR)/XCFrameworkIntermediates
+USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES

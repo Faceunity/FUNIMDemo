@@ -135,7 +135,7 @@ static NSString * const kFUBeautyShapeCellIdentifier = @"FUBeautyShapeCell";
     cell.currentValue = shape.currentValue;
     // 处理低性能手机禁用特效
     if (shape.differentiateDevicePerformance) {
-        cell.disabled = self.viewModel.performanceLevel != FUDevicePerformanceLevelHigh;
+        cell.disabled = self.viewModel.performanceLevel < FUDevicePerformanceLevelHigh;
     } else {
         cell.disabled = NO;
     }
@@ -148,7 +148,7 @@ static NSString * const kFUBeautyShapeCellIdentifier = @"FUBeautyShapeCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     FUBeautyShapeModel *shape = self.viewModel.beautyShapes[indexPath.item];
     if (shape.differentiateDevicePerformance) {
-        if (self.viewModel.performanceLevel != FUDevicePerformanceLevelHigh) {
+        if (self.viewModel.performanceLevel < FUDevicePerformanceLevelHigh) {
             [FUTipHUD showTips:[NSString stringWithFormat:FULocalizedString(@"该功能只支持在高端机上使用"), FULocalizedString(shape.name)] dismissWithDelay:1];
             [self.shapeCollectionView reloadData];
             if (self.viewModel.selectedIndex >= 0) {

@@ -1,0 +1,13 @@
+${PODS_ROOT}/Target Support Files/Pods-NERTC1to1Sample/Pods-NERTC1to1Sample-frameworks.sh
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/AiDenoise/NERtcAiDenoise.framework/NERtcAiDenoise
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/AiHowling/NERtcAiHowling.framework/NERtcAiHowling
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Beauty/NERtcBeauty.framework/NERtcBeauty
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/FaceDetect/NERtcFaceDetect.framework/NERtcFaceDetect
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/FaceEnhance/NERtcFaceEnhance.framework/NERtcFaceEnhance
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Nenn/NERtcnn.framework/NERtcnn
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/RtcBasic/NERtcSDK.framework/NERtcSDK
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/ScreenShare/NERtcReplayKit.framework/NERtcReplayKit
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Segment/NERtcPersonSegment.framework/NERtcPersonSegment
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/SpatialSound/NERtcAudio3D.framework/NERtcAudio3D
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/SuperResolution/NERtcSuperResolution.framework/NERtcSuperResolution
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/VideoDenoise/NERtcVideoDenoise.framework/NERtcVideoDenoise
