@@ -1,0 +1,13 @@
+${PODS_ROOT}/Target Support Files/NERtcSDK/NERtcSDK-xcframeworks.sh
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcAiDenoise.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcAiHowling.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcBeauty.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcFaceDetect.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcFaceEnhance.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcnn.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcSDK.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcReplayKit.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcPersonSegment.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcAudio3D.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcSuperResolution.xcframework
+${PODS_ROOT}/NERtcSDK/NERTC/NERtcSDK/NERtcVideoDenoise.xcframework

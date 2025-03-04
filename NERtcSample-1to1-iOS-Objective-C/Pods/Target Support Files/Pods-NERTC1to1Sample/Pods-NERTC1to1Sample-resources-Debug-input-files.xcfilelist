@@ -1,0 +1,13 @@
+${PODS_ROOT}/Target Support Files/Pods-NERTC1to1Sample/Pods-NERTC1to1Sample-resources.sh
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/aitype.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/armeshv2.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/body_slim.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/controller_cpp.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/face_beautification.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/face_makeup.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/fuzzytoonfilter.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/fxaa.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/graphics/tongue.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/model/ai_face_processor.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/model/ai_hand_processor.bundle
+${PODS_ROOT}/FURenderKit_nama/Resources/model/ai_human_processor.bundle

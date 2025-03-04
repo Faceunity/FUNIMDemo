@@ -1,0 +1,12 @@
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/AiDenoise/NERtcAiDenoise.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/AiHowling/NERtcAiHowling.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Beauty/NERtcBeauty.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/FaceDetect/NERtcFaceDetect.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/FaceEnhance/NERtcFaceEnhance.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Nenn/NERtcnn.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/RtcBasic/NERtcSDK.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/ScreenShare/NERtcReplayKit.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/Segment/NERtcPersonSegment.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/SpatialSound/NERtcAudio3D.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/SuperResolution/NERtcSuperResolution.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/NERtcSDK/VideoDenoise/NERtcVideoDenoise.framework

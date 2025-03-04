@@ -55,6 +55,7 @@
     }
     FUBeautyFilterModel *model = self.beautyFilters[self.selectedIndex];
     model.filterLevel = value;
+    [FURenderKit shareRenderKit].beauty.filterName = model.filterName;
     [FURenderKit shareRenderKit].beauty.filterLevel = model.filterLevel;
 }
 

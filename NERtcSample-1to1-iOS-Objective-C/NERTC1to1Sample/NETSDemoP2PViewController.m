@@ -60,6 +60,7 @@
         
         // FaceUnity UI
         [FUDemoManager setupFUSDK];
+        [FUDemoManager shared].stickerH = YES;
         [[FUDemoManager shared] addDemoViewToView:self.view originY:CGRectGetHeight(self.view.bounds) - FUBottomBarHeight - FUSafaAreaBottomInsets() - 88];
     }
     
@@ -72,12 +73,42 @@
 
 #pragma mark ----NERtcEngineVideoFrameObserver
 
-//- (void)onNERtcEngineVideoFrameCaptured:(CVPixelBufferRef)bufferRef rotation:(NERtcVideoRotationType)rotation{
-//
-//    if (self.isuseFU) {
-//        [[FUManager shareManager] renderItemsToPixelBuffer:bufferRef];
-//    }
-//}
+- (void)onNERtcEngineVideoFrameCaptured:(CVPixelBufferRef)bufferRef rotation:(NERtcVideoRotationType)rotation{
+
+    if (self.isuseFU) {
+        
+        if ([FUDemoManager shared].shouldRender) {
+            [[FUDemoManager shared] checkAITrackedResult];
+            [[FUTestRecorder shareRecorder] processFrameWithLog];
+            [FUDemoManager updateBeautyBlurEffect];
+            FURenderInput *input = [[FURenderInput alloc] init];
+            input.pixelBuffer = bufferRef;
+            input.renderConfig.imageOrientation = 0;
+            FUImageOrientation orientation = FUImageOrientationUP;
+            switch (rotation) {
+                case kNERtcVideoRotation_0:
+                    orientation = FUImageOrientationUP;
+                    break;
+                case kNERtcVideoRotation_90:
+                    orientation = FUImageOrientationLeft;
+                    break;
+                case kNERtcVideoRotation_180:
+                    orientation = FUImageOrientationDown;
+                    break;
+                case kNERtcVideoRotation_270:
+                    orientation = FUImageOrientationRight;
+                    break;
+                default:
+                    break;
+            }
+            input.renderConfig.imageOrientation = orientation;
+            input.renderConfig.stickerFlipH = [FUDemoManager shared].stickerH;
+            input.renderConfig.isFromFrontCamera = [FUDemoManager shared].stickerH;
+            input.renderConfig.readBackToPixelBuffer = YES;
+            FURenderOutput *outPut = [[FURenderKit shareRenderKit] renderWithInput:input];
+        }
+    }
+}
 
 
 #pragma mark -  Loading
@@ -85,7 +116,7 @@
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [self.mCamera startCapture];
+//    [self.mCamera startCapture];
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     
 }
@@ -147,19 +178,19 @@
     
     NERtcEngine *coreEngine = [NERtcEngine sharedEngine];
     
-//    NSDictionary *params = @{
-//        kNERtcKeyPublishSelfStreamEnabled: @YES,    // 打开推流
-//        kNERtcKeyVideoCaptureObserverEnabled: @YES  // 将摄像头采集的数据回调给用户
-//    };
-//    [coreEngine setParameters:params];
+    // 配置音视频引擎,将摄像头采集的数据回调给用户
+    NSDictionary *params = @{
+            kNERtcKeyVideoCaptureObserverEnabled: @YES // 将摄像头采集的数据回调给用户
+    };
+    [coreEngine setParameters:params];
     
     NERtcEngineContext *context = [[NERtcEngineContext alloc] init];
     context.engineDelegate = self;
     context.appKey = AppKey;
     [coreEngine setupEngineWithContext:context];
-    [coreEngine setExternalVideoSource:YES isScreen:NO];
+//    [coreEngine setExternalVideoSource:YES isScreen:NO];
     [coreEngine enableLocalAudio:YES];
-    [coreEngine enableLocalVideo:YES];
+    [coreEngine enableLocalVideo:YES streamType:(kNERtcStreamChannelTypeMainStream)];;
     NERtcVideoEncodeConfiguration *config = [[NERtcVideoEncodeConfiguration alloc] init];
     config.maxProfile = kNERtcVideoProfileHD720P;
     config.cropMode = kNERtcVideoCropMode16_9;
@@ -213,8 +244,7 @@
     
     [self.mCamera stopCapture];
     [NERtcEngine.sharedEngine leaveChannel];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         [NERtcEngine destroyEngine];
     });
     
@@ -242,12 +272,12 @@
     
     sender.selected = !sender.selected;
     
-    [self.mCamera changeCameraInputDeviceisFront:!sender.selected];
+//    [self.mCamera changeCameraInputDeviceisFront:!sender.selected];
     
-//    [[NERtcEngine sharedEngine] switchCamera];
+    [[NERtcEngine sharedEngine] switchCamera];
     
     if (self.isuseFU) {
-//        [FUManager shareManager].flipx = ![FUManager shareManager].flipx;
+        [FUDemoManager shared].stickerH = ![FUDemoManager shared].stickerH;
         [FUDemoManager resetTrackedResult];
     }
 }
